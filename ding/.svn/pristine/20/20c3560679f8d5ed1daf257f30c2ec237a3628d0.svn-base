@@ -1,0 +1,901 @@
+package com.ddcar.controller;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.common.BaseBean;
+import com.common.Commonparam;
+import com.ddcar.entity.TbInout;
+import com.ddcar.entity.TbManager;
+import com.ddcar.entity.TbModelNumber;
+import com.ddcar.entity.TbVehicle;
+import com.ddcar.service.TbInoutService;
+import com.ddcar.service.TbModelNumberService;
+import com.ddcar.service.TbVehicleService;
+import com.ddcar.util.CommUtil;
+import com.ddcar.util.UtilLog;
+import com.github.pagehelper.PageInfo;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.hssf.util.HSSFColor;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-03.
+ */
+@Controller
+@RequestMapping("/vehicle")
+public class TbVehicleController {
+
+    @Autowired
+    TbVehicleService tbVehicleService;
+    @Autowired
+    TbInoutService tbInoutService;
+    @Autowired
+    TbModelNumberService tbModelNumberService;
+
+    @RequestMapping(value = "/findTbVehicleList")
+    public @ResponseBody
+    BaseBean findTbVehicleList(Integer page, Integer size,Long brandId,Integer modelType,String branchName,Long vehicleId,Integer state,String start,String end) throws Exception {
+        BaseBean bean = new BaseBean();
+        try {
+            List<TbVehicle> list=tbVehicleService.findTbVehicleList(page,size,brandId,modelType,branchName,vehicleId,state,start,end);
+            bean.setStatus(200);
+            bean.setRows(list);
+            bean.setTotal(new PageInfo<>(list).getTotal());
+
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+        }
+        return bean;
+    }
+
+
+    @RequestMapping(value = "/noOutTbVehicleList")
+    public @ResponseBody
+    BaseBean noOutTbVehicleList(Integer page, Integer size, Integer brandId,Integer modelType,Integer vehicleId) throws Exception {
+        BaseBean bean = new BaseBean();
+        try {
+            List<TbVehicle> list=tbVehicleService.noOutTbVehicleList(page,size,brandId,modelType,vehicleId);
+            bean.setStatus(200);
+            bean.setRows(list);
+            bean.setTotal(new PageInfo<>(list).getTotal());
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+        }
+        return bean;
+    }
+    //分公司退回的车电
+    @RequestMapping(value = "/returnTbVehicleList")
+    public @ResponseBody
+    BaseBean returnTbVehicleList(Integer page, Integer size,Integer branchId,String branchName) throws Exception {
+        BaseBean baseBean=new BaseBean();
+        try {
+            List<HashMap> list=tbVehicleService.returnTbVehicleList(page,size,branchId,branchName);
+            baseBean.setStatus(200);
+            baseBean.setRows(list);
+            baseBean.setTotal(new PageInfo<>(list).getTotal());
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+    //网点退回的车电
+    @RequestMapping(value = "/wangReturnTbVehicleList")
+    public @ResponseBody
+    BaseBean wangReturnTbVehicleList(HttpSession session,Integer page, Integer size) throws Exception {
+        BaseBean bean = new BaseBean();
+        try {
+            TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+            Long com=companyId.getCompanyId();
+            List<TbVehicle> list=tbVehicleService.wangReturnTbVehicleList(page,size,com);
+            bean.setStatus(200);
+            bean.setRows(list);
+            bean.setTotal(new PageInfo<>(list).getTotal());
+
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+        }
+        return bean;
+    }
+
+    //根据分公司查询
+    @GetMapping("/tbVehiclebranch")
+    @ResponseBody
+    public String update(Integer page, Integer size,Integer modelId){
+        TbVehicle vehicle = (TbVehicle) tbVehicleService.findTbVehiclebranchList(page, size, modelId);
+        String json = JSON.toJSONString(vehicle);
+        return json;
+    }
+
+    //根据id查询
+    @ResponseBody
+    @RequestMapping("/searchId")
+    public BaseBean searchId(@RequestParam("vehicleId")Long vehicleId){
+        BaseBean baseBean=new BaseBean();
+        try {
+            baseBean.setRows(tbVehicleService.tbVehicleSeacherId(vehicleId));
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //根据id查询
+    @ResponseBody
+    @RequestMapping("/searchmodel")
+    public BaseBean searchmodel(@RequestParam("model")String model){
+        BaseBean baseBean=new BaseBean();
+        try {
+            baseBean.setRows(tbModelNumberService.selectmodel(model));
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //删除车电
+    @RequestMapping("/delTbVehicle")
+    @ResponseBody
+    public BaseBean delTbVehicle(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+
+        try {
+            for (Long id:delArr){
+                Integer ifout = tbVehicleService.ifout(id);
+                if (ifout>0){
+                    baseBean.setMsg("该车电已出库，不可删除");
+                    return baseBean;
+                }
+            }
+            tbVehicleService.delTbVehicle(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+
+    //退回车电再入库
+    @RequestMapping("/comreturnTbVehicle")
+    @ResponseBody
+    public BaseBean comreturnTbVehicle(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+
+        try {
+            tbVehicleService.comreturmTbVehicle(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+    //可租
+    @RequestMapping("/updatestateOk")
+    @ResponseBody
+    public BaseBean updatestateOk(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+
+        try {
+            tbVehicleService.updatestateOk(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+    //维修
+    @RequestMapping("/updatestateRepair")
+    @ResponseBody
+    public BaseBean updatestateRepair(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+
+        try {
+            tbVehicleService.updatestateRepair(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+    //停用
+    @RequestMapping("/updatestateokStop")
+    @ResponseBody
+    public BaseBean updatestateokStop(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+
+        try {
+            tbVehicleService.updatestateokStop(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+
+    //出库到分公司
+    @RequestMapping("/vehicleOutCom")
+    @ResponseBody
+    public BaseBean vehicleOutCom(HttpSession session,Long branchId,Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            for (Long id:delArr){
+                TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+                String com=companyId.getUserName();
+                TbInout tbInout=new TbInout();
+                tbInout.setVehicleId(id);
+                tbInout.setFromId(0);//来源方
+                tbInout.setState("1");//进行状态
+                tbInout.setToId(branchId);
+                tbInout.setType(2);
+                tbInout.setInoutType(2);
+                tbInout.setDeleteFlag(0);
+                tbInout.setCreateBy(com);
+                Date date=new Date();
+                DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String time=format.format(date);
+                tbInout.setCreateTime(time);
+                tbInoutService.add(tbInout);
+            }
+            tbVehicleService.vehicleOutCom(branchId,delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //出库到网点
+    @RequestMapping("/vehicleOutPing")
+    @ResponseBody
+    public BaseBean vehicleOutPing(HttpSession session,Long branchId,Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            for (Long id:delArr){
+                TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+                String com=companyId.getUserName();
+                TbInout tbInout=new TbInout();
+                tbInout.setVehicleId(id);
+                tbInout.setFromId(0);//来源方
+                tbInout.setState("1");//进行状态
+                tbInout.setToId(branchId);
+                tbInout.setType(2);
+                tbInout.setInoutType(2);
+                tbInout.setDeleteFlag(0);
+                tbInout.setCreateBy(com);
+                Date date=new Date();
+                DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String time=format.format(date);
+                tbInout.setCreateTime(time);
+                tbInoutService.add(tbInout);
+            }
+            TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+            Long bid=companyId.getCompanyId();
+            tbVehicleService.vehicleOutPing(bid,delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+
+    //编辑型号信息
+    @ResponseBody
+    @RequestMapping("/updateTbVehicle")
+    public BaseBean editAddress(TbVehicle tbVehicle){
+        BaseBean baseBean=new BaseBean();
+        try {
+            tbVehicleService.updateTbVehicle(tbVehicle);
+            baseBean.setStatus(200);
+            baseBean.setMsg("编辑成功");
+        }catch (Exception ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error("操作失败",ex);
+        }
+        return baseBean;
+    }
+
+    //分公司查询没有入库的车电
+    @ResponseBody
+    @RequestMapping("/ruTbVehicleList")
+    public BaseBean ruTbVehicleList(HttpSession session,Integer page, Integer size,Integer brandId,Integer modelType,Integer wangUserId,Integer source,Integer vehicleId,Integer state){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            List<TbVehicle> tbVehicles = tbVehicleService.ruTbVehicleList(page, size, com, brandId, modelType, wangUserId, source, vehicleId, state);
+            baseBean.setRows(tbVehicles);
+            baseBean.setTotal(new PageInfo<>(tbVehicles).getTotal());
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+    //查询分公司已入库的车电
+    @ResponseBody
+    @RequestMapping("/okTbVehicleList")
+    public BaseBean okTbVehicleList(HttpSession session,Integer page, Integer size,Integer brandId,Integer modelType,String branchName,String state,Integer tName,String start,String end){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            List<HashMap> list = tbVehicleService.okTbVehicleList(page, size, com, brandId, modelType,branchName,state, tName,start,end);
+            baseBean.setRows(list);
+            baseBean.setTotal(new PageInfo<>(list).getTotal());
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //查询分公司已入库的车电
+    @ResponseBody
+    @RequestMapping("/okTbVehicleListout")
+    public BaseBean okTbVehicleListout(HttpSession session,Integer page, Integer size,Integer brandId,Integer modelType,Integer wangUserId,String branchName,Long vehicleId,String state,Integer tName){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            List<HashMap> list = tbVehicleService.okTbVehicleListout(page, size, com, brandId, modelType, wangUserId, branchName, vehicleId, state, tName);
+            baseBean.setRows(list);
+            baseBean.setTotal(new PageInfo<>(list).getTotal());
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+    //查询分公司可以出库的车电
+    @ResponseBody
+    @RequestMapping("/ifoutwang")
+    public BaseBean ifoutwang(HttpSession session,Integer page, Integer size,Integer brandId,Integer modelType,Integer wangUserId,String branchName,Long vehicleId,String state,Integer tName){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        Long coms=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            List<HashMap> list = tbVehicleService.ifoutwang(page, size, com,coms,brandId, modelType, wangUserId, branchName, vehicleId, state, tName);
+            baseBean.setRows(list);
+            baseBean.setTotal(new PageInfo<>(list).getTotal());
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //分公司把车电入库到公司
+    @RequestMapping("/completedRk")
+    @ResponseBody
+    public BaseBean completedRk(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+
+        try {
+            tbVehicleService.completedRk(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //分公司把车电入库到公司
+    @RequestMapping("/completedRe")
+    @ResponseBody
+    public BaseBean completedRe(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+
+        try {
+            tbVehicleService.completedRe(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //出库到网点
+    @RequestMapping("/vehicleOutWang")
+    @ResponseBody
+    public BaseBean vehicleOutWang(HttpSession session,Long branchId,Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+
+            tbVehicleService.vehicleOutWang(branchId,delArr,companyId,branchId);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //查看发票
+    @ResponseBody
+    @RequestMapping("/findRes")
+    public BaseBean findRes(HttpSession session,Integer page, Integer size,Long vehicleId){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            List<HashMap> res = tbVehicleService.findRes(page, size, com, vehicleId);
+            baseBean.setRows(res);
+            baseBean.setTotal(new PageInfo<>(res).getTotal());
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+            UtilLog.logger.error("错误信息",e);
+        }
+        return baseBean;
+    }
+
+    //导出全部车电
+    @RequestMapping("/all/downloadExcel")
+    public void setUpExcel(HttpServletRequest request, HttpServletResponse response,Long brandId,Integer modelType,Long branchId,String branchName) {
+        String[] headers = { "编号", "预留编号","车架号","GPS号","型号","类型","状态"};
+        List<TbVehicle> vehicle=tbVehicleService.allist(brandId,modelType,branchId,branchName);
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet();
+        //设置列宽
+        sheet.setDefaultColumnWidth((short) 18);
+        //创建第一行的对象，第一行一般用于填充标题内容。从第二行开始一般是数据
+        HSSFRow row = sheet.createRow(0);
+        for (short i = 0; i < headers.length; i++) {
+            //创建单元格，每行多少数据就创建多少个单元格
+            HSSFCell cell = row.createCell(i);
+            HSSFRichTextString text = new HSSFRichTextString(headers[i]);
+            //给单元格设置内容
+            cell.setCellValue(text);
+        }
+        //遍历集合，将每个集合元素对象的每个值填充到单元格中
+        for(int i=0;i<vehicle.size();i++){
+            TbVehicle tbVehicle=vehicle.get(i);
+            //从第二行开始填充数据
+            row = sheet.createRow(i+1);
+            //该集合只记录数量和时间，这两个值来自statisticsModel。如果对象比较复杂，需要额外转换，比如Date类型的日期，int，float类型的数值
+            List<String> datas=new ArrayList<>();
+
+            datas.add(tbVehicle.getVehicleId().toString());//id
+            datas.add(tbVehicle.getSerialNumber());//预留编号
+            datas.add(tbVehicle.getVin());
+            datas.add(tbVehicle.getGpsNumber());
+            System.out.print(tbVehicle.getModelNumber().getModel());
+            datas.add(tbVehicle.getModelNumber().getModel());
+            String ss=tbVehicle.getModelNumber().getModelType().toString();
+            String ty0="0";
+            String ty1="1";
+            if(ss.equals(ty0)){
+                datas.add("车辆");
+            }else if(ss.equals(ty1)){
+                datas.add("电池");
+            }else{
+                datas.add("数据未匹配");
+            }
+            String sta=tbVehicle.getState();
+            String stao="0";
+            String stat="1";
+            String stas="2";
+            String staf="3";
+            if (sta.equals(stao)){
+                datas.add("可租");
+            }else if (sta.equals(stat)){
+                datas.add("已租");
+            }else if (sta.equals(stas)){
+                datas.add("维修");
+            }else if (sta.equals(staf)){
+                datas.add("停用");
+            }else {
+                datas.add("未定义");
+            }
+            for (int j=0;j<datas.size();j++) {
+                String string=datas.get(j);
+                HSSFCell cell = row.createCell(j);
+                HSSFRichTextString richString = new HSSFRichTextString(string);
+                HSSFFont font3 = workbook.createFont();
+                //定义Excel数据颜色，这里设置为蓝色
+                /*font3.setColor(HSSFColor.BLUE.index);
+                richString.applyFont(font3);*/
+                cell.setCellValue(richString);
+            }
+
+        }
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-disposition", "attachment;filename="+"Vehicle.xls");//Excel文件名
+        try {
+            response.flushBuffer();
+            //将workbook中的内容写入输出流中
+            workbook.write(response.getOutputStream());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    //导出全部车电
+    @RequestMapping("/allTve")
+    public void alltve(HttpServletRequest request, HttpServletResponse response,Long brandId,Integer modelType,String branchName,Long vehicleId,Integer state)throws IOException {
+        String[] headers = { "编号", "预留编号","车架号","GPS号","型号","类型","状态","imei"};
+        List<TbVehicle> vehicle=tbVehicleService.TbVehicleexal(brandId,modelType,branchName,vehicleId,state);
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet();
+        //设置列宽
+        sheet.setDefaultColumnWidth((short) 18);
+        //创建第一行的对象，第一行一般用于填充标题内容。从第二行开始一般是数据
+        HSSFRow row = sheet.createRow(0);
+        for (short i = 0; i < headers.length; i++) {
+            //创建单元格，每行多少数据就创建多少个单元格
+            HSSFCell cell = row.createCell(i);
+            HSSFRichTextString text = new HSSFRichTextString(headers[i]);
+            //给单元格设置内容
+            cell.setCellValue(text);
+        }
+        //遍历集合，将每个集合元素对象的每个值填充到单元格中
+        for(int i=0;i<vehicle.size();i++){
+            TbVehicle tbVehicle=vehicle.get(i);
+            //从第二行开始填充数据
+            row = sheet.createRow(i+1);
+            //该集合只记录数量和时间，这两个值来自statisticsModel。如果对象比较复杂，需要额外转换，比如Date类型的日期，int，float类型的数值
+            List<String> datas=new ArrayList<>();
+            datas.add(tbVehicle.getVehicleId().toString());//id
+            datas.add(tbVehicle.getSerialNumber());//预留编号
+            datas.add(tbVehicle.getVin());
+            datas.add(tbVehicle.getGpsNumber());
+            datas.add(tbVehicle.getModelNumber().getModel());
+            Integer ss=tbVehicle.getModelNumber().getModelType();
+            if(ss.equals(0)){
+                datas.add("车辆");
+            }else if(ss.equals(1)){
+                datas.add("电池");
+            }
+            String sta=tbVehicle.getState();
+            String stao="0";
+            String stat="1";
+            String stas="2";
+            String staf="3";
+            if (sta.equals(stao)){
+                datas.add("可租");
+            }else if (sta.equals(stat)){
+                datas.add("已租");
+            }else if (sta.equals(stas)){
+                datas.add("维修");
+            }else if (sta.equals(staf)){
+                datas.add("停用");
+            }else {
+                datas.add("未定义");
+            }
+            datas.add(tbVehicle.getImei());
+            for (int j=0;j<datas.size();j++) {
+                String string=datas.get(j);
+                HSSFCell cell = row.createCell(j);
+                HSSFRichTextString richString = new HSSFRichTextString(string);
+                HSSFFont font3 = workbook.createFont();
+                //定义Excel数据颜色，这里设置为蓝色
+                /*font3.setColor(HSSFColor.BLUE.index);
+                richString.applyFont(font3);*/
+                cell.setCellValue(richString);
+            }
+
+        }
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-disposition", "attachment;filename="+"Vehicle.xls");//Excel文件名
+        try {
+            response.flushBuffer();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //将workbook中的内容写入输出流中
+        workbook.write(response.getOutputStream());
+    }
+    //导出退回的
+    @RequestMapping("/downloadExcel")
+    public void outsetUpExcel(HttpServletRequest request, HttpServletResponse response,Integer branchId,String branchName) throws IOException {
+        String[] headers = { "编号","品牌","型号","类型","状态","所在公司Id","所在公司"};
+        List<HashMap> vehicle=tbVehicleService.returnTbVehicleList(branchId,branchName);
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet();
+        //设置列宽
+        sheet.setDefaultColumnWidth((short) 18);
+        //创建第一行的对象，第一行一般用于填充标题内容。从第二行开始一般是数据
+        HSSFRow row = sheet.createRow(0);
+        for (short i = 0; i < headers.length; i++) {
+            //创建单元格，每行多少数据就创建多少个单元格
+            HSSFCell cell = row.createCell(i);
+            HSSFRichTextString text = new HSSFRichTextString(headers[i]);
+            //给单元格设置内容
+            cell.setCellValue(text);
+        }
+        //遍历集合，将每个集合元素对象的每个值填充到单元格中
+        for(int i=0;i<vehicle.size();i++){
+            HashMap tbVehicle=vehicle.get(i);
+            //从第二行开始填充数据
+            row = sheet.createRow(i+1);
+            //该集合只记录数量和时间，这两个值来自statisticsModel。如果对象比较复杂，需要额外转换，比如Date类型的日期，int，float类型的数值
+            List<String> datas=new ArrayList<>();
+
+            datas.add(tbVehicle.get("vehicleId").toString());//id
+            datas.add(tbVehicle.get("brandName").toString());
+            datas.add(tbVehicle.get("modelName").toString());
+            String ty=tbVehicle.get("modelType").toString();
+            String ty1="0";
+            String ty2="1";
+            if(ty.equals(ty1)){
+                datas.add("车辆");
+            }else if(ty.equals(ty2)){
+                datas.add("电池");
+            }
+            String st=tbVehicle.get("state").toString();
+            String st1="0";
+            String st2="1";
+            String st3="2";
+            String st4="3";
+            if (st.equals(st1)){
+                datas.add("可租");
+            }else if (st.equals(st2)){
+                datas.add("已租");
+            }else if (st.equals(st3)){
+                datas.add("维修");
+            }else if (st.equals(st4)){
+                datas.add("停用");
+            }else {
+                datas.add("未定义");
+            }
+            datas.add(tbVehicle.get("branchId").toString());
+            datas.add(tbVehicle.get("branchName").toString());
+            for (int j=0;j<datas.size();j++) {
+                String string=datas.get(j);
+                HSSFCell cell = row.createCell(j);
+                HSSFRichTextString richString = new HSSFRichTextString(string);
+                HSSFFont font3 = workbook.createFont();
+                //定义Excel数据颜色，这里设置为蓝色
+                /*font3.setColor(HSSFColor.BLUE.index);
+                richString.applyFont(font3);*/
+                cell.setCellValue(richString);
+            }
+
+        }
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-disposition", "attachment;filename="+"ReturnVehicle.xls");//Excel文件名
+        try {
+            response.flushBuffer();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //将workbook中的内容写入输出流中
+        workbook.write(response.getOutputStream());
+
+    }
+    //分公司导出车电
+    @RequestMapping("/comdownloadExcel")
+    public void comsetUpExcel(HttpServletRequest request, HttpServletResponse response,HttpSession session,Integer brandId,Integer modelType,Integer wangUserId,String branchName,Long vehicleId,String state,Integer tName) throws IOException {
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        String[] headers = { "编号","预留编号","品牌","型号","车架号","GPS号","类型","状态","网点ID","网点名称"};
+        List<HashMap> vehicle=tbVehicleService.comveh(com,brandId,modelType,wangUserId,branchName,vehicleId,state,tName);
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet();
+        //设置列宽
+        sheet.setDefaultColumnWidth((short) 18);
+        //创建第一行的对象，第一行一般用于填充标题内容。从第二行开始一般是数据
+        HSSFRow row = sheet.createRow(0);
+        for (short i = 0; i < headers.length; i++) {
+            //创建单元格，每行多少数据就创建多少个单元格
+            HSSFCell cell = row.createCell(i);
+            HSSFRichTextString text = new HSSFRichTextString(headers[i]);
+            //给单元格设置内容
+            cell.setCellValue(text);
+        }
+
+        //遍历集合，将每个集合元素对象的每个值填充到单元格中
+        for(int i=0;i<vehicle.size();i++){
+            HashMap tbVehicle=vehicle.get(i);
+            //从第二行开始填充数据
+            row = sheet.createRow(i+1);
+            //该集合只记录数量和时间，这两个值来自statisticsModel。如果对象比较复杂，需要额外转换，比如Date类型的日期，int，float类型的数值
+            List<String> datas=new ArrayList<>();
+
+            datas.add(tbVehicle.get("vehicleId").toString());//id
+            datas.add(tbVehicle.get("serialNumber").toString());
+            datas.add(tbVehicle.get("brandName").toString());
+            datas.add(tbVehicle.get("modelName").toString());
+            datas.add(tbVehicle.get("vin").toString());
+            datas.add(tbVehicle.get("gpsNumber").toString());
+            String ty=tbVehicle.get("type").toString();
+            String ty1="0";
+            String ty2="1";
+            if(ty.equals(ty1)){
+                datas.add("车辆");
+            }else if(ty.equals(ty2)){
+                datas.add("电池");
+            }
+            String st=tbVehicle.get("state").toString();
+            String st1="0";
+            String st2="1";
+            String st3="2";
+            String st4="3";
+            if (st.equals(st1)){
+                datas.add("可租");
+            }else if (st.equals(st2)){
+                datas.add("已租");
+            }else if (st.equals(st3)){
+                datas.add("维修");
+            }else if (st.equals(st4)){
+                datas.add("停用");
+            }else {
+                datas.add("未定义");
+            }
+            datas.add(tbVehicle.get("wangUserId").toString());
+            datas.add(tbVehicle.get("branchName").toString());
+            for (int j=0;j<datas.size();j++) {
+                String string=datas.get(j);
+                HSSFCell cell = row.createCell(j);
+                HSSFRichTextString richString = new HSSFRichTextString(string);
+                HSSFFont font3 = workbook.createFont();
+                cell.setCellValue(richString);
+            }
+
+        }
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-disposition", "attachment;filename="+"ComVehicle.xls");//Excel文件名
+        try {
+            response.flushBuffer();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //将workbook中的内容写入输出流中
+        workbook.write(response.getOutputStream());
+
+    }
+    /**  获取车辆位置
+     * @author ZhangXuanWei
+     * @date 2018/9/20 16:00
+     * @param
+     * @return com.common.BaseBean
+     */
+    @ResponseBody
+    @RequestMapping("/carPosition")
+    public BaseBean carPosition(Long companyId,Integer page,Integer size,String userName){
+        BaseBean baseBean=new BaseBean();
+        try {
+            if (companyId!=null){
+                List<HashMap> list = tbVehicleService.searchCarPosition(companyId,page,size,userName);
+                baseBean.setStatus(200);
+                baseBean.setRows(list);
+                baseBean.setTotal(new PageInfo<>(list).getTotal());
+            }else {
+                baseBean.setMsg("参数错误");
+            }
+        }catch (Exception ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error("操作失败",ex);
+        }
+        return baseBean;
+    }
+
+
+
+
+    //导入excel
+    @ResponseBody
+    @RequestMapping("/readExcel")
+    public void findImportUser(
+            @RequestParam("fileName") MultipartFile fileName,
+            String suffixName,
+            String callbackFun,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        BaseBean bean = new BaseBean();
+        try {
+            Workbook workbook = null;   //是一种 poi方式
+            InputStream is = fileName.getInputStream(); //创建文件的输入流
+            if (suffixName.equals("xls")) {
+                workbook = new HSSFWorkbook(is);
+            } else if (suffixName.equals("xlsx")) {  //xls和xlsx需要不同的workbook对象
+                workbook = new XSSFWorkbook(is);
+            }
+            Sheet sheet = workbook.getSheetAt(0); //
+            int lastRowNum = sheet.getLastRowNum();
+            for (int rowNum = 1; rowNum <= lastRowNum; rowNum++) {
+                TbVehicle veh = new TbVehicle();
+                veh.setSerialNumber(getCellValue(sheet.getRow(rowNum).getCell(0)));
+                veh.setVin(getCellValue(sheet.getRow(rowNum).getCell(1)));
+                veh.setGpsNumber(getCellValue(sheet.getRow(rowNum).getCell(2)));
+                System.out.print(getCellValue(sheet.getRow(rowNum).getCell(3)));
+                TbModelNumber model= tbModelNumberService.selectmodel(getCellValue(sheet.getRow(rowNum).getCell(3)));
+                if(model!=null){
+                    veh.setModelId(model.getModelId());
+                }
+                veh.setDeleteFlag(0);
+                //生成二维码号
+                Long vehicle=tbVehicleService.maxqrcode();
+                veh.setQrCode(CommUtil.getCarCode(1,vehicle));
+                tbVehicleService.add(veh);
+            }
+            is.close();
+            bean.setStatus(200);
+            bean.setMsg("导入成功");
+        } catch (RuntimeException ex) {
+            Log.logger.error("操作失败", ex);
+            bean.setStatus(400);
+            bean.setMsg(ex.getLocalizedMessage());
+        }
+        String json=JSON.toJSONString(bean);
+        if (Commonparam.stringIsNotNull(callbackFun)) {
+            response.getOutputStream().write(("<script>parent." + callbackFun + "(" + json + ")</script>").getBytes("UTF-8"));
+        }
+    }
+    public static String getCellValue(Cell cell) {
+        String cellValue = "";
+        if (cell == null) {
+            return cellValue;
+        }
+        //把数字当成String来读，避免出现1读成1.0的情况
+        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+        }
+        //判断数据的类型
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_NUMERIC: //数字
+                cellValue = String.valueOf(cell.getNumericCellValue());
+                break;
+            case Cell.CELL_TYPE_STRING: //字符串
+                cellValue = String.valueOf(cell.getStringCellValue());
+                break;
+            case Cell.CELL_TYPE_BOOLEAN: //Boolean
+                cellValue = String.valueOf(cell.getBooleanCellValue());
+                break;
+            case Cell.CELL_TYPE_FORMULA: //公式
+                cellValue = String.valueOf(cell.getCellFormula());
+                break;
+            case Cell.CELL_TYPE_BLANK: //空值
+                cellValue = "";
+                break;
+            case Cell.CELL_TYPE_ERROR: //故障
+                cellValue = "非法字符";
+                break;
+            default:
+                cellValue = "未知类型";
+                break;
+        }
+        return cellValue;
+    }
+
+
+
+}

@@ -1,0 +1,231 @@
+package com.ddcar.service.impl;
+
+import com.common.BaseBean;
+import com.common.Commonparam;
+import com.common.MD5Util;
+import com.ddcar.entity.TbUser;
+import com.ddcar.mapper.SignUserMapper;
+import com.ddcar.mapper.UserMapper;
+import com.ddcar.pojo.SignUser;
+import com.ddcar.pojo.SignUserDetail;
+import com.ddcar.service.SignService;
+import com.ddcar.util.UtilLog;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 团签接口 Service实现
+ *
+ * @author wcy
+ */
+@Service
+public class SignServiceImpl implements SignService {
+
+    @Autowired
+    private SignUserMapper signUserMapper;
+
+    /**
+     * 每页显示条数
+     */
+    private final Integer size = 10;
+
+    @Override
+    public BaseBean login(String account, String pwd) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            TbUser info = signUserMapper.login(account, MD5Util.digest(pwd));
+            if(info==null){
+                baseBean.setMsg("账号或密码错误!");
+                return baseBean;
+            }
+            baseBean.setMsg("登陆成功!");
+            baseBean.setRows(info);
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            UtilLog.logger.error(Commonparam.handle(e));
+            baseBean.setMsg("登陆出错,请稍后重试");
+        }
+        return baseBean;
+    }
+
+    @Override
+    public BaseBean queryUserByParentId(Integer page, Long parentId, Long type) {
+        BaseBean baseBean = new BaseBean();
+        if (parentId == null) {
+            baseBean.setMsg("参数错误!");
+            return baseBean;
+        }
+        try {
+            Integer userFlag = signUserMapper.isUserFlag(parentId);
+            if (userFlag <= 0) {
+                baseBean.setMsg("未查询到团签信息");
+                return baseBean;
+            }
+            PageHelper.startPage(page, size);
+            //骑手列表
+            List<SignUser> users = signUserMapper.queryList(parentId);
+            if (!(users != null && users.size() > 0)) {
+                if(page==1){
+                    baseBean.setMsg("未查询到骑手!");
+                }else{
+                    baseBean.setMsg("没有更多数据了!");
+                }
+            }
+            PageInfo pageInfo = new PageInfo(users);
+            //数量
+            Map<String, Object> count = null;
+            if(page==1){
+                if (type == 1) {
+                    //数量
+                    count = signUserMapper.queryNum(parentId);
+                } else {
+                    //押金
+                    count = signUserMapper.querySumDeposit(parentId);
+                }
+            }
+            baseBean.setRows(pageInfo.getList());
+            baseBean.setStatus(200);
+            baseBean.setTotal(count);
+        } catch (Exception e) {
+            UtilLog.logger.error(Commonparam.handle(e));
+            baseBean.setMsg("查询列表失败!");
+        }
+        return baseBean;
+    }
+
+    @Override
+    public BaseBean bindUser(Long parentId, String code) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            Integer userFlag = signUserMapper.isUserFlag(parentId);
+            if (userFlag <= 0) {
+                baseBean.setMsg("未查询到团签信息");
+                return baseBean;
+            }
+            TbUser user = signUserMapper.queryUser(code);
+            if (user == null) {
+                baseBean.setMsg("没有该骑手信息");
+                return baseBean;
+            }
+            if (user.getParentId() != null && user.getParentId() > 0) {
+                if(user.getParentId().equals(parentId)){
+                    baseBean.setMsg("该骑手已被绑定!");
+                    return baseBean;
+                }
+                baseBean.setMsg("该骑手已绑定其他团签,请先解绑之后,再进行其他操作!");
+                return baseBean;
+            }
+            //团签信息
+            TbUser signDetail = signUserMapper.regimentSignUserDetail(parentId);
+            //总数量
+            Map<String, Object> maps = signUserMapper.queryNum(parentId);
+            //绑定的骑手数量
+            Long userNum = (Long) maps.get("userNum");
+            //判断当前团签绑定的骑手数量是否超过
+            if(userNum>=signDetail.getNumber()){
+                baseBean.setMsg("绑定骑手数量已上限!");
+                return baseBean;
+            }
+            //绑定骑手
+            Integer integer = signUserMapper.bindUser(parentId, user.getUserId());
+            if (integer > 0) {
+                baseBean.setStatus(200);
+                baseBean.setMsg("绑定成功");
+            } else {
+                baseBean.setMsg("绑定失败");
+            }
+        } catch (Exception e) {
+            UtilLog.logger.error(Commonparam.handle(e));
+            baseBean.setMsg("绑定失败");
+        }
+        return baseBean;
+    }
+
+    @Override
+    public BaseBean unbindUser(Long parentId, Long userId) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            BaseBean logic = this.commonLogic(parentId, userId);
+            if(logic.getStatus()!=200){
+                return logic;
+            }
+            SignUserDetail user = (SignUserDetail) logic.getRows();
+            //骑手名下有没有正在租车的状态
+            if(user.getType()>0){
+                baseBean.setMsg("该骑手有车辆或电瓶未归还!");
+                return baseBean;
+            }
+            //解绑骑手
+            Integer integer = signUserMapper.bindUser(0L, userId);
+            if (integer > 0) {
+                baseBean.setStatus(200);
+                baseBean.setMsg("解绑成功");
+            } else {
+                
+                baseBean.setMsg("解绑失败");
+            }
+        }catch (Exception e){
+            UtilLog.logger.error(Commonparam.handle(e));
+            baseBean.setMsg("解绑失败");
+        }
+        return baseBean;
+    }
+
+    @Override
+    public BaseBean detail(Long parentId,Long userId) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            BaseBean logic = this.commonLogic(parentId, userId);
+            if(logic.getStatus()!=200){
+                return logic;
+            }
+            SignUserDetail user = (SignUserDetail) logic.getRows();
+            List<Map<String, Object>> historyList = signUserMapper.leaseHistoryList(user.getUserId());
+            for(Map<String, Object> map:historyList){
+                String[] start_date = map.get("start_date").toString().split("-");
+                String[] end_date = map.get("end_date").toString().split("-");
+                String startTime=start_date[0]+"."+start_date[1];
+                String endTime=end_date[0]+"."+end_date[1];
+                map.put("startTime",startTime);
+                map.put("endTime",endTime);
+            }
+            user.setLeaseHistory(historyList);
+            baseBean.setStatus(200);
+            baseBean.setRows(user);
+        } catch (Exception e) {
+            baseBean.setMsg("查询详情出错");
+            UtilLog.logger.error(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    /**
+     * 逻辑判断
+     * @param parentId 团签id
+     * @param userId 用户id
+     * @return
+     */
+    private BaseBean commonLogic(Long parentId,Long userId){
+        BaseBean baseBean = new BaseBean();
+        Integer userFlag = signUserMapper.isUserFlag(parentId);
+        if (userFlag <= 0) {
+            baseBean.setMsg("未查询到团签信息");
+            return baseBean;
+        }
+        SignUserDetail user = signUserMapper.queryUserDetail(parentId,userId);
+        if (user == null) {
+            baseBean.setMsg("未查询到信息");
+            return baseBean;
+        }
+        baseBean.setStatus(200);
+        baseBean.setRows(user);
+        return baseBean;
+    }
+}

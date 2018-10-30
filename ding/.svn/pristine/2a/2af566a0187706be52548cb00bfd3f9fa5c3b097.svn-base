@@ -1,0 +1,170 @@
+package com.ddcar.service.impl;
+
+import com.ddcar.entity.TbVehicle;
+import com.ddcar.mapper.TbVehicleMapper;
+import com.ddcar.service.TbVehicleService;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-03.
+ */
+@Service
+public class TbVehicleServiceImpl implements TbVehicleService{
+
+    @Autowired(required = false)
+    TbVehicleMapper tbVehicleMapper;
+
+    @Override
+    public List<TbVehicle> findTbVehicleList(Integer page, Integer size,Long brandId,Integer modelType,Long branchId,String branchName,Long vehicleId,Integer state) {
+        PageHelper.startPage(page,size);
+        return tbVehicleMapper.findTbVehicleList(brandId,modelType,branchId,branchName,vehicleId,state);
+    }
+
+    @Override
+    public List<TbVehicle> noOutTbVehicleList(Integer page, Integer size,Integer brandId,Integer modelType,Integer vehicleId) {
+        PageHelper.startPage(page,size);
+        return tbVehicleMapper.noOutTbVehicleList(brandId, modelType,vehicleId);
+    }
+
+    @Override
+    public List<HashMap> returnTbVehicleList(Integer page, Integer size,Integer branchId,String branchName) {
+        PageHelper.startPage(page,size);
+        return tbVehicleMapper.returnTbVehicleList(branchId,branchName);
+    }
+
+    @Override
+    public List<TbVehicle> wangReturnTbVehicleList(Integer page, Integer size, Long branchId) {
+        PageHelper.startPage(page,size);
+        return tbVehicleMapper.wangReturnTbVehicleList(branchId);
+    }
+
+    @Override
+    public List<TbVehicle> findTbVehiclebranchList(Integer page, Integer size,Integer modelId) {
+        PageHelper.startPage(page,size);
+        return tbVehicleMapper.findTbVehiclebranchList(page, size,modelId);
+    }
+
+    @Override
+    public List<TbVehicle> ruTbVehicleList(Integer page, Integer size,Long branchId,Integer brandId,Integer modelType,Integer wangUserId,Integer source,Integer vehicleId,Integer state) {
+        PageHelper.startPage(page,size);
+        return tbVehicleMapper.ruTbVehicleList(branchId,brandId,modelType,wangUserId,source,vehicleId,state);
+    }
+
+    @Override
+    public List<HashMap> okTbVehicleList(Integer page, Integer size, Long branchId,Integer brandId,Integer modelType,Integer wangUserId,String branchName,Long vehicleId,String state,Integer tName) {
+        PageHelper.startPage(page,size);
+        return tbVehicleMapper.okTbVehicleList(branchId,brandId,modelType,wangUserId,branchName,vehicleId,state,tName);
+    }
+
+    @Override
+    public void completedRk(Long[] vehicleId) {
+        for (Long id:vehicleId){
+            tbVehicleMapper.completedRk(id);
+        }
+    }
+
+    @Override
+    public void completedRe(Long[] vehicleId) {
+        for (Long id:vehicleId){
+           // tbVehicleMapper.completedRe(id);
+        }
+    }
+
+    @Override
+    public void delTbVehicle(Long[] vehicleId) {
+        for (Long id:vehicleId){
+            tbVehicleMapper.delTbVehicle(id);
+        }
+    }
+
+    @Override
+    public void comreturmTbVehicle(Long[] vehicleId) {
+        for (Long id:vehicleId){
+            tbVehicleMapper.comreturmTbVehicle(id);
+        }
+    }
+
+    @Override
+    public void updatestateOk(Long[] vehicleId) {
+        for (Long id:vehicleId){
+            tbVehicleMapper.updatestateOk(id);
+        }
+    }
+
+    @Override
+    public void updatestateRepair(Long[] vehicleId) {
+        for (Long id:vehicleId){
+            tbVehicleMapper.updatestateRepair(id);
+        }
+    }
+
+    @Override
+    public void updatestateokStop(Long[] vehicleId) {
+        for (Long id:vehicleId){
+            tbVehicleMapper.updatestateokStop(id);
+        }
+    }
+    @Transactional
+    @Override
+    public void vehicleOutCom(Long branchId, Long[] vehicleId) {
+        for (Long id:vehicleId){
+            tbVehicleMapper.vehicleOutCom(branchId,id);
+        }
+    }
+    @Transactional
+    @Override
+    public void vehicleOutWang(Long wangUserId, Long[] vehicleId) {
+        for (Long id:vehicleId){
+            tbVehicleMapper.vehicleOutWang(wangUserId,id);
+        }
+    }
+
+    @Override
+    public void vehicleOutPing(Long branchId, Long[] vehicleId) {
+        for (Long id:vehicleId){
+            //tbVehicleMapper.vehicleOutPing(branchId,id);
+        }
+    }
+
+    @Override
+    public TbVehicle tbVehicleSeacherId(Long vehicleId) {
+        return tbVehicleMapper.tbVehicleSeacherId(vehicleId);
+    }
+    @Transactional
+    @Override
+    public void updateTbVehicle(TbVehicle tbVehicle) {
+        tbVehicleMapper.updateTbVehicle(tbVehicle);
+    }
+
+    @Override
+    public void add(TbVehicle tbVehicle) {
+        tbVehicleMapper.insert(tbVehicle);
+    }
+
+    @Override
+    public List<HashMap> findRes(Integer page, Integer size, Long branchId,Long vehicleId) {
+        PageHelper.startPage(page,size);
+        return tbVehicleMapper.findRes(branchId,vehicleId);
+    }
+
+    @Override
+    public void update(TbVehicle tbVehicle) {
+
+    }
+
+    @Override
+    public void del(Integer id) {
+
+    }
+
+    @Override
+    public List<HashMap> searchCarPosition(Long companyId) {
+        return tbVehicleMapper.findCarPosition(companyId);
+    }
+}

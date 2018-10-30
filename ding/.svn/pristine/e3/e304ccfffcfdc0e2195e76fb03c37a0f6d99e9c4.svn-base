@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>分公司管理</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:underline; text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline;}
+    </style>
+</head>
+<body class="gray-bg">
+
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+
+                        <div class="form-group">
+                            <label for="searchbranchId">公司Id</label>
+                            <input type="text" placeholder="" id="searchbranchId" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchbranchName">公司名称</label>
+                            <input type="text" placeholder="" id="searchbranchName" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+
+
+                        <button type="button" class="btn btn-outline btn-default" onclick="loadData(1)">
+                            <i class="glyphicon glyphicon-search" aria-hidden="true"></i>查询
+                        </button>
+                        <button type="button" class="btn btn-outline btn-warning" onclick="clearSearch()">
+                            <i class="glyphicon" aria-hidden="true"></i>清除查询条件
+                        </button>
+                    </form>
+
+                </div>
+                <div class="ibox-content">
+
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <a href="../company/addCompany" type="button" class="btn btn-outline btn-default">
+                            新增
+                        </a>
+                        <button type="button" class="btn btn-outline btn-default" onclick="enable()">
+                            启用
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="closecom()">
+                            关停
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="deleteData()">
+                            <i class="glyphicon" aria-hidden="true"></i>删除
+                        </button>
+
+                    </div>
+                    <div  style="position:relative;width: 100%;overflow-x: scroll;border:1px solid #eee;margin-bottom:30px;">
+                        <table class="tbsalelist table table-striped table-bordered" data-toggle="table"  data-click-to-select="true" data-select-item-name="myRadioName" data-mobile-responsive="true">
+                            <thead>
+                            <tr>
+                                <th width="40" id="title-table-checkbox">全选</th>
+                                <th width="60">ID</th>
+                                <th width="80">公司名称</th>
+                                <th width="80">类型</th>
+                                <th width="80">管理员ID</th>
+                                <th width="80">管理员</th>
+                                <th width="80">电话</th>
+                                <th width="80">地址</th>
+                                <th width="80">状态</th>
+                                <th width="80">地图</th>
+                                <th width="80">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="table_content">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <a href="../company/addCompany" type="button" class="btn btn-outline btn-default">
+                            新增
+                        </a>
+                        <button type="button" class="btn btn-outline btn-default" onclick="enable()">
+                            启用
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="closecom()">
+                            关停
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="deleteData()">
+                            <i class="glyphicon" aria-hidden="true"></i>删除
+                        </button>
+
+                    </div>
+                    <div class="btn-group" role="group" style="width:100%;">
+                        <header th:replace="comm :: pagenation_web"></header>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        //$(".tbsalelist").width(2200);
+        //$(".tbsalelist").css("max-width", 2200);
+        //initUpload('uploadBtn','showImg',null,1024);
+
+        loadData(1);
+
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+    function clearSearch(){
+        $('#searchForm input').val('');
+        $('#searchForm select').val('');
+        $('#selectSalerSearch').val('');
+        $('#selectKefuSearch').val('');
+    }
+
+    function showSystemLog(msgType,userId){
+        parent.locationCurrMenu();
+        parent.addPage("web登陆日志","${ctx}/pages/system/systemlog.jsp?msgType="+msgType+"&userId="+userId);
+
+    }
+    function refreshData(){
+        loadData(pageinfo["page"]);
+    }
+
+    function loadData(page, size) {
+        if (size != undefined) {
+            pageinfo["size"] = size;
+            $('#pagesize').html(size);
+        }
+        if (page == -1)
+            pageinfo["page"]--;
+        else if (page == -2)
+            pageinfo["page"]++;
+        else {
+            if (page >= pageinfo["tp"] && pageinfo["tp"] > 0)
+                pageinfo["page"] = pageinfo["tp"];
+            else
+                pageinfo["page"] = page;
+        }
+        pageinfo["branchId"]=$('#searchbranchId').val();
+        pageinfo["branchName"]=$('#searchbranchName').val();
+
+
+        $('#table_content').html('<tr><td colspan="23">'+$('#divLoading').html()+'</td></tr>');
+        httpPost(ctx+'/branch/findTbBranchbranchList',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        array.push('<tr>');
+                        array.push('<td><input  type="checkbox" class="i-checks" name="checkbox-tr" value="' + data["branchId"]+ '"/></td>');
+                        array.push('<td >'+data["branchId"]+'</td>');
+                        array.push('<td >'+data["branchName"]+'</td>');
+                        if (data["websiteType"] == 0) {
+                            array.push('<td>自营</td>');
+                        } else if (data["websiteType"] == 1) {
+                            array.push('<td>加盟</td>');
+                        }else{
+                            array.push('<td>数据不匹配</td>');
+                        }
+                        array.push('<td >'+data["managerId"]+'</td>');
+                        array.push('<td >'+data["tbManager"].userName+'</td>');
+                        array.push('<td >'+data["branchPhone"]+'</td>');
+                        array.push('<td >'+data["branchaaddr"]+'</td>');
+                        if (data["branchState"] == 0) {
+                            array.push('<td>启用</td>');
+                        } else if (data["branchState"] == 1) {
+                            array.push('<td>关停</td>');
+                        }else{
+                            array.push('<td>数据不匹配</td>');
+                        }
+                        array.push('<td >'+'<a onclick="locationMap(&quot;'+data["x"]+'&quot;,&quot;'+data["y"]+'&quot;,&quot;'+data["branchName"]+'&quot;)">' + '查看</a>'+'</td>');
+                        array.push('<td >'+'<a href="../company/updateCompany?branchId='+data["branchId"]+'">编辑</a>'+'</td>');
+                        array.push('</tr>');
+                    }
+                    $('#table_content').html(array.join(''));
+                    initpageInfo(msg.total);
+                    array=[];
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+
+    //批量删除
+    function deleteData() {
+
+        var delArr = [];
+        $('input[name="checkbox-tr"]').each(function(index, data) {
+            if($(this).parent().attr('class').indexOf('checked')!=-1){
+                delArr.push($(this).val());
+            }
+        });
+        if(delArr.length==0){
+            swal({
+                title:'信息提示',
+                text:'请至少选择一项待删除！',
+                type:'warning',
+                confirmButtonText:'确定'
+            });
+            return;
+        }
+        swal({
+            title: "请删除所选分公司吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },function(){
+
+            var params="delArr="+delArr;
+            $.post(ctx+"/branch/delTbBranch",params,function(data){
+                if(data["status"]==200){
+                    swal({
+                        title:"信息提示",
+                        text:"删除成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    })
+                    loadData(pageinfo["page"]);
+                }else {
+                    swal({
+                        title:"信息提示",
+                        text:"删除失败",
+                        type:"error",
+                        confirmButtonText:'确定'
+                    })
+                }
+            });
+
+        })
+    }
+
+    //启用
+    function enable() {
+
+        var delArr = [];
+        $('input[name="checkbox-tr"]').each(function(index, data) {
+            if($(this).parent().attr('class').indexOf('checked')!=-1){
+                delArr.push($(this).val());
+            }
+        });
+        if(delArr.length==0){
+            swal({
+                title:'信息提示',
+                text:'请至少选择一项待启用！',
+                type:'warning',
+                confirmButtonText:'确定'
+            });
+            return;
+        }
+        swal({
+            title: "确定启用所选分公司吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },function(){
+
+            var params="delArr="+delArr;
+            $.post(ctx+"/branch/enable",params,function(data){
+                if(data["status"]==200){
+                    swal({
+                        title:"信息提示",
+                        text:"启用成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    })
+                    loadData(pageinfo["page"]);
+                }else {
+                    swal({
+                        title:"信息提示",
+                        text:"启用失败",
+                        type:"error",
+                        confirmButtonText:'确定'
+                    })
+                }
+            });
+
+        })
+    }
+
+    //关停
+    function closecom() {
+        var delArr = [];
+        $('input[name="checkbox-tr"]').each(function(index, data) {
+            if($(this).parent().attr('class').indexOf('checked')!=-1){
+                delArr.push($(this).val());
+            }
+        });
+        if(delArr.length==0){
+            swal({
+                title:'信息提示',
+                text:'请至少选择一项待关停！',
+                type:'warning',
+                confirmButtonText:'确定'
+            });
+            return;
+        }
+        swal({
+            title: "确定关停所选分公司吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },function(){
+
+            var params="delArr="+delArr;
+            $.post(ctx+"/branch/close",params,function(data){
+                if(data["status"]==200){
+                    swal({
+                        title:"信息提示",
+                        text:"关停成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    })
+                    loadData(pageinfo["page"]);
+                }else {
+                    swal({
+                        title:"信息提示",
+                        text:"关停失败",
+                        type:"error",
+                        confirmButtonText:'确定'
+                    })
+                }
+            });
+
+        })
+    }
+
+    function locationMap(x,y,branchName) {
+        if (x==null||x==undefined||y==null||y==undefined){
+            alert("公司坐标位置缺失")
+        }else {
+            var param='latitude='+y+'&longitude='+x+'&companyName='+branchName;
+            top.parent.locationCurrMenu();
+            top.parent.addPage("公司位置","../page/company/companyMap?"+param);
+        }
+
+
+    }
+</script>
+
+

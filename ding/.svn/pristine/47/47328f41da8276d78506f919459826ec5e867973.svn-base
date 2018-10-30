@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新建网点</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+        .mapBox {  font-size: 14px; height: 94vh; }
+        .mapBox > #mapInfo { padding: 20px; }
+        .mapBox > div { width: 100%; height: 100%; }
+        .mapBox > p { padding: 20px; }
+        /*  .addShop { display: block; color: #fff; background: #00CC99; border: none; font-size: 14px; width: 50vw; margin: 0.4rem 0 0 25vw; padding: 0.32rem; border-radius: 0.8rem; }
+          .mapInfo > p.center { text-align: center; }
+          .mapInfo > p { line-height: 0.533333rem; }
+          .mapInfo > button { display: block; margin: 0.106667rem auto; color: #0c9; background: #fafafb; border: 1px solid #0c9; border-radius: 0.133333rem; padding: 0.15rem 0.3rem; }*/
+        .map-btn{
+            padding: 5px 10px;border: 1px solid #00CC99;background: white
+        }
+    </style>
+</head>
+<body class="gray-bg">
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins ">
+                <div class="ibox-title col-sm-4">
+                    <form role="form" class="form-inline" id="searchForm">
+
+                        <br>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>类型:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="col-md-8" id="wrap">
+                                    <input type="radio" name="websiteType" value="0" checked="checked">&nbsp;自营&nbsp;&nbsp;&nbsp;
+                                    <input type="radio" name="websiteType" value="1">&nbsp;加盟
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>营业类型:</label>
+                            </div>
+                            <div class="col-sm-8" id="item">
+                                &nbsp;&nbsp;&nbsp;<input type="checkbox" name="items" value="0">&nbsp;租车&nbsp;
+                                <input type="checkbox" name="items" value="1">&nbsp;修车&nbsp;
+                                <input type="checkbox" name="items" value="2">&nbsp;卖车&nbsp;
+                                <input type="checkbox" name="items" value="3">&nbsp;救援
+                                <span id="itemsif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>名称:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="" name="branchName" id="branchName" class="form-control keyupclick"  style="width:300px;">
+                                <span id="branchNameif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>网点地址:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="" name="branchaaddr" id="branchaaddr" class="form-control keyupclick"  style="width:300px;">
+                                <span id="branchaaddrif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>网点坐标:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="点击获取经度" onclick="getposition()" readonly name="branchx" id="branchx" class=" form-control keyupclick"  style="width: 147px">
+                                <input type="text" placeholder="点击获取纬度" onclick="getposition()" readonly name="branchy" id="branchy" class="form-control keyupclick" style="width: 147px" >
+                                <span id="branchposition" style="color: red"></span>
+                            </div>
+
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>管理员:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="" name="manager" id="manager" class="form-control keyupclick"  style="width:300px;">
+                                <span id="managerif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>联系电话:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="" name="branchPhone" id="branchPhone" class="form-control keyupclick"  style="width:300px;">
+                                <span id="branchPhoneif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>账号:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="" name="userName" id="userName" class="form-control keyupclick"  style="width:300px;">
+                                <span id="userNameif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>密码:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="password" placeholder="" name="pwdone" id="pwdone" class="form-control keyupclick"  style="width:300px;">
+                                <span id="pwdoneif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>确认密码:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="password" placeholder="" name="pwd" id="pwd" class="form-control keyupclick"  style="width:300px;">
+                                <span id="pwdif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row" style="">
+                            <div class="col-sm-3 text-right">
+                                <label>网点照片:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <button type="button" class="btn btn-outline btn-default" id="uploadBtn">
+                                    <i class="glyphicon" aria-hidden="true"></i>上传图片（400*400，500K)
+                                </button>
+                                <img src="" id="showImg"/>
+                            </div>
+                        </div>
+
+                        <div class="ibox-content">
+
+                            <div class="btn-group" id="exampleToolbar" role="group">
+                                <button type="button" class="btn btn-outline btn-default" name="add" id="comadd">
+                                    </i>保存
+                                </button>
+                                &nbsp;&nbsp;&nbsp;
+                                <button type="button" class="btn btn-outline btn-default" onclick="javascript:history.go(-1)">
+                                    </i>取消
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="col-sm-8" style="display: none" id="maps">
+                    <input type="hidden" name="companyId" th:value="${session.dcoinManagerInfo.companyId}">
+                    <div style="height: 50px;padding: 10px">
+                        <div style="">
+                            <input type="text" name="address" th:value="${#httpServletRequest.getParameter('address')}" style="height: 32px">
+                            <button type="button" onclick="codeAddress()" class="map-btn">搜索</button>
+                            <div style="float: right">
+                                <button type="button" class="map-btn" onclick="closeMap()">关闭</button>
+                                <button type="button" class="map-btn" onclick="clearOverlays()" >清除标记</button>
+                                <button type="button" class="map-btn" onclick="showOverlays()">显示标记</button>
+                                <button type="button" class="map-btn" onclick="deleteOverlays()">删除标记</button>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="mapBox">
+                        <div id="mapBox">
+                            <p id="mapInfo"></p>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp"></script>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        initUpload('uploadBtn','showImg',null,1024);
+        adminoption();
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+    function adminoption() {
+        httpPost(ctx+'/manager/companyAdmin',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        var option='<option value="'+data.managerId+'">'+data.userName+'</option>';
+                        $("[name=managerId]").append(option);
+                    }
+
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+
+
+        $("#comadd").click(function () {
+            var standard = $('input[name="items"]:checked').val();
+            if($.trim($("#branchName").val()).length==0){
+                $("#branchNameif").text("*请输入网点名称！")
+                return;
+            }
+            if($.trim($("#branchaaddr").val()).length==0){
+                $("#branchaaddrif").text("*请输入网点地址！")
+                return;
+            }
+            if ($.trim($('[name=branchx]').val()).length<=0||$.trim($('[name=branchy]').val()).length<=0){
+                $('#branchposition').html("*请获取经纬度");
+                return;
+            }
+            if($.trim($("#manager").val()).length==0){
+                $("#managerif").text("*请输入管理员名称！")
+                return;
+            }
+            if($.trim($("#branchPhone").val()).length==0){
+                $("#branchPhoneif").text("*请输入网点联系电话！")
+                return;
+            }
+            if($.trim($("#userName").val()).length==0){
+                $("#userNameif").text("*请输入用户名！")
+                return;
+            }
+            if($.trim($("#pwdone").val()).length==0){
+                $("#pwdoneif").text("*请输入密码！")
+                return;
+            }
+            if($("#pwd").val()!=$("#pwdone").val()){
+                $("#pwdif").text("*两次密码不一致！")
+                return;
+            }
+            var arr = new Array();
+            $("#item :checkbox:checked").each(function(i){
+                arr[i] = $(this).val();
+            });
+            var vals = arr.join(",");
+            var param={
+                branchName:document.getElementById("branchName").value,
+                websiteType:$('#wrap input[name="websiteType"]:checked ').val(),
+                items:vals,
+                manager:document.getElementById("manager").value,
+                branchPhone:document.getElementById("branchPhone").value,
+                branchaaddr:document.getElementById("branchaaddr").value,
+                userName:document.getElementById("userName").value,
+                pwd:document.getElementById("pwd").value,
+                photo:$("#showImg")[0].src,
+                x:$("[name=branchx]").val(),
+                y:$("[name=branchy]").val()
+            }
+            httpPost(ctx+"/branch/insertDot",param,function (data) {
+                if(data.status==200){
+                    location.href=ctx+"/page/networkManagement/networkList";
+                }else {
+                    swal({
+                        title:'信息提示',
+                        text:data.msg,
+                        type:'error',
+                        confirmButtonText:'确认'
+                    });
+                }
+            });
+        });
+
+
+
+    function getposition(){
+        var address=$.trim($("#branchaaddr").val());
+        if (address.length<=0){
+            alert('请先输入网点地址')
+        }else {
+            //location=ctx+'/page/networkManagement/getPosition?address='+address;
+            $("#maps").show();
+            $("[name=address]").val(address);
+            $.ajax({
+                url:'branch/companyPosition',
+                type:'post',
+                async:false,
+                data:{branchId:$("[name=companyId]").val()},
+                success:function (data) {
+                    if(data.status==200){
+                        latitude=data.rows.latitude;
+                        longitude=data.rows.longitude;
+                    }
+                }
+            });
+            showMap(latitude,longitude);
+            geocoder.getLocation(address)
+        }
+    }
+
+    var latitude=39.90960456049752;//纬度
+    var longitude=116.3972282409668;//经度
+    var address=$.trim($('[name=address]').val());
+    var map,markersArray = [];
+   /* $(function () {
+        $.ajax({
+            url:'branch/companyPosition',
+            type:'post',
+            async:false,
+            data:{branchId:$("[name=companyId]").val()},
+            success:function (data) {
+                if(data.status==200){
+                    latitude=data.rows.latitude;
+                    longitude=data.rows.longitude;
+                }
+            }
+        });
+        showMap(latitude,longitude);
+        geocoder.getLocation(address)
+    })*/
+
+    function showMap(latitude,longitude) {
+        var center = new qq.maps.LatLng(latitude,longitude);
+        map = new qq.maps.Map(document.getElementById("mapBox"),{
+            center: center,
+            zoom: 14,
+            zoomControl: true,    //不启用缩放控件
+            mapTypeControlOptions: {  //设置控件的地图类型为普通街道地图
+                mapTypeIds: qq.maps.MapTypeId.ROADMAP
+            }
+        });
+
+        //添加dom监听事件
+        qq.maps.event.addDomListener(map, 'click', function(event) {
+            addMarker(event.latLng);
+        });
+
+        //调用地址解析类
+        geocoder = new qq.maps.Geocoder({
+            complete : function(result){
+                console.info(result);
+                map.setCenter(result.detail.location);
+                var info = new qq.maps.InfoWindow({ map: map });
+                var marker = new qq.maps.Marker({
+                    map:map,
+                    position: result.detail.location
+                });
+
+                markersArray.push(marker);
+                marker.name = $.trim($('[name=address]').val());
+                //marker.locate = data.locate;
+                qq.maps.event.addListener(marker, 'click', function() {    //获取标记的点击事件
+                    info.open();  //点击标记打开提示窗
+                    info.setContent('<div><p>纬度：<span style="color: #0c9;">'+this.position.lat+'</span></p>' +
+                        '<p>经度：<span style="color: #0c9;">'+this.position.lng+'</span></p>' +
+                        '<p style="text-align: center"><button class="map-btn" onclick="setPosition(&quot;'+this.position.lat+'&quot;,&quot;'+this.position.lng+'&quot;)">确定</button></p>' +
+                        '</div>');  //***设置提示窗内容（这里用到了marker对象中保存的数据）
+                    console.info(this);
+                    info.setPosition(new qq.maps.LatLng(this.position.lat, this.position.lng));  //提示窗位置
+                });
+            }
+        });
+
+    }
+
+    //添加标记
+    function addMarker(location) {
+        var info = new qq.maps.InfoWindow({ map: map });
+        var marker = new qq.maps.Marker({
+            position: location,
+            map: map
+        });
+        qq.maps.event.addListener(marker, 'click', function() {    //获取标记的点击事件
+            info.open();  //点击标记打开提示窗
+            info.setContent('<div><p>纬度：<span style="color: #0c9;">'+this.position.lat+'</span></p>' +
+                '<p>经度：<span style="color: #0c9;">'+this.position.lng+'</span></p>' +
+                '<p style="text-align: center"><button class="map-btn" onclick="setPosition(&quot;'+this.position.lat+'&quot;,&quot;'+this.position.lng+'&quot;)">确定</button></p>' +
+                '</div>');  //***设置提示窗内容（这里用到了marker对象中保存的数据）
+            console.info(this);
+            info.setPosition(new qq.maps.LatLng(this.position.lat, this.position.lng));  //提示窗位置
+        });
+        markersArray.push(marker);
+    }
+
+    //清除覆盖层
+    function clearOverlays() {
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+        }
+    }
+
+    //显示覆盖层
+    function showOverlays() {
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(map);
+            }
+        }
+    }
+
+
+    //删除覆盖物
+    function deleteOverlays() {
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+            markersArray.length = 0;
+        }
+    }
+
+    function codeAddress() {
+        var address = $("[name=address]").val();
+        //alert(address);
+        //通过getLocation();方法获取位置信息值
+        geocoder.getLocation(address);
+    }
+
+    function setPosition(latitude,longitude){
+        //alert(latitude+'===>'+longitude);
+        $("[name=branchx]").val(longitude);
+        $("[name=branchy]").val(latitude);
+    }
+
+    function closeMap() {
+        $("#maps").hide();
+    }
+
+</script>
+
+

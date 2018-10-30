@@ -1,0 +1,38 @@
+package com.ddcar.mapper;
+
+import com.ddcar.entity.AccountFlow;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+
+@Mapper
+public interface AccountFlowMapper {
+
+    /**
+     * 添加流水信息
+     * @param accountFlow
+     * @return
+     */
+    Integer saveFlow(AccountFlow accountFlow);
+
+    /**
+     * 网点查看流水信息
+     * @param wangUserId
+     * @return
+     */
+    List<AccountFlow> findWangFlow(Long wangUserId);
+
+    /**
+     * 本月的收入总金额
+     * @param wangUserId
+     * @return
+     */
+    Double incomeTotal(Long wangUserId);
+
+    /**
+     * 本月的支出总金额
+     * @param wangUserId
+     * @return
+     */
+    Double expenditureTotal(Long wangUserId);
+}

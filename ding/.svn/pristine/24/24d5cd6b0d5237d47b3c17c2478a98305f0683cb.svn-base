@@ -1,0 +1,937 @@
+package com.common;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+
+import net.coobird.thumbnailator.Thumbnails;
+
+/**
+ * 提示信息配置
+ * 
+ * @author Acer
+ * 
+ */
+
+public class Commonparam {
+
+	
+	public static SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static SimpleDateFormat fmtshortother = new SimpleDateFormat("yyyy/MM/dd");
+	public static SimpleDateFormat fmtshort = new SimpleDateFormat("yyyy-MM-dd");
+	public static SimpleDateFormat fmtshortCH = new SimpleDateFormat("yyyy年MM月dd日");
+	public static SimpleDateFormat fmtshortCHShort = new SimpleDateFormat("yyyy年MM月dd日");
+	public static SimpleDateFormat fmtCHLong = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
+	public static SimpleDateFormat fmtMMdd = new SimpleDateFormat("MM/dd");
+	public static String USERINFO_SESSION = "youlhaiLoginUser";
+	public static String USERINFO_SESSION_WEIXIN = "yonlunhaiWeiixnUser";
+	public static final String[] cityParent = new String[]{"亚洲","欧洲","北美洲"};
+	public static final String[] cabinTypeEnd = new String[]{"内舱","海景","阳台","套房"};
+	public static final String[] weekDayCH = new String[]{"周一","周二","周三","周四","周五","周六","周日"};
+	public static final String RoutPDF = "/upload/RoutPDF/";
+	public static final String OrderPDF = "/upload/OrderPDF/";
+	public static String[] orderStatus=new String[]{"0","1","2","3","4","5","6","7"};
+	public static final String USER_MANAGER_SESSION = "dcoinManagerInfo";
+
+	public static final String UPLOAD_TEMP = "/upload/temp";
+	public static String[] FILE_PATH=new String[]{"/upload/notice","/upload/passportImg"
+			,"/upload/waterImg","/upload/cruise"};
+	public static String qrcodefolder = "/upload/qrcode/";
+	public static long imageMax = 800 * 1024;
+	public static String htmlImage = "/upload/html/";
+	public static String apkPath = "/upload/apk/";
+	public static String error_param_msg = "参数错误!";
+	public static String error_time_msg = "超时!";
+	public static long videoMax=1024*1024*100;
+	public static long swfMax=1024*1024*100;
+	public static long fileMax=1024*1024*10;
+	
+	public static Date String2ShortDate(String str) {
+		Date time = null;
+
+		try {
+			time = fmtshort.parse(str);
+		} catch (java.text.ParseException e) {
+
+			e.printStackTrace();
+		}
+		return time;
+	}
+	public static Date String2ShortDate(String str,String fmt) {
+		Date time = null;
+		SimpleDateFormat fmtshort = new SimpleDateFormat(fmt);
+		try {
+			time = fmtshort.parse(str);
+		} catch (java.text.ParseException e) {
+
+			e.printStackTrace();
+		}
+		return time;
+	}
+	public static String Date2ShortStr(Date date) {
+		if (date != null)
+			return fmtshort.format(date);
+		else
+			return "";
+
+	}
+
+	public static String Date2Str(Date date) {
+		if (date != null)
+			return fmt.format(date);
+		else
+			return "";
+	}
+
+	public static String Date2Str() {
+		return fmt.format(new Date());
+	}
+
+	public static Date StringtoDate(String str) {
+		Date time = null;
+
+		try {
+			time = fmt.parse(str);
+		} catch (java.text.ParseException e) {
+
+			e.printStackTrace();
+		}
+		return time;
+	}
+
+	/**
+	 * 获取参数
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getRequestParam(HttpServletRequest request) {
+		// TODO Auto-generated method stub
+		// 获取支付宝POST过来反馈信息
+		String paramStr = "";
+		Map requestParams = request.getParameterMap();
+		for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
+			String name = (String) iter.next();
+			String[] values = (String[]) requestParams.get(name);
+			String valueStr = "";
+			for (int i = 0; i < values.length; i++) {
+				valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
+			}
+			paramStr += "&" + name + "=" + valueStr;
+		}
+		return ("参数列表    " + paramStr);
+	}
+
+	/**
+	 * 捕获异常
+	 */
+	public static String handle(Exception ee0) {
+		StackTraceElement stackTraceElement = ee0.getStackTrace()[0];
+		String exclass = stackTraceElement.getClassName();
+		String method = stackTraceElement.getMethodName();
+		String str = ("Exception " + Commonparam.Date2Str() + "[类:" + exclass + "]调用" + method + "时在第"
+				+ stackTraceElement.getLineNumber() + "行代码处发生异常!异常类型:" + ee0.getLocalizedMessage());
+		return str;
+	}
+
+	public static boolean stringIsNotNull(String loginAccount) {
+		// TODO Auto-generated method stub
+		if (loginAccount != null && loginAccount.trim().length() > 0 && !loginAccount.trim().equalsIgnoreCase("null")) {
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean stringIsNull(String loginAccount) {
+		// TODO Auto-generated method stub
+		if (loginAccount == null || loginAccount.trim().length() == 0 || loginAccount.trim().equalsIgnoreCase("null")) {
+			return true;
+		}
+		return false;
+	}
+
+	public static String ToCH(int intInput) {
+		// TODO Auto-generated method stub
+		String si = String.valueOf(intInput);
+		String sd = "";
+		if (si.length() == 1) // 個
+		{
+			sd += GetCH(intInput);
+			return sd;
+		} else if (si.length() == 2)// 十
+		{
+			if (si.substring(0, 1).equals("1"))
+				sd += "十";
+			else
+				sd += (GetCH(intInput / 10) + "十");
+			sd += ToCH(intInput % 10);
+		} else if (si.length() == 3)// 百
+		{
+			sd += (GetCH(intInput / 100) + "百");
+			if (String.valueOf(intInput % 100).length() < 2)
+				sd += "零";
+			sd += ToCH(intInput % 100);
+		} else if (si.length() == 4)// 千
+		{
+			sd += (GetCH(intInput / 1000) + "千");
+			if (String.valueOf(intInput % 1000).length() < 3)
+				sd += "零";
+			sd += ToCH(intInput % 1000);
+		} else if (si.length() == 5)// 萬
+		{
+			sd += (GetCH(intInput / 10000) + "萬");
+			if (String.valueOf(intInput % 10000).length() < 4)
+				sd += "零";
+			sd += ToCH(intInput % 10000);
+		}
+
+		return sd;
+	}
+
+	private static String GetCH(int input) {
+		String sd = "";
+		switch (input) {
+		case 1:
+			sd = "一";
+			break;
+		case 2:
+			sd = "二";
+			break;
+		case 3:
+			sd = "三";
+			break;
+		case 4:
+			sd = "四";
+			break;
+		case 5:
+			sd = "五";
+			break;
+		case 6:
+			sd = "六";
+			break;
+		case 7:
+			sd = "七";
+			break;
+		case 8:
+			sd = "八";
+			break;
+		case 9:
+			sd = "九";
+			break;
+		default:
+			break;
+		}
+		return sd;
+	}
+
+	public static String spaceShortDay(int after) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_MONTH, after);
+		return fmtshort.format(cal.getTime());
+
+	}
+	public static Date spaceShortDay(Date sailingDate, int after) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(sailingDate);
+		cal.add(Calendar.DAY_OF_MONTH, after);
+		return  cal.getTime();
+	}
+	public static Object Date2ShortCH() {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		return fmtshortCH.format(cal.getTime());
+	}
+	public static Object Date2ShortCH(Date day) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(day);
+		return fmtshortCH.format(cal.getTime());
+	}
+	public static Object Date2ShortCH(int after) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_MONTH, after);
+		return fmtshortCH.format(cal.getTime());
+	}
+
+	public static String[] week = new String[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
+
+	public static String getWeekDay() {
+		Calendar now = Calendar.getInstance();
+		// 一周第一天是否为星期天
+		boolean isFirstSunday = (now.getFirstDayOfWeek() == Calendar.SUNDAY);
+		// 获取周几
+		int weekDay = now.get(Calendar.DAY_OF_WEEK);
+		// 若一周第一天为星期天，则-1
+		if (isFirstSunday) {
+			weekDay = weekDay - 1;
+			if (weekDay == 0) {
+				weekDay = 7;
+			}
+		}
+		return week[weekDay = 1];
+	}
+
+	public static String spaceShortDay(String nowday, int after) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(String2ShortDate(nowday));
+		cal.add(Calendar.DAY_OF_MONTH, after);
+		return fmtshort.format(cal.getTime());
+	}
+
+	public static int getWeekDay(String startDay) {
+		// TODO Auto-generated method stub
+		Calendar ca2 = Calendar.getInstance();
+		ca2.setTime(Commonparam.String2ShortDate(startDay));
+		boolean isFirstSunday = (ca2.getFirstDayOfWeek() == Calendar.SUNDAY);
+		// 获取周几
+		int weekDay = ca2.get(Calendar.DAY_OF_WEEK);
+		// 若一周第一天为星期天，则-1
+		if (isFirstSunday) {
+			weekDay = weekDay - 1;
+			if (weekDay == 0) {
+				weekDay = 7;
+			}
+		}
+		return weekDay;
+	}
+	public static int getWeekDay(Date startDay) {
+		// TODO Auto-generated method stub
+		Calendar ca2 = Calendar.getInstance();
+		ca2.setTime(startDay);
+		boolean isFirstSunday = (ca2.getFirstDayOfWeek() == Calendar.SUNDAY);
+		// 获取周几
+		int weekDay = ca2.get(Calendar.DAY_OF_WEEK);
+		// 若一周第一天为星期天，则-1
+		if (isFirstSunday) {
+			weekDay = weekDay - 1;
+			if (weekDay == 0) {
+				weekDay = 7;
+			}
+		}
+		return weekDay;
+	}
+
+	public static String spaceMinutes(int minute) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, minute);
+		return fmt.format(cal.getTime());
+	}
+	public static Date spaceMinutesDate(int minute) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, minute);
+		return cal.getTime();
+	}
+	public static Date spaceHours(int hours) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.HOUR_OF_DAY, hours);
+		return cal.getTime();
+	}
+	/**
+	 * 计算加价
+	 * @param addMoneyInfo
+	 * @param price
+	 * @param houseType
+	 * @param roomNumber
+	 * @return
+	 */
+	public static Double findAddMoney(Short webShowType,HashMap addMoneyInfo, Object price,Object houseType,Object maxInStay) {
+		if(price==null||Double.valueOf(price.toString())==-1){
+			return -1.0;
+		}
+		Double p=Double.valueOf(price.toString());
+		if(webShowType==2){//同业不加价
+			return p;
+		}
+		
+		if(addMoneyInfo!=null){
+			if(addMoneyInfo.get("currType").toString().equals("0")){
+				return p+Integer.valueOf(addMoneyInfo.get("moneyWholeOne").toString());
+				
+			}else if(addMoneyInfo.get("currType").toString().equals("1")){
+				return p+Integer.valueOf(addMoneyInfo.get("moneyWholeTwo").toString());
+			}else if(addMoneyInfo.get("currType").toString().equals("2")){
+				JSONObject moneyHouse=JSONObject.parseObject(addMoneyInfo.get("moneyHouse").toString());
+				if(houseType.equals("内舱")){
+					return p+moneyHouse.getIntValue("inner");
+				}else  if(houseType.equals("阳台")){
+					return p+moneyHouse.getIntValue("sun");
+				}else if(houseType.equals("海景")){
+					return p+moneyHouse.getIntValue("sea");
+				}else if(houseType.equals("套房")){
+					return p+moneyHouse.getIntValue("tao");
+				}else{
+					return  p;
+				}
+			}else if(addMoneyInfo.get("currType").toString().equals("3")){
+				JSONArray array=JSONArray.parseArray(addMoneyInfo.get("moneyRoom").toString());
+				for(int h=0;h<array.size();h++){
+					if(maxInStay.toString().
+							equals(array.getJSONObject(h).getString("roomNumber"))){
+						return p+array.getJSONObject(h).getIntValue("addMoney");
+					}
+				}
+			}
+			
+		}
+		return p;
+	}
+	public static String Date2MonthDay(Date sailingDate) {
+		// TODO Auto-generated method stub
+		if(sailingDate==null) return "";
+		return fmtMMdd.format(sailingDate);
+	}
+	public static String Date2ShortCHShort(Date sailingDate) {
+		// TODO Auto-generated method stub
+		return fmtshortCHShort.format(sailingDate);
+	}
+	public static String Date2LongCH(Date sailingDate) {
+		// TODO Auto-generated method stub
+		if(sailingDate==null) return "";
+		return fmtCHLong.format(sailingDate);
+	}
+//	public static String getPropertyValueByKey(String key) {
+//		Properties prop = new Properties();
+//		InputStream in = Commonparam.class
+//				.getResourceAsStream("/util.properties");
+//		try {
+//			prop.load(in);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return prop.getProperty(key);
+//
+//	}
+//	public static String getRedisPropertyByKey(String key) {
+//		Properties prop = new Properties();
+//		InputStream in = Commonparam.class
+//				.getResourceAsStream("/redis.properties");
+//		try {
+//			prop.load(in);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return prop.getProperty(key);
+//
+//	}
+//	public static String getMailPropertyByKey(String key) {
+//		Properties prop = new Properties();
+//		InputStream in = Commonparam.class
+//				.getResourceAsStream("/mail.properties");
+//		try {
+//			prop.load(in);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return prop.getProperty(key);
+//
+//	}
+	public static SimpleDateFormat yearmonth = new SimpleDateFormat("/yyyy/MM/");
+	public static String makeYearMonth(Date date) {
+		String time = "/2013/12/";
+		try {
+			time = yearmonth.format(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return time;
+	}
+	static SimpleDateFormat fmt1 = new SimpleDateFormat("yyyyMMddHHmmss");
+	public static String makeNewFileName(String oldfilename) {
+
+		String ext = oldfilename.substring(oldfilename.lastIndexOf("."),
+				oldfilename.length());
+		String name = UUID.randomUUID().toString().replaceAll("-", "")
+				.toUpperCase();
+		String newfilename = fmt1.format(new Date()) + "_" + name
+				+ ext.toLowerCase();
+		return newfilename;
+	}
+	/**
+	 * 保存图片 需要三个参数 文件 uploadFile 文件名称 uploadFileFileName 文件类型 type 保存的路径
+	 * imageStorePath 调用时候的IP imageWebHttp
+	 * */
+	public static BaseBean saveFile(String imageStorePath,String imageWebHttp,InputStream uploadFile,
+			String uploadFileFileName,int type) {
+		
+		BaseBean bean = new BaseBean();
+		if (uploadFile != null) {
+			try {
+
+					String newfilename = Commonparam
+							.makeNewFileName(uploadFileFileName);
+					String targetFolder = Commonparam.FILE_PATH[type]
+							+ Commonparam.makeYearMonth(new Date());
+					
+					String targetFolderTemp =imageStorePath + targetFolder;
+					File file = new File(targetFolderTemp);
+					if (!file.exists()) {
+						file.mkdirs();
+					}
+					String absolute = targetFolderTemp + "/" + newfilename;
+					BufferedInputStream fileIn = new BufferedInputStream(
+							uploadFile);
+
+					byte[] buf = new byte[1024];
+					file = new File(absolute);
+
+					BufferedOutputStream fileOut = new BufferedOutputStream(
+							new FileOutputStream(file));
+
+					while (true) {
+						// 读取数据
+						int bytesIn = fileIn.read(buf, 0, 1024);
+						if (bytesIn == -1) {
+							break;
+						} else {
+							fileOut.write(buf, 0, bytesIn);
+						}
+					}
+
+					fileOut.flush();
+					fileOut.close();
+
+					bean.setStatus(200);
+					bean.setRows(imageWebHttp	+ targetFolder + "/" + newfilename);
+			
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+
+		}
+		return bean;
+	}
+
+
+	public static BaseBean compressImage2Temp(String imageStorePath,String imageWebHttp,InputStream uploadFile,
+			String uploadFileFileName,int filesizeTarget) {
+		
+		BaseBean bean = new BaseBean();
+		if (uploadFile != null) {
+			try {
+
+				String newfilename = Commonparam
+						.makeNewFileName(uploadFileFileName);
+				String targetFolder = Commonparam.UPLOAD_TEMP;
+				
+				String targetFolderTemp = imageStorePath+ targetFolder;
+				
+				File file = new File(targetFolderTemp);
+				if (!file.exists()) {
+					file.mkdirs();
+				}
+				String absolute = targetFolderTemp + "/" + newfilename;
+				
+	 			float filesize=fileSize(uploadFile);
+	 			float Quality=filesizeTarget/filesize;
+	 			if(Quality>1||Quality==0){
+	 				Quality=1; 
+	 			}
+	 			
+	 			
+	 				Thumbnails.of(uploadFile).scale(1f)  
+				      .outputQuality(Quality) 
+//				      .outputFormat("jpg") 
+				      .toFile(absolute);  
+	 				
+				
+				bean.setStatus(200);
+				bean.setRows(imageWebHttp + targetFolder+ "/" + newfilename);
+
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				bean.setStatus(400);
+				bean.setMsg(e2.getLocalizedMessage());
+			}
+
+		}
+		return bean;
+	}
+	public static float fileSize(InputStream uploadFile){
+		int length = 0;
+			try {
+				length = uploadFile.available();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		float size = length*1.0f/1024;
+		return size;
+	}
+	public static float fileSize(File uploadFile){
+		int length = 0;
+		try {
+			FileInputStream fis = new FileInputStream(uploadFile);
+			try {
+				length = fis.available();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		} catch (FileNotFoundException e2) {
+			e2.printStackTrace();
+		}
+		float size = length*1.0f/1024;
+		return size;
+	}
+	public static String[] monthCH=new String[]{"一月","二月","三月","四月","五月","六月","七月"
+			,"八月","九月","十月","十一月","十二月"};
+
+	
+
+	
+	public static String monthCH(String month) {
+		// TODO Auto-generated method stub
+		return monthCH[Integer.valueOf(month)-1];
+	}
+	public static boolean isPhone(String receivePhone) {
+		// TODO Auto-generated method stub
+		    Pattern p = null;  
+	        Matcher m = null;  
+	        boolean b = false;   
+	        p = Pattern.compile("^[1][3,4,5,7,8][0-9]{9}$"); // 验证手机号  
+	        m = p.matcher(receivePhone);  
+	        b = m.matches();   
+	        return b;  
+	}
+	public  static boolean isHuzhao(String str){
+		 //中国隐私护照规则
+        String regEx = "^(G|E)[a-zA-Z0-9]{1}[0-9]{7}$";
+        // 编译正则表达式
+        Pattern pattern = Pattern.compile(regEx);
+        // 忽略大小写的写法
+        // Pattern pat = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(str);
+        // 字符串是否与正则表达式相匹配
+        boolean rs = matcher.matches();
+        return rs;
+	}
+	
+	public void test(){
+		System.out.println(isYearMonth("2013-10"));
+	}
+	public static boolean isYearMonth(String receivePhone) {
+		// TODO Auto-generated method stub
+		Pattern p = null;  
+        Matcher m = null;
+        boolean b = false;   
+        p = Pattern.compile("^[0-9]{4}-[0-1]{1}[0-9]{1}$"); // 验证手机号  
+        m = p.matcher(receivePhone);  
+        b = m.matches();   
+        return b;    
+	}
+
+	public static void handleCabinTypeEnd(String boatType, HashMap param) {
+		// TODO Auto-generated method stub
+		if(boatType.equals("内双")){
+			param.put("cabinTypeEnd", "内舱");
+			param.put("maxInStay", 2);
+		}else if(boatType.equals("内三")){
+			param.put("cabinTypeEnd", "内舱");
+			param.put("maxInStay", 3);
+		}else if(boatType.equals("内四")){
+			param.put("cabinTypeEnd", "内舱");
+			param.put("maxInStay", 4);
+		}else if(boatType.equals("海双")){
+			param.put("cabinTypeEnd", "海景");
+			param.put("maxInStay", 2);
+		}else if(boatType.equals("海三")){
+			param.put("cabinTypeEnd", "海景");
+			param.put("maxInStay", 3);
+		}else if(boatType.equals("海四")){
+			param.put("cabinTypeEnd", "海景");
+			param.put("maxInStay", 4);
+		}else if(boatType.equals("阳双")){
+			param.put("cabinTypeEnd", "阳台");
+			param.put("maxInStay", 2);
+		}else if(boatType.equals("阳三")){
+			param.put("cabinTypeEnd", "阳台");
+			param.put("maxInStay", 3);
+		}else if(boatType.equals("阳四")){
+			param.put("cabinTypeEnd", "阳台");
+			param.put("maxInStay", 4);
+		}else if(boatType.equals("套房")){
+			param.put("cabinTypeEnd", "套房");
+		}
+	}
+
+	
+
+	
+	/**
+	 * 当月，浮动spaceMonth月后的最后一天
+	 * @param spaceMonth
+	 * @return
+	 */
+	public static String getMonthLastDay(int spaceMonth) {
+		 Calendar cal = Calendar.getInstance();
+		 if(spaceMonth!=0){
+			 cal.add(Calendar.MONTH, spaceMonth);
+		 }		 
+		 cal.set(Calendar.DAY_OF_MONTH, cal     
+		            .getActualMaximum(Calendar.DAY_OF_MONTH));   
+	        return Date2ShortStr(cal.getTime()); 
+	}
+	/**
+	 * 当月，浮动spaceMonth月后的第一天
+	 * @param spaceMonth
+	 * @return
+	 */
+	public static String getMonthFirstDay(int spaceMonth) {
+		Calendar cal = Calendar.getInstance(); 
+		if(spaceMonth!=0){
+			 cal.add(Calendar.MONTH, spaceMonth);
+		 }
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);  
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));  
+        return Date2ShortStr(cal.getTime());
+	}
+
+	public static int nowYear() {
+		Calendar cal = Calendar.getInstance(); 
+		return cal.get(Calendar.YEAR);
+	}
+	 /** 
+     * 获取某年第一天日期 
+     * @param year 年份 
+     * @return Date 
+     */  
+    public static String getYearFirst(int year){  
+        Calendar calendar = Calendar.getInstance();  
+        calendar.clear();  
+        calendar.set(Calendar.YEAR, year);  
+        Date currYearFirst = calendar.getTime();  
+        return Date2ShortStr(currYearFirst);  
+    }  
+      
+    /** 
+     * 获取某年最后一天日期 
+     * @param year 年份 
+     * @return Date 
+     */  
+    public static String getYearLast(int year){  
+        Calendar calendar = Calendar.getInstance();  
+        calendar.clear();  
+        calendar.set(Calendar.YEAR, year);  
+        calendar.roll(Calendar.DAY_OF_YEAR, -1);  
+        Date currYearLast = calendar.getTime();  
+        return Date2ShortStr(currYearLast); 
+    }
+
+	public static List<HashMap<String,Object>> getMonthList() {
+		// TODO Auto-generated method stub
+		Calendar cal=Calendar.getInstance();
+		SimpleDateFormat fmt=new SimpleDateFormat("yyyy-MM");
+		String nowMonth=fmt.format(cal.getTime());
+		
+		List<HashMap<String,Object>> list=new ArrayList<HashMap<String,Object>>();
+		int monthMax=Integer.valueOf(nowMonth.substring(5));
+		HashMap<String,Object> month=new HashMap<String,Object>();
+		month.put("value", nowMonth);
+		month.put("name", "本月");
+		list.add(month);
+		for(int h=1;h<monthMax;h++){
+			int m=monthMax-h;
+			month=new HashMap();
+			if(m<10){
+				month.put("value", nowMonth.substring(0, 5)+"0"+m);
+			}else{
+				month.put("value", nowMonth.substring(0, 5)+m);
+			}
+			month.put("name", Commonparam.monthCH((monthMax-h)+""));
+			list.add(month);
+		}
+		return list;
+	}
+
+	public static int getCabinType(String cabinType) {
+		// TODO Auto-generated method stub
+		if(cabinType.contains("內舱")){
+			return 1;
+		}
+		if(cabinType.contains("海景")){
+			return 2;
+		}
+		if(cabinType.contains("阳台")){
+			return 3;
+		}
+		if(cabinType.contains("套房")){
+			return 4;
+		}
+		return 0;
+	}
+
+	public static String checkChinaEnglish(String companyName) {
+		// TODO Auto-generated method stub
+		String rt="";
+		String chRegx="[\\u4e00-\\u9fa5（）]+";
+        if(companyName.matches(chRegx)){
+       	
+        }else{
+       	 if(companyName.matches("[a-zA-Z()@\\s]+")){
+       		 
+       	 }else{
+           	 rt="必须是全英文或全汉字";
+            }
+        }
+        return rt;
+		
+	}  
+	public static boolean checkChina(String companyName) {
+		// TODO Auto-generated method stub
+		
+		 String chRegx="[\\u4e00-\\u9fa5（）]+";
+        if(companyName.matches(chRegx)){
+       	  return true;
+        }
+        return false;
+		
+	} 
+	public static boolean checkDigat(String companyName) {
+		// TODO Auto-generated method stub
+		
+		 String chRegx="^\\d+$";
+        if(companyName.matches(chRegx)){
+       	  return true;
+        }
+        return false;
+		
+	} 
+	public static void main(String[] arg){
+		try {
+			Thumbnails.of("d:\\imgTest.png")  
+			.rotate(90)//旋转度数  
+			.scale(1)//缩放比例  
+			.toFile("d:\\imgTest.png");
+			
+			AlipayClient alipayClient = new DefaultAlipayClient("", "", "");
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String voyageNo="JOY170102";
+		System.out.println(voyageNo.substring(0,voyageNo.length()-6));
+	}
+
+	public static String Date2StrStartEnd(Date start, Date endDate) {
+		return fmtshortother.format(start)+"~"+fmtshortother.format(endDate);
+	}
+	public static String getUrlResult(String urlStr, String encoding) {
+		URL url = null;
+		HttpURLConnection connection = null;
+		try {
+			url = new URL(urlStr);
+			connection = (HttpURLConnection) url.openConnection();// 新建连接实例
+			connection.setConnectTimeout(2000);// 设置连接超时时间，单位毫秒
+			connection.setReadTimeout(2000);// 设置读取数据超时时间，单位毫秒
+			connection.setDoOutput(true);// 是否打开输出流 true|false
+			connection.setDoInput(true);// 是否打开输入流true|false
+			connection.setRequestMethod("GET");// 提交方法POST|GET
+			connection.setUseCaches(false);// 是否缓存true|false
+			connection.connect();// 打开连接端口
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					connection.getInputStream(), encoding));
+			// 往对端写完数据对端服务器返回数据 ,以BufferedReader流来读取
+			StringBuffer buffer = new StringBuffer();
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				buffer.append(line);
+			}
+			reader.close();
+			return buffer.toString();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				connection.disconnect();// 关闭连接
+			}
+		}
+		return null;
+	}
+	
+	
+	public static String findXmlField(String rt, String field) {
+		// TODO Auto-generated method stub
+		Pattern pattern = Pattern
+				.compile("<" + field + ">(.*)</" + field + ">");
+		Matcher matcher = pattern.matcher(rt);
+		String out_trade_no = "";
+		while (matcher.find()) {
+			out_trade_no = matcher.group(1);
+		}
+		if (out_trade_no.indexOf("<![CDATA[") >= 0) {
+			out_trade_no = out_trade_no.substring(out_trade_no
+					.indexOf("<![CDATA[") + 9);
+			out_trade_no = out_trade_no.substring(0,
+					out_trade_no.indexOf("]]>"));
+		}
+
+		return out_trade_no;
+	}
+	public static String getReqIP(HttpServletRequest request) {
+		 String ip = request.getHeader("x-forwarded-for");  
+         if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+             ip = request.getHeader("Proxy-Client-IP");  
+         }  
+         if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+             ip = request.getHeader("WL-Proxy-Client-IP");  
+         }  
+        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+            ip = request.getRemoteAddr();  
+        }  
+        return ip; 
+	}
+	public static String txt2String(String filePath){
+        StringBuilder result = new StringBuilder();
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(new File(filePath)));//构造一个BufferedReader类来读取文件
+            String s = null;
+            while((s = br.readLine())!=null){//使用readLine方法，一次读一行
+                result.append(System.lineSeparator()+s);
+            }
+            br.close();    
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return result.toString();
+    }
+    
+
+	
+}

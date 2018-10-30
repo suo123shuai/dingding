@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <base th:href="@{/}"/>
+    <title>计费规则</title>
+</head>
+<body>
+<h4>计费规则：</h4>
+<p style="font-size:13px">
+    1、	租赁方式：按期租赁，一期为30天（不是自然月）<br>
+    2、	收费内容：押金+租金单价=租赁期数<br>
+    3、	退租约定：退还押金，租金不退<br>
+</p>
+<img src="img/gz.jpg" style="width: 90%;height: 90%">
+</body>
+</html>

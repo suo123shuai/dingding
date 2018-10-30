@@ -1,0 +1,77 @@
+package com.ddcar.service.impl;
+
+import com.ddcar.entity.TbManager;
+import com.ddcar.mapper.TbManagerMapper;
+import com.ddcar.service.TbManagerService;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-03.
+ */
+@Service
+public class TbManagerServiceImpl implements TbManagerService{
+    @Autowired(required = false)
+    TbManagerMapper tbManagerMapper;
+
+    @Override
+    public List<TbManager> findInoutMapperList(Integer page, Integer size,Integer managerId,String userAccount,String userName,Integer branchId,String branchName) {
+        PageHelper.startPage(page,size);
+        return tbManagerMapper.findTbManagerList(managerId,userAccount,userName,branchId,branchName);
+    }
+
+    @Override
+    public List<TbManager> companyAdmin() {
+        return tbManagerMapper.companyAdmin();
+    }
+
+    @Override
+    public Integer ifUsername(String userAccount) {
+        return tbManagerMapper.ifUsername(userAccount);
+    }
+
+    @Transactional
+    @Override
+    public void disable(Long[] managerId) {
+        for (Long id:managerId){
+            tbManagerMapper.disable(id);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void open(Long[] managerId) {
+        for (Long id:managerId){
+            tbManagerMapper.open(id);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void del(Long[] managerId) {
+        for (Long id:managerId){
+            tbManagerMapper.del(id);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void add(TbManager tbManager) {
+        tbManagerMapper.insertManager(tbManager);
+    }
+
+    @Transactional
+    @Override
+    public void update(TbManager tbManager) {
+        tbManagerMapper.updateManager(tbManager);
+    }
+
+    @Override
+    public void del(Integer id) {
+
+    }
+}

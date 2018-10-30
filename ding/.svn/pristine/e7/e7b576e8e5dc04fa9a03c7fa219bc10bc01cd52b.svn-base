@@ -1,0 +1,142 @@
+﻿<!doctype html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>登录</title>
+    <header th:replace="comm :: header_web"></header>
+    <link th:href="@{/css/myself/login.min.css}" rel="stylesheet">
+   <style>
+         .content {
+            color: #ffffff;
+        }
+        .bg {
+            background: url(../img/login-background1.jpg);
+            height:100%;
+            text-align: center;
+        }
+        .bg-blur {
+            float: left;
+            width: 100%;
+            background-repeat: repeat;
+            background-position: center;
+            background-size: 100% 100%;
+            -webkit-filter: blur(12px);
+            -moz-filter: blur(12px);
+            -o-filter: blur(12px);
+            -ms-filter: blur(12px);
+            filter: blur(12px);
+        }
+        .content-front {
+          position:absolute;
+          left: 10px;
+          right: 10px;
+          text-align: center;
+        }
+        
+   </style>
+
+</head>
+
+<body>
+<div>
+        <div class="bg bg-blur"></div>
+        <div class="content content-front">
+           <div class="signinpanel" style="background: url(../css/patterns/header-profile.png) repeat;padding:30px;opacity:0.9;">
+        <div class="row">
+            <div class="col-sm-7">
+                <div class="signin-info" style="padding-left:20px;">
+                    <div class="logopanel m-b">
+                        <h1>登录丁丁后台管理系统</h1>
+                    </div>
+                    <div class="m-b"></div>
+                    <h4>欢迎使用 <strong>登录丁丁后台管理系统</strong></h4>
+                  
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <form id="loginForm" action="index.jsp">
+                    <h4 class="no-margins"></h4>
+                    <p class="m-t-md" id="loadingMsg" style="font-size:18px;color:red;display:none;"></p>
+                    <input id="txtAccount" name="txtAccount" type="text" class="form-control uname" placeholder="用户名" required=""/>
+                    <input id="txtPassword" name="txtPassword" type="password" class="form-control pword m-b" placeholder="密码" required=""/>
+                    <div style="width:100%;height:40px;display:none;">
+                     <div style="width:60%;float:left;">
+                    <input id="verifycode" type="text" class="form-control" style="width:100%;margin:0px;color:#444;"  placeholder="请输入验证码" />
+                    </div>
+                    <div style="width:40%;float:left;">
+                    <img id="randImage" height="30" style="background-color: #B7F1D7;float:right;width:100%;cursor:pointer;" onclick="loadimage()" />
+                   
+                    </div>
+                    </div>
+			 </form>  
+                <button onclick="login()" class="btn btn-success btn-block" id="btnLogin">登录</button>
+                
+            </div>
+        </div>
+        <div class="signup-footer" style="padding-left:20px;">
+            <div class="pull-left">
+                &copy; <span id="nowYear"></span> All Rights Reserved.
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+   
+    <footer th:replace="comm :: footer_web"></footer>
+    	
+<script type="text/javascript">
+
+	$(function() {
+		
+		$('.bg').css("height",$(window).height()+"px");
+		$('#nowYear').html((new Date()).getFullYear());
+		loadimage();
+		if (document.addEventListener) {//如果是Firefox   
+			document.addEventListener("keypress", fireFoxHandler, true);
+		} else {
+			document.attachEvent("onkeypress", ieHandler);
+		}
+		
+	});
+	function fireFoxHandler(evt) {
+		if (evt.keyCode == 13) {
+			if (evt.target.id == 'txtPassword' || evt.target.id =='txtAccount'||evt.target.id == 'verifycode') {
+				login();
+			}
+		}
+	}
+	function ieHandler(evt) {
+		if (evt.keyCode == 13) {
+			if (evt.target.id == 'txtPassword' || evt.target.id =='txtAccount'||evt.target.id == 'verifycode') {
+				login();
+			}
+		}
+	}
+	function loadimage() {
+		//document.getElementById("randImage").src = "${ctx}/pages/verifyCode.jsp?"
+		//		+ Math.random();
+
+	}
+	function login(){
+		
+		httpPost(ctx+'/api/user/loginManager',{
+			account : $('#txtAccount').val(),
+			password : $('#txtPassword').val(),
+			verifycode:$("#verifycode").val()
+		},function(msg){
+			if (msg.status == 200) {
+				window.location.href="index";
+			} else {
+				$('#loadingMsg').fadeIn();
+				$('#loadingMsg').html(msg.msg);
+			}
+		},function(){
+			$('#loadingMsg').hide();
+			$('#loadingMsg').html('');
+		});
+		
+	}
+</script>
+
+</body>
+</html>

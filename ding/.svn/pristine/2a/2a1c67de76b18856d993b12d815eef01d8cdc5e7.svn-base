@@ -1,0 +1,13 @@
+package com.ddcar.service;
+
+import com.ddcar.entity.Feedback;
+
+public interface FeedbackService {
+
+    /**
+     * 插入新的反馈信息
+     * @param feedback
+     * @return
+     */
+    Long saveFeedback(String content, Long userId, String addresss)throws Exception;
+}

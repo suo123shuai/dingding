@@ -1,0 +1,30 @@
+package com.ddcar.service;
+
+import com.ddcar.entity.TbManager;
+import com.ddcar.entity.TbModelNumber;
+
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-03.
+ */
+public interface TbModelNumberService {
+    //查询
+    List<TbModelNumber> findTbModelNumberList(Integer page, Integer size,String model, Long brandId,Integer modelType);
+
+    TbModelNumber  selectByPrimaryKey(Long modelId);
+
+    List<TbModelNumber> selectbrandsearch(Long brandId);
+    //查询没有设置价格的型号
+    List<HashMap> onPriceModel(Integer page, Integer size,String brandName, String model, Integer modelType);
+    //逻辑删除
+    void delTbModelNumber(Long[] brandId);
+
+    void add(TbModelNumber tbModelNumber);
+
+    void update(TbModelNumber tbModelNumber);
+
+    void del(Integer id);
+
+}

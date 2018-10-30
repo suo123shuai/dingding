@@ -1,0 +1,87 @@
+package com.ddcar.controller;
+
+import com.common.BaseBean;
+import com.ddcar.service.SignService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * 团签 接口Controller
+ * @author wcy
+ */
+
+@RestController
+@RequestMapping("/sign")
+public class RegimentsignController {
+
+    @Autowired
+    private SignService signService;
+
+
+    /**
+     * 登陆
+     * @param account 账号
+     * @param pwd 密码
+     * @return
+     */
+    @RequestMapping(value = "login",method = RequestMethod.POST)
+    @ResponseBody
+    public BaseBean login(String account,String pwd){
+        return signService.login(account,pwd);
+    }
+
+    /**
+     * 列表
+     * @param page 页码
+     * @param parentId 团签id
+     * @param type 类型 0:首页  1:查看绑定
+     * @return
+     */
+    @RequestMapping("list")
+    @ResponseBody
+    public BaseBean list(@RequestParam(defaultValue = "1") Integer page,
+                         Long parentId,
+                         @RequestParam(defaultValue = "0") Long type){
+        return signService.queryUserByParentId(page,parentId,type);
+    }
+
+
+    /**
+     * 绑定骑手
+     * @param parentId 团签id
+     * @param code 二维码内容
+     * @return
+     */
+    @RequestMapping("bindUser")
+    @ResponseBody
+    public BaseBean bindUser(Long parentId,String code){
+        return signService.bindUser(parentId,code);
+    }
+
+    /**
+     * 解绑骑手
+     * @param parentId 团签id
+     * @param userId 用户id
+     * @return
+     */
+    @RequestMapping("unbindUser")
+    @ResponseBody
+    public BaseBean unbindUser(Long parentId,Long userId){
+        return signService.unbindUser(parentId,userId);
+    }
+
+    /**
+     * 用户详情
+     * @param userId 用户id
+     * @param parentId 团签id
+     * @return
+     */
+    @RequestMapping("detail")
+    @ResponseBody
+    public BaseBean detail(Long parentId,Long userId){
+        return signService.detail(parentId,userId);
+    }
+
+
+}

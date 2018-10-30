@@ -1,0 +1,53 @@
+package com.ddcar.service;
+
+import com.ddcar.entity.PatchOrder;
+import com.ddcar.entity.TbInvoice;
+import com.ddcar.entity.TbVehicle;
+import com.ddcar.entity.Vehicles;
+
+import java.util.List;
+import java.util.Map;
+
+public interface RiderMyVehicleService {
+
+    /**
+     * 查用户的所有车电
+     *
+     * @param userId
+     * @return
+     */
+    List<Vehicles> findUserVehicle(long userId) throws Exception;
+
+    /**
+     * 新增发票信息
+     *
+     * @param Invoice
+     * @return
+     */
+    int saveInvoice(TbInvoice invoice) throws Exception;
+
+    /**
+     * 用户id和车电二维码查车电
+     *
+     * @param map
+     * @return
+     */
+    TbVehicle getVehicleByUserIdAndVehicleId(Map map) throws Exception;
+
+    /**
+     * 新增补交信息
+     * @param userId
+     * @param wangUserId
+     * @param money
+     * @return
+     * @throws Exception
+     */
+    Map savePatchOrder(Long userId, Double money)throws Exception;
+
+    /**
+     * 更新用户退租状态
+     * @param map
+     * @return
+     */
+    int updateUserTuiState(Map map)throws Exception;
+}

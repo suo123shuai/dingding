@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.PatchOrderMapper">
+    <insert id="savePatchOrder" parameterType="com.ddcar.entity.PatchOrder">
+        insert into tb_patch_order(order_no,money,create_time,user_id,
+        wang_user_id,pay_state) values (#{orderNo}, #{money}, now(),
+        #{userId}, #{wangUserId},0)
+    </insert>
+
+    <select id="getOrderNo" resultType="String">
+    SELECT order_no FROM tb_patch_order WHERE patch_id =
+    (SELECT MAX(patch_id) FROM tb_patch_order)
+  </select>
+</mapper>

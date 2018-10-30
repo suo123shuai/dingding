@@ -1,0 +1,8 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.AccountFlowMapper">
+    <insert id="saveFlow" parameterType="com.ddcar.entity.AccountFlow">
+        INSERT INTO tb_Account_flow
+        (create_time,deposit,rent,user_id,wang_user_id,brsnch_id,pay_type)
+        VALUES (NOW(),#{deposit},#{rent},#{userId},#{wangUserId},#{brsnchId},#{payType})
+    </insert>
+</mapper>

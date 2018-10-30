@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<header th:replace="comm :: checkManagerLogin"></header>
+<header th:replace="comm :: header_web"></header>
+
+<style>
+
+    .bg-gary{
+        margin: 30px;
+        background-color: #18b683;
+        height: 100px;
+        width: 25%;
+        display: table-cell;
+        height:100px;
+        line-height:100px;
+        float : left;
+        color: #2E2D3C;
+    }
+    a{
+        color: #f0f4f7;
+    }
+</style>
+<body>
+
+<div>
+    <div  class="bg-gary" align="center" onclick="xcdrk()"><a onclick="xcdrk()"> 新车电入库</a></div>
+    <div  class="bg-gary" align="center" onclick="ck()"><a onclick="ck()">出库</a></div>
+</div>
+<div>
+    <div  class="bg-gary" align="center" onclick="fgscdth()"><a onclick="fgscdth()">分公司车电退回</a></div>
+    <div  class="bg-gary" align="center" onclick="cdgl()"><a onclick="cdgl()">车电管理</a></div>
+</div>
+<div>
+    <div  class="bg-gary" align="center" onclick="ppgl()"><a onclick="ppgl()">品牌管理</a></div>
+    <div  class="bg-gary" align="center" onclick="xhgl()"><a onclick="xhgl()">型号管理</a></div>
+</div>
+<!--<div class="btn-group" id="exampleToolbar" role="group">
+    <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='../brand/brandList'">
+        品牌管理
+    </button>
+    <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='../models/modelList'">
+        型号管理
+    </button>
+</div>-->
+
+
+
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    function xcdrk() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("新车电入库","../page/carBattery/warehousing");
+    }
+    function ck() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("出库","../page/carBattery/outtreasuryBranch");
+    }
+    function fgscdth() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("分公司车电退回","../page/carBattery/return");
+    }
+    function cdgl() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("车电管理","../page/carBattery/carBatteryList");
+    }
+    function ppgl() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("品牌管理","../page/brand/brandList");
+    }
+    function xhgl() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("型号管理","../page/models/modelList");
+    }
+
+</script>

@@ -1,0 +1,78 @@
+package com.ddcar.entity;
+
+import java.io.Serializable;
+
+public class AccountFlow implements Serializable {
+    private Long accountId;
+    private String createTime;
+    private Double deposit;
+    private Double rent;
+    private Long userId;
+    private Long wangUserId;
+    private Long brsnchId;
+    private Integer payType;
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+    public Double getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(Double deposit) {
+        this.deposit = deposit;
+    }
+
+    public Double getRent() {
+        return rent;
+    }
+
+    public void setRent(Double rent) {
+        this.rent = rent;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getWangUserId() {
+        return wangUserId;
+    }
+
+    public void setWangUserId(Long wangUserId) {
+        this.wangUserId = wangUserId;
+    }
+
+    public Long getBrsnchId() {
+        return brsnchId;
+    }
+
+    public void setBrsnchId(Long brsnchId) {
+        this.brsnchId = brsnchId;
+    }
+
+    public Integer getPayType() {
+        return payType;
+    }
+
+    public void setPayType(Integer payType) {
+        this.payType = payType;
+    }
+}

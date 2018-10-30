@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<title>客户管理</title>
+<header th:replace="comm :: checkManagerLogin"></header>
+<header th:replace="comm :: header_web"></header>
+<style type="text/css">
+a{text-decoration:underline;}
+.col-xs-4{padding:0px;}
+.col-xs-8{padding:0px;}
+.col-sm-4{padding:0px;}
+.col-sm-8{padding:0px;padding-right:10px;}
+.a-reason{background-color: red;text-decoration:underline;}
+
+</style>
+</head>
+<body class="gray-bg">
+
+
+
+	 <div class="wrapper wrapper-content animated fadeInRight">
+
+		 <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <form role="form" class="form-inline" id="searchForm">
+
+                        	<div class="form-group">
+                                <label for="searchCompanyName">昵称</label>
+                                <input type="text" placeholder="" id="searchNickname" class="form-control keyupclick"  style="width:120px;">
+                            </div>
+                            <div class="form-group">
+                                <label for="searchCompanyName">姓名</label>
+                                <input type="text" placeholder="" id="searchRealname" class="form-control keyupclick"  style="width:120px;">
+                            </div>
+                             <div class="form-group">
+                                <label for="searchCompanyName">手机号</label>
+                                <input type="text" placeholder="" id="searchUserAccount" class="form-control keyupclick"  style="width:120px;">
+                            </div>
+
+                            <div class="form-group">
+								<label for="startTime">注册时间</label> <input type="text"
+									placeholder="开始时间" id="startTimeCreate"
+									class=" Wdate form-control"
+									onfocus="WdatePicker({maxDate:'#F{$dp.$D(\'endTimeCreate\');}',dateFmt:'yyyy-MM-dd'})"
+									style="width: 130px; height: 35px; border: 1px solid #E5E6E7">
+
+								<label for="endTime">-</label> <input type="text"
+									placeholder="结束时间" id="endTimeCreate" class="form-control Wdate"
+									onfocus="WdatePicker({minDate:'#F{$dp.$D(\'startTimeCreate\');}',dateFmt:'yyyy-MM-dd'})"
+									style="width: 130px; height: 35px; border: 1px solid #E5E6E7">
+							</div>
+
+							 <button type="button" class="btn btn-outline btn-default" onclick="loadData(1)">
+                                        <i class="glyphicon glyphicon-search" aria-hidden="true"></i>查询
+                            </button>
+                             <button type="button" class="btn btn-outline btn-warning" onclick="clearSearch()">
+                                        <i class="glyphicon" aria-hidden="true"></i>清除查询条件
+                            </button>
+                        </form>
+
+                    </div>
+                    <div class="ibox-content">
+
+ 							<div class="btn-group" id="exampleToolbar" role="group">
+                                    <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                                        <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                                    </button>
+                                     <button type="button" class="btn btn-outline btn-default" onclick="deleteData(1,'User')">
+                                        <i class="glyphicon" aria-hidden="true"></i>删除
+                                   </button>
+
+                                </div>
+                        <div  style="position:relative;width: 100%;overflow-x: scroll;border:1px solid #eee;margin-bottom:30px;">
+						<table class="tbsalelist table table-striped table-bordered" data-toggle="table"  data-click-to-select="true" data-select-item-name="myRadioName" data-mobile-responsive="true">
+                            <thead>
+								<tr>
+									<th width="40" id="title-table-checkbox">全选</th>
+									<th width="60">ID</th>
+									<th width="80">姓名</th>
+								</tr>
+							</thead>
+                            <tbody id="table_content">
+                            </tbody>
+                        </table>
+                        </div>
+                       <div class="btn-group" id="exampleToolbar" role="group">
+                                    <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                                        <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                                    </button>
+                                     <button type="button" class="btn btn-outline btn-default" onclick="deleteData('User')">
+                                        <i class="glyphicon" aria-hidden="true"></i>删除
+                                   </button>
+
+                                </div>
+                       <div class="btn-group" role="group" style="width:100%;">
+                           <header th:replace="comm :: pagenation_web"></header>
+						</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+ <button type="button" class="btn btn-outline btn-default" id="uploadBtn">
+                                        <i class="glyphicon" aria-hidden="true"></i>上传图片（400*400，500K)
+             </button>
+             <img src="" id="showImg"/>
+
+
+	 <footer th:replace="comm :: footer_web"></footer>
+
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+	var rowData = [];
+	var roleArray = [ "管理员", "普通用户" ];
+	$(function() {
+		//$(".tbsalelist").width(2200);
+		//$(".tbsalelist").css("max-width", 2200);
+		initUpload('uploadBtn','showImg',null,1024);
+
+		loadData(1);
+
+		$('.keyupclick').on('keypress', function(evt){
+			if (evt.keyCode == 13) {
+				loadData(1);
+			}
+
+		});
+
+	});
+	function clearSearch(){
+		$('#searchForm input').val('');
+		$('#searchForm select').val('');
+		$('#selectSalerSearch').val('');
+		$('#selectKefuSearch').val('');
+	}
+
+	function showSystemLog(msgType,userId){
+		parent.locationCurrMenu();
+		parent.addPage("web登陆日志","${ctx}/pages/system/systemlog.jsp?msgType="+msgType+"&userId="+userId);
+
+	}
+	function refreshData(){
+		loadData(pageinfo["page"]);
+	}
+
+	function loadData(page, size) {
+		if (size != undefined) {
+			pageinfo["size"] = size;
+			$('#pagesize').html(size);
+		}
+		if (page == -1)
+			pageinfo["page"]--;
+		else if (page == -2)
+			pageinfo["page"]++;
+		else {
+			if (page >= pageinfo["tp"] && pageinfo["tp"] > 0)
+				pageinfo["page"] = pageinfo["tp"];
+			else
+				pageinfo["page"] = page;
+		}
+		pageinfo["nickName"]=$('#searchNickname').val();
+		pageinfo["realName"]=$('#searchRealname').val();
+		pageinfo["userAccount"]=$('#searchUserAccount').val();
+		pageinfo["userId"]=$('#searchUserId').val();
+		pageinfo["startTimeCreate"]=$('#startTimeCreate').val();
+		pageinfo["endTimeCreate"]=$('#endTimeCreate').val();
+
+
+		$('#table_content').html('<tr><td colspan="23">'+$('#divLoading').html()+'</td></tr>');
+		httpPost(ctx+'/api/user/findUserList',
+					 pageinfo,
+					 function(msg, status) {
+						if (msg.status == 200) {
+							rowData = msg.rows;
+							var array = [];
+							for ( var i = 0; i < msg.rows.length; i++) {
+								var data = msg.rows[i];
+								array.push('<tr>');
+
+								array.push('<td><input  type="checkbox" class="i-checks" name="checkbox-tr" value="' + data["userId"]+ '"/></td>');
+								array.push('<td >'+data["userId"]+'</td>');
+								array.push('<td >'+data["userName"]+'</td>');
+								array.push('</tr>');
+							}
+							$('#table_content').html(array.join(''));
+							initpageInfo(msg.total);//初始化分页
+							array=[];
+
+						} else {
+							alert(msg.msg);
+
+						}
+				});
+	}
+
+    //批量删除
+    function deleteData(deleteFlag1,tableName) {
+        /*var obj=document.getElementsByName("checkbox-tr");
+         var delArr=[];
+         for(var o in obj){
+         if(obj[o].checked){
+         delArr.push(obj[o].value);
+         }
+         }*/
+        var deleteFlag = 1;
+        if (deleteFlag1 != undefined) {
+            deleteFlag = deleteFlag1;
+        }
+        var delArr = [];
+        $('input[name="checkbox-tr"]').each(function(index, data) {
+            if($(this).parent().attr('class').indexOf('checked')!=-1){
+                delArr.push($(this).val());
+            }
+        });
+        if(delArr.length==0){
+            swal({
+                title:'信息提示',
+                text:'请至少选择一项待删除！',
+                type:'warning',
+                confirmButtonText:'确定'
+            });
+            return;
+        }
+        swal({
+            title:'信息提示',
+            text:'确实要删除么？',
+            type:'question',
+            confirmButtonText:'确定',
+            showCancelButton: true,
+            cancelButtonText:'取消'
+        }).then(function(flag){
+            if(flag){
+                var params="delArr="+delArr;
+                $.post(ctx+"/api/user/delUser",params,function(data){
+                    if(data["status"]==200){
+                        swal({
+                            title:"信息提示",
+                            text:"删除成功",
+                            type:"success",
+                            confirmButtonText:'确定'
+                        })
+                        loadData(pageinfo["page"]);
+                    }else {
+                        swal({
+                            title:"信息提示",
+                            text:"删除失败",
+                            type:"error",
+                            confirmButtonText:'确定'
+                        })
+                    }
+                });
+            }else {
+                delArr=[];
+            }
+        });
+    }
+
+
+</script>
+
+

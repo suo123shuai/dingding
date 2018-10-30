@@ -1,0 +1,15 @@
+package com.ddcar.service;
+
+import com.ddcar.entity.Vehicles;
+
+import java.util.List;
+
+public interface RiderMyVehicleService {
+
+    /**
+     * 查用户的所有车电
+     * @param userId
+     * @return
+     */
+    List<Vehicles> findUserVehicle(long userId)throws Exception;
+}

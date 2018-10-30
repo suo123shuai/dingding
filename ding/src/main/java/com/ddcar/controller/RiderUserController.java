@@ -1,0 +1,108 @@
+package com.ddcar.controller;
+
+import com.common.BaseBean;
+import com.ddcar.entity.TbUser;
+import com.ddcar.entity.UserVehicle;
+import com.ddcar.service.FeedbackService;
+import com.ddcar.service.RiderUserService;
+import com.ddcar.util.UtilLog;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/rider/user")
+public class RiderUserController {
+
+    @Autowired
+    private RiderUserService riderUserService;
+
+    @Resource
+    private FeedbackService feedbackService;
+
+    @RequestMapping("/userDetails")
+    public @ResponseBody
+    BaseBean userDetails(long userId) {
+        BaseBean bean = new BaseBean();
+        try {
+            UserVehicle user = riderUserService.findUser(userId);
+            bean.setStatus(200);
+            bean.setRows(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/getUser")
+    public @ResponseBody
+    BaseBean
+    getUser(long userId) {
+        BaseBean bean = new BaseBean();
+        try {
+            TbUser userByUserId = riderUserService.getUserByUserId(userId);
+            bean.setStatus(200);
+            bean.setRows(userByUserId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/updRescue")
+    public @ResponseBody
+    BaseBean updRescue(long rescueId, Integer status, Long userId) {
+        BaseBean bean = new BaseBean();
+        Map map = new HashMap();
+        map.put("status", status);
+        map.put("rescueId", rescueId);
+        map.put("modifyTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        try {
+            riderUserService.updRescuestatus(map, userId);
+            bean.setStatus(200);
+            bean.setMsg("更新成功!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/saveFeedback")
+    public @ResponseBody
+    BaseBean saveFeedback(String content, Long userId, String addresss) {
+        BaseBean bean = new BaseBean();
+        try {
+            Long aLong = feedbackService.saveFeedback(content, userId, addresss);
+            bean.setStatus(200);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/findWangUserId")
+    public @ResponseBody
+    BaseBean findWangUserId(String qrCode) {
+        BaseBean bean = new BaseBean();
+        try {
+            Map aLong = riderUserService.qrCodeGetBranchId(qrCode);
+            bean.setStatus(200);
+            bean.setRows(aLong);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("", e);
+        }
+        return bean;
+    }
+}

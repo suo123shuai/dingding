@@ -1,0 +1,12 @@
+package com.common;
+
+public class AA {
+    public static void main(String[] args) throws Exception {
+        long a = 1;
+        double q = 30;
+        long floor = (long) Math.floor(a / q);
+        long floor1 = (long) Math.ceil(a / q);
+        long distanceDays = Commonparam.getDistanceDays("2018-10-15 10:32:29");
+        System.out.println(floor);
+    }
+}

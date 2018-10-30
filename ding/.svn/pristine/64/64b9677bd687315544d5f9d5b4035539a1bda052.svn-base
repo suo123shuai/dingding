@@ -1,0 +1,164 @@
+package com.ddcar.controller;
+
+import com.common.BaseBean;
+import com.ddcar.entity.RescueXin;
+import com.ddcar.entity.TbBranch;
+import com.ddcar.entity.TbRescue;
+import com.ddcar.entity.TbUser;
+import com.ddcar.service.RiderIndexService;
+import com.ddcar.service.TbUserService;
+import com.ddcar.util.UtilLog;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/rider/index")
+public class RiderIndexController {
+
+    @Autowired
+    private RiderIndexService riderIndex;
+    @Resource
+    private TbUserService tbUserService;
+
+    @RequestMapping("/listrider")
+    public @ResponseBody
+    BaseBean listrider(String items, String x, String y) {
+        BaseBean bean = new BaseBean();
+        Map map = new HashMap();
+        map.put("items", items);
+        map.put("x", x);
+        map.put("y", y);
+        try {
+            List<TbBranch> tbBranches = riderIndex.listBranch(map);
+            bean.setStatus(200);
+            bean.setRows(tbBranches);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/rescue")
+    public @ResponseBody
+    BaseBean rescue(TbRescue rescue) {
+        BaseBean bean = new BaseBean();
+        try {
+            int i = riderIndex.insertRescue(rescue);
+            if (i == 200) {
+                bean.setStatus(i);
+            } else if (i == 300) {
+                bean.setStatus(400);
+                bean.setMsg("用户未认证或信息错误");
+            } else {
+                bean.setStatus(400);
+                bean.setMsg("请勿重复请求救援");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/rescueInformation")
+    public @ResponseBody
+    BaseBean rescueInformation(long userId) {
+        BaseBean bean = new BaseBean();
+        try {
+            RescueXin tbRescue = riderIndex.rescueInformation(userId);
+            bean.setStatus(200);
+            bean.setRows(tbRescue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/findBranch")
+    public @ResponseBody
+    BaseBean findrescue(long wangUserId) {
+        BaseBean bean = new BaseBean();
+        try {
+            TbBranch branch = riderIndex.getBranch(wangUserId);
+            bean.setStatus(200);
+            bean.setRows(branch);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/login")
+    public @ResponseBody
+    BaseBean weiXinlogin(String weiXinId, String avatar) {
+        BaseBean bean = new BaseBean();
+        try {
+            TbUser user = tbUserService.getUserByWeiXinId(weiXinId, avatar);
+            bean.setStatus(200);
+            bean.setRows(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/updateUser")
+    public @ResponseBody
+    BaseBean updateUser(TbUser user) {
+        BaseBean bean = new BaseBean();
+        try {
+            user.setState("3");
+            riderIndex.updateUser(user);
+            bean.setStatus(200);
+            bean.setMsg("更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/getUserByUserId")
+    public @ResponseBody
+    BaseBean getUserId(Long userId) {
+        BaseBean bean = new BaseBean();
+        try {
+            TbUser user = riderIndex.getUserByUserId(userId);
+            bean.setStatus(200);
+            bean.setRows(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bean;
+    }
+
+    @RequestMapping("/getUserState")
+    public @ResponseBody
+    BaseBean getUserState(Long userId) {
+        BaseBean bean = new BaseBean();
+        try {
+            Map map = riderIndex.findUserState(userId);
+            if(map.isEmpty()){
+                bean.setStatus(400);
+                bean.setMsg("没有查到信息");
+            } else {
+                bean.setStatus(200);
+                bean.setRows(map);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bean;
+    }
+}

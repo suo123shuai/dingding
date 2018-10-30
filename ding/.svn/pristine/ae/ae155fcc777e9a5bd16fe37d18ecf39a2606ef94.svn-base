@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.TbManagerMapper" >
+  <resultMap id="BaseResultMap" type="com.ddcar.entity.TbManager" >
+    <id column="manager_id" property="managerId" jdbcType="BIGINT" />
+    <result column="user_account" property="userAccount" jdbcType="VARCHAR" />
+    <result column="user_password" property="userPassword" jdbcType="VARCHAR" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="pow" property="pow" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="role_type" property="roleType" jdbcType="INTEGER" />
+    <result column="delete_flag" property="deleteFlag" jdbcType="INTEGER" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="modify_by" property="modifyBy" jdbcType="VARCHAR" />
+    <result column="modify_time" property="modifyTime" jdbcType="VARCHAR" />
+    <association property="branch" column="branch_id" javaType="com.ddcar.entity.TbBranch">
+      <id column="branch_id " property="branchId " jdbcType="BIGINT" />
+      <result column="branch_name" property="branchName" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    manager_id,user_account,user_password,user_name, pow, phone, role_type, delete_flag, create_by, create_time,
+    modify_by, modify_time
+  </sql>
+  <select id="findTbManagerList" resultMap="BaseResultMap">
+    SELECT * FROM tb_manager t1
+    LEFT JOIN tb_branch t2
+    ON t1.companyId=t2.branch_id
+    WHERE t1.delete_flag=0
+    <if test="managerId != null and managerId!=''">
+      AND t1.manager_id=#{managerId}
+    </if>
+    <if test="userAccount != null and userAccount!=''">
+      AND t1.user_account=#{userAccount}
+    </if>
+    <if test="userName != null and userName!=''">
+      AND t1.user_name LIKE '%${userName}%'
+    </if>
+    <if test="branchId != null and branchId!=''">
+      AND t1.companyId=#{branchId}
+    </if>
+    <if test="branchName != null and branchName!=''">
+      AND t2.branch_name LIKE '%${branchName}%'
+    </if>
+  </select>
+  <!--查出分公司管理员-->
+  <select id="companyAdmin" resultType="com.ddcar.entity.TbManager">
+    SELECT manager_id,user_name FROM tb_manager WHERE delete_flag=0 AND u_role=2
+  </select>
+  <!--禁用-->
+  <update id="disable">
+    update tb_manager set u_status=2 where manager_id = #{managerId,jdbcType=BIGINT}
+  </update>
+  <!--开启-->
+  <update id="open">
+    update tb_manager set u_status=1 where manager_id = #{managerId,jdbcType=BIGINT}
+  </update>
+  <!--删除-->
+  <update id="del">
+    update tb_manager set delete_flag=1 where manager_id = #{managerId,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_manager
+    where manager_id = #{managerId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_manager
+    where manager_id = #{managerId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.ddcar.entity.TbManager" >
+    insert into tb_manager (manager_id, user_name, pow, 
+      phone, role_type, delete_flag, 
+      create_by, create_time, modify_by, 
+      modify_time)
+    values (#{managerId,jdbcType=BIGINT}, #{userName,jdbcType=VARCHAR}, #{pow,jdbcType=VARCHAR}, 
+      #{phone,jdbcType=VARCHAR}, #{roleType,jdbcType=INTEGER}, #{deleteFlag,jdbcType=INTEGER}, 
+      #{createBy,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, #{modifyBy,jdbcType=VARCHAR}, 
+      #{modifyTime,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ddcar.entity.TbManager" >
+    insert into tb_manager
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="managerId != null" >
+        manager_id,
+      </if>
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="pow != null" >
+        pow,
+      </if>
+      <if test="phone != null" >
+        phone,
+      </if>
+      <if test="roleType != null" >
+        role_type,
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyBy != null" >
+        modify_by,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="managerId != null" >
+        #{managerId,jdbcType=BIGINT},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="pow != null" >
+        #{pow,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="roleType != null" >
+        #{roleType,jdbcType=INTEGER},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateManager" parameterType="com.ddcar.entity.TbManager" >
+    update tb_manager
+    <set >
+      <if test="userAccount != null" >
+        user_account = #{userAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="userPassword != null" >
+        user_password =Md5(#{userPassword,jdbcType=VARCHAR}),
+      </if>
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="roleType != null" >
+        role_type = #{roleType,jdbcType=INTEGER},
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        modify_by = #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where manager_id = #{managerId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ddcar.entity.TbManager" >
+    update tb_manager
+    set
+      user_account = #{userAccount,jdbcType=VARCHAR},
+      user_password = #{userPassword,jdbcType=VARCHAR},
+      user_name = #{userName,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      role_type = #{roleType,jdbcType=INTEGER},
+      delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR},
+      modify_by = #{modifyBy,jdbcType=VARCHAR},
+      modify_time = #{modifyTime,jdbcType=VARCHAR}
+    where manager_id = #{managerId,jdbcType=BIGINT}
+  </update>
+</mapper>

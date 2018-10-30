@@ -1,0 +1,47 @@
+package com.ddcar.service;
+
+import com.ddcar.entity.TbBranch;
+
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-03.
+ */
+public interface TbBranchService {
+
+    List<TbBranch> findTbBranchMapperList(Integer page, Integer size);
+    //查询分公司
+    List<TbBranch> findTbBranchbranchList(Integer page, Integer size,Integer branchId,String branchName,Integer websiteType);
+    //查询库里是否有该用户名
+    Integer ifbranchName(String userName);
+    //最大id
+    Long maxqrcode();
+
+    List<TbBranch> findTbBranchbranchList(Integer branchId,String branchName,Integer websiteType);
+    //查询该公司的网点
+    List<TbBranch> selectcomWang(Long parentId,Integer page,Integer size,Integer websiteType,Long branchId,String branchName);
+
+    List<TbBranch> Wang(Long parentId,Integer websiteType,Long branchId,String branchName);
+    //新增分公司
+    void add(TbBranch tbBranch);
+    //新建网点
+    void insertDot(TbBranch tbBranch);
+    //修改分公司信息
+    void update(TbBranch tbBranch);
+    //修改网点信息
+    void updateDot(TbBranch tbBranch);
+    //删除delTbBranch
+    void delTbBranch(Long[] branchId);
+    //启用
+    void enable(Long[] branchId);
+    //关停
+    void close(Long[] branchId);
+
+    TbBranch  branchSearchId(Long branchId);
+
+    void del(Integer id);
+
+    HashMap searchCompanyPosition(Long branchId);
+
+}

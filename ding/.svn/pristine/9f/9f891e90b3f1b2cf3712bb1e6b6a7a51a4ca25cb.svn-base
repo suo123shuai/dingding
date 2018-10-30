@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>管理员</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline;}
+
+    </style>
+</head>
+<body class="gray-bg">
+
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+
+                        <div class="form-group">
+                            <label for="searchmanagerId">管理员Id</label>
+                            <input type="text" placeholder="" id="searchmanagerId" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchuserAccount">账号</label>
+                            <input type="text" placeholder="" id="searchuserAccount" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchUserName">姓名</label>
+                            <input type="text" placeholder="" id="searchUserName" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchcompanyId">公司Id</label>
+                            <input type="text" placeholder="" id="searchcompanyId" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchcompanyName">公司名称</label>
+                            <input type="text" placeholder="" id="searchcompanyName" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+
+
+                        <button type="button" class="btn btn-outline btn-default" onclick="loadData(1)">
+                            <i class="glyphicon glyphicon-search" aria-hidden="true"></i>查询
+                        </button>
+                        <button type="button" class="btn btn-outline btn-warning" onclick="clearSearch()">
+                            <i class="glyphicon" aria-hidden="true"></i>清除查询条件
+                        </button>
+                    </form>
+
+                </div>
+                <div class="ibox-content">
+
+                    <div class="btn-group" id="foot" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="disable()">
+                            禁用
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="openadmin()">
+                            开启
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="addadmin()">
+                            新增管理员
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="deleteData()">
+                            <i class="glyphicon" aria-hidden="true"></i>删除
+                        </button>
+
+                    </div>
+                    <div  style="position:relative;width: 100%;overflow-x: scroll;border:1px solid #eee;margin-bottom:30px;">
+                        <table class="tbsalelist table table-striped table-bordered" data-toggle="table"  data-click-to-select="true" data-select-item-name="myRadioName" data-mobile-responsive="true">
+                            <thead>
+                            <tr>
+                                <th width="40" id="title-table-checkbox">全选</th>
+                                <th width="60">编号</th>
+                                <th width="80">账号</th>
+                                <th width="80">姓名</th>
+                                <th width="80">类别</th>
+                                <th width="80">公司Id</th>
+                                <th width="80">所属公司名称</th>
+                                <th width="80">最后一次使用时间</th>
+                                <th width="80">操作</th>
+                                <th width="80">密码</th>
+                            </tr>
+                            </thead>
+                            <tbody id="table_content">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="disable()">
+                            禁用
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="openadmin()">
+                            开启
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="addadmin()">
+                            新增管理员
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="deleteData()">
+                            <i class="glyphicon" aria-hidden="true"></i>删除
+                        </button>
+
+                    </div>
+                    <div class="btn-group" role="group" style="width:100%;">
+                        <header th:replace="comm :: pagenation_web"></header>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--新增管理员-->
+<div class="modal fade" id="addadmin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">新增管理员</h4>
+            </div>
+            <br>
+            <form class="form-horizontal" name="addFm">
+                <div class="form-group">
+                    <label class="control-label col-md-3">账号：</label>
+                    <div class="col-md-8">
+                        <input type="text" name="userAccount"  class="form-control" id="userAccount">
+                        <br>
+                        <span id="userAccountif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">密码：</label>
+                    <div class="col-md-8">
+                        <input type="password" name="addpwd"  class="form-control" id="addpwd">
+                        <br>
+                        <span id="addpwdif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">确认密码：</label>
+                    <div class="col-md-8">
+                        <input type="password" name="userPassword" class="form-control" id="addPassword">
+                        <br>
+                        <span id="addPasswordif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">姓名：</label>
+                    <div class="col-md-8">
+                        <input type="text" name="userName" class="form-control" id="userName">
+                        <br>
+                        <span id="adduserNameif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">人员类型：</label>
+                    <div class="col-md-8" id="wrap">
+                        <input type="radio" name="uRole" value="1" checked>&nbsp;平台管理员&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="uRole" value="2">&nbsp;分公司管理员
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" id="addmag" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--编辑信息-->
+<div class="modal fade" id="editmag" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">编辑资料</h4>
+            </div>
+            <br>
+            <form class="form-horizontal" name="addFm">
+                <input type="hidden" id="editmagid">
+                <div class="form-group">
+                    <label class="control-label col-md-3">账号：</label>
+                    <div class="col-md-8">
+                        <input type="text" name="newpwd"  disabled= "true "  class="form-control" id="euserAccount">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">姓名：</label>
+                    <div class="col-md-8">
+                        <input type="text" name="userName" class="form-control" id="euserName">
+                        <br>
+                        <span id="userNameif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" id="editpwd" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--修改密码-->
+<div class="modal fade" id="upprossword" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">修改密码</h4>
+            </div>
+            <br>
+            <form class="form-horizontal" name="addFm">
+                <input type="hidden" id="upmagid">
+                <div class="form-group">
+                    <label class="control-label col-md-3">新密码：</label>
+                    <div class="col-md-8">
+                        <input type="password" name="newpwd" class="form-control" id="newpwd">
+                        <br>
+                        <span id="newpwdif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">确认密码：</label>
+                    <div class="col-md-8">
+                        <input type="password" name="userPassword" class="form-control" id="userPassword">
+                        <br>
+                        <span id="userPasswordif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" id="updatepwd" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        //$(".tbsalelist").width(2200);
+        //$(".tbsalelist").css("max-width", 2200);
+        // initUpload('uploadBtn','showImg',null,1024);
+
+        loadData(1);
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+    //清除条件查询
+    function clearSearch(){
+        $('#searchForm input').val('');
+        $('#searchForm select').val('');
+        $('#selectSalerSearch').val('');
+        $('#selectKefuSearch').val('');
+    }
+
+    function showSystemLog(msgType,userId){
+        parent.locationCurrMenu();
+        parent.addPage("web登陆日志","${ctx}/pages/system/systemlog.jsp?msgType="+msgType+"&userId="+userId);
+
+    }
+    function refreshData(){
+        loadData(pageinfo["page"]);
+    }
+
+    function loadData(page, size) {
+        if (size != undefined) {
+            pageinfo["size"] = size;
+            $('#pagesize').html(size);
+        }
+        if (page == -1)
+            pageinfo["page"]--;
+        else if (page == -2)
+            pageinfo["page"]++;
+        else {
+            if (page >= pageinfo["tp"] && pageinfo["tp"] > 0)
+                pageinfo["page"] = pageinfo["tp"];
+            else
+                pageinfo["page"] = page;
+        }
+        pageinfo["managerId"]=$('#searchmanagerId').val();
+        pageinfo["userAccount"]=$('#searchuserAccount').val();
+        pageinfo["userName"]=$('#searchUserName').val();
+        pageinfo["branchId"]=$('#searchcompanyId').val();
+        pageinfo["branchName"]=$('#searchcompanyName').val();
+
+
+        $('#table_content').html('<tr><td colspan="23">'+$('#divLoading').html()+'</td></tr>');
+        httpPost(ctx+'/manager/findTbManagerList',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        array.push('<tr>');
+
+                        array.push('<td><input  type="checkbox" class="i-checks" name="checkbox-tr" value="' + data["managerId"]+ '"/></td>');
+                        array.push('<td >'+data["managerId"]+'</td>');
+                        array.push('<td >'+data["userAccount"]+'</td>');
+                        array.push('<td >'+data["userName"]+'</td>');
+                        if (data["uRole"] == 1) {
+                            array.push('<td>平台管理员</td>');
+                        } else if (data["uRole"] == 2) {
+                            array.push('<td>分公司管理员</td>');
+                        }else{
+                            array.push('<td>数据不匹配</td>');
+                        }
+                        if (data["companyId"] == null) {
+                            array.push('<td>待分配</td>');
+                        }else{
+                            array.push('<td >'+data["companyId"]+'</td>');
+                        }
+                        if (data["branch"].branchName == null) {
+                            array.push('<td>待分配</td>');
+                        }else{
+                            array.push('<td >'+data["branch"].branchName+'</td>');
+                        }
+                        if (data["lastTime"] == null) {
+                            array.push('<td>暂无登录记录</td>');
+                        }else{
+                            array.push('<td >'+data["lastTime"]+'</td>');
+                        }
+                        array.push('<td >'+'<a onclick="editpwd('+data["managerId"]+',&quot;'+data["userAccount"]+'&quot;,&quot;'+data["userName"]+'&quot;)">编辑</a>'+'</td>');
+                        array.push('<td >'+'<a onclick="uppwd('+data["managerId"]+')">修改密码</a>'+'</td>');
+                        array.push('</tr>');
+                    }
+                    $('#table_content').html(array.join(''));
+                    initpageInfo(msg.total);
+                    array=[];
+
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+
+
+    //禁用
+    function disable() {
+
+        var delArr = [];
+        $('input[name="checkbox-tr"]').each(function(index, data) {
+            if($(this).parent().attr('class').indexOf('checked')!=-1){
+                delArr.push($(this).val());
+            }
+        });
+        if(delArr.length==0){
+            swal({
+                title:'信息提示',
+                text:'请至少选择一项待禁用！',
+                type:'warning',
+                confirmButtonText:'确定'
+            });
+            return;
+        }
+        swal({
+            title: "确定禁用所选用户吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },function(){
+
+            var params="delArr="+delArr;
+            $.post(ctx+"/manager/disable",params,function(data){
+                if(data["status"]==200){
+                    swal({
+                        title:"信息提示",
+                        text:"禁用成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    })
+                    loadData(pageinfo["page"]);
+                }else {
+                    swal({
+                        title:"信息提示",
+                        text:"禁用失败",
+                        type:"error",
+                        confirmButtonText:'确定'
+                    })
+                }
+            });
+
+        })
+    }
+
+
+    //启用
+    function openadmin() {
+
+        var delArr = [];
+        $('input[name="checkbox-tr"]').each(function(index, data) {
+            if($(this).parent().attr('class').indexOf('checked')!=-1){
+                delArr.push($(this).val());
+            }
+        });
+        if(delArr.length==0){
+            swal({
+                title:'信息提示',
+                text:'请至少选择一项待启用！',
+                type:'warning',
+                confirmButtonText:'确定'
+            });
+            return;
+        }
+        swal({
+            title: "确定启用所选用户吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },function(){
+
+            var params="delArr="+delArr;
+            $.post(ctx+"/manager/open",params,function(data){
+                if(data["status"]==200){
+                    swal({
+                        title:"信息提示",
+                        text:"启用成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    })
+                    loadData(pageinfo["page"]);
+                }else {
+                    swal({
+                        title:"信息提示",
+                        text:"启用失败",
+                        type:"error",
+                        confirmButtonText:'确定'
+                    })
+                }
+            });
+
+        })
+    }
+    //批量删除
+    function deleteData() {
+
+        var delArr = [];
+        $('input[name="checkbox-tr"]').each(function(index, data) {
+            if($(this).parent().attr('class').indexOf('checked')!=-1){
+                delArr.push($(this).val());
+            }
+        });
+        if(delArr.length==0){
+            swal({
+                title:'信息提示',
+                text:'请至少选择一项待删除！',
+                type:'warning',
+                confirmButtonText:'确定'
+            });
+            return;
+        }
+        swal({
+            title: "请删除所选账号吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },function(){
+
+            var params="delArr="+delArr;
+            $.post(ctx+"/manager/del",params,function(data){
+                if(data["status"]==200){
+                    swal({
+                        title:"信息提示",
+                        text:"删除成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    })
+                    loadData(pageinfo["page"]);
+                }else {
+                    swal({
+                        title:"信息提示",
+                        text:"删除失败",
+                        type:"error",
+                        confirmButtonText:'确定'
+                    })
+                }
+            });
+
+        })
+    }
+
+    function addadmin(){
+        $("#userAccountif").text("")
+        $("#addpwdif").text("")
+        $("#addPasswordif").text("")
+        $("#adduserNameif").text("")
+        $("input[name='userAccount']").val("").focus();
+        $("input[name='addpwd']").val("").focus();
+        $("input[name='userPassword']").val("").focus();
+        $("input[name='userName']").val("").focus();
+        $("#addadmin").modal("show");
+    };
+
+    $("#addmag").click(function () {
+        if($.trim($("#userAccount").val()).length==0){
+            $("#userAccountif").text("*请输入账号！")
+            return;
+        }
+        if($.trim($("#addpwd").val()).length==0){
+            $("#addpwdif").text("*请输入密码！")
+            return;
+        }
+        if($("#addPassword").val()!=$("#addpwd").val()){
+            $("#addPasswordif").text("*两次密码不一致！")
+            return;
+        }
+        if($.trim($("#userName").val()).length==0){
+            $("#adduserNameif").text("*请输入姓名！")
+            return;
+        }
+
+        var param={
+            userAccount:document.getElementById("userAccount").value,
+            userPassword:document.getElementById("addPassword").value,
+            userName:document.getElementById("userName").value,
+            uRole:$('#wrap input[name="uRole"]:checked ').val()
+        }
+        httpPost(ctx+"/manager/add",param,function (data) {
+            if(data.status==200){
+                $("#addadmin").modal("hide");
+                loadData(1);
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:data.msg,
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+    });
+
+
+
+    function editpwd(managerId,userAccount,userName){
+        $("#userPasswordif").text("")
+        $("#euserAccount").val(userAccount);
+        $("#euserName").val(userName);
+        $("#editmagid").val(managerId);
+        $("#editmag").modal("show");
+    };
+    //编辑名称
+    $("#editpwd").click(function () {
+        if($.trim($("#euserName").val()).length==0){
+            $("#userNameif").text("*请输入姓名！")
+            return;
+        }
+        var param={
+            managerId:$("#editmagid").val(),
+            userName:document.getElementById("euserName").value,
+        }
+        httpPost(ctx+"/manager/updatepwd",param,function (data) {
+            if(data.status==200){
+                $("#editmag").modal("hide");
+                loadData(1);
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:'编辑失败',
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+    });
+
+
+
+    function uppwd(managerId){
+        $("#newpwdif").text("")
+        $("#userPasswordif").text("")
+        $("#upmagid").val(managerId);
+        $("input[name='userPassword']").val("").focus();
+        $("input[name='newpwd']").val("").focus();
+        $("#upprossword").modal("show");
+    };
+    //修改密码
+    $("#updatepwd").click(function () {
+        if($.trim($("#newpwd").val()).length==0){
+            $("#newpwdif").text("*请输入新密码！")
+            return;
+        }
+        if($("#userPassword").val()!=$("#newpwd").val()){
+            $("#userPasswordif").text("*两次密码不一致！")
+            return;
+        }
+        var param={
+            managerId:$("#upmagid").val(),
+            userPassword:document.getElementById("userPassword").value,
+        }
+        httpPost(ctx+"/manager/updatepwd",param,function (data) {
+            if(data.status==200){
+                $("#upprossword").modal("hide");
+                loadData(1);
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:'编辑失败',
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+    });
+
+
+</script>
+
+

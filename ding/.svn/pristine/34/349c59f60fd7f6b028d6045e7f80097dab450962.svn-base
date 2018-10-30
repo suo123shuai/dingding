@@ -1,0 +1,380 @@
+package com.ddcar.entity;
+
+import java.io.Serializable;
+
+public class TbVehicle implements Serializable {
+    private Long vehicleId;
+
+    private String type;
+
+    private String serialNumber;
+
+    private String vin;
+
+    private String gpsNumber;
+
+    private Long modelId;
+    private TbModelNumber modelNumber;
+    private Double deposit;
+
+    private String state;
+
+    private Integer source;
+
+    private String vehicledName;
+
+    private Long branchId;
+    private TbBranch branch;
+
+    private Long wangUserId;
+
+    private Long teamUserid;
+
+    private Long userId;
+    private TbUser tbUser;
+
+    private String userType;
+
+    private Long priceId;
+
+    private String qrCode;
+
+    private Integer deleteFlag;
+
+    private String createBy;
+
+    private String createTime;
+
+    private String modifyBy;
+
+    private String modifyTime;
+
+    private String startRentalTime;
+
+    private String stopRentalTime;
+
+    private Long manager;
+
+    private String tyreimg;
+
+    private String invoice;
+
+    private Integer belonged;
+
+    private String x;
+    private String y;
+
+    private String imei;
+
+    private String quantity;
+
+    private double rentMoney;
+
+    public double getRentMoney() {
+        return rentMoney;
+    }
+
+    public void setRentMoney(double rentMoney) {
+        this.rentMoney = rentMoney;
+    }
+
+    public String getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(String quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getImei() {
+        return imei;
+    }
+
+    public void setImei(String imei) {
+        this.imei = imei;
+    }
+
+    private Integer onlineStatus;
+
+    private Integer unlockedState;
+
+    public Integer getUnlockedState() {
+        return unlockedState;
+    }
+
+    public void setUnlockedState(Integer unlockedState) {
+        this.unlockedState = unlockedState;
+    }
+
+    public Integer getOnlineStatus() {
+        return onlineStatus;
+    }
+
+    public void setOnlineStatus(Integer onlineStatus) {
+        this.onlineStatus = onlineStatus;
+    }
+
+    public String getX() {
+        return x;
+    }
+
+    public void setX(String x) {
+        this.x = x;
+    }
+
+    public String getY() {
+        return y;
+    }
+
+    public void setY(String y) {
+        this.y = y;
+    }
+
+    public double getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(double deposit) {
+        this.deposit = deposit;
+    }
+
+    public String getInvoice() {
+        return invoice;
+    }
+
+    public void setInvoice(String invoice) {
+        this.invoice = invoice;
+    }
+
+    public Integer getBelonged() {
+        return belonged;
+    }
+
+    public void setBelonged(Integer belonged) {
+        this.belonged = belonged;
+    }
+
+    public TbUser getTbUser() {
+        return tbUser;
+    }
+
+    public void setTbUser(TbUser tbUser) {
+        this.tbUser = tbUser;
+    }
+
+    public Integer getSource() {
+        return source;
+    }
+
+    public void setSource(Integer source) {
+        this.source = source;
+    }
+
+    public String getTyreimg() {
+        return tyreimg;
+    }
+
+    public void setTyreimg(String tyreimg) {
+        this.tyreimg = tyreimg;
+    }
+
+    public Long getManager() {
+        return manager;
+    }
+
+    public void setManager(Long manager) {
+        this.manager = manager;
+    }
+
+    public void setStartRentalTime(String startRentalTime) {
+        this.startRentalTime = startRentalTime;
+    }
+
+    public void setStopRentalTime(String stopRentalTime) {
+        this.stopRentalTime = stopRentalTime;
+    }
+
+    public String getStartRentalTime() {
+        return startRentalTime;
+    }
+
+    public String getStopRentalTime() {
+        return stopRentalTime;
+    }
+
+    public String getVehicledName() {
+        return vehicledName;
+    }
+
+    public void setVehicledName(String vehicledName) {
+        this.vehicledName = vehicledName;
+    }
+
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public TbModelNumber getModelNumber() {
+        return modelNumber;
+    }
+
+    public void setModelNumber(TbModelNumber modelNumber) {
+        this.modelNumber = modelNumber;
+    }
+
+    public TbBranch getBranch() {
+        return branch;
+    }
+
+    public void setBranch(TbBranch branch) {
+        this.branch = branch;
+    }
+
+    public void setType(String type) {
+        this.type = type == null ? null : type.trim();
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber == null ? null : serialNumber.trim();
+    }
+
+    public String getVin() {
+        return vin;
+    }
+
+    public void setVin(String vin) {
+        this.vin = vin == null ? null : vin.trim();
+    }
+
+    public String getGpsNumber() {
+        return gpsNumber;
+    }
+
+    public void setGpsNumber(String gpsNumber) {
+        this.gpsNumber = gpsNumber == null ? null : gpsNumber.trim();
+    }
+
+    public Long getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(Long modelId) {
+        this.modelId = modelId;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state == null ? null : state.trim();
+    }
+
+    public Long getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
+    }
+
+    public Long getWangUserId() {
+        return wangUserId;
+    }
+
+    public void setWangUserId(Long wangUserId) {
+        this.wangUserId = wangUserId;
+    }
+
+    public Long getTeamUserid() {
+        return teamUserid;
+    }
+
+    public void setTeamUserid(Long teamUserid) {
+        this.teamUserid = teamUserid;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType == null ? null : userType.trim();
+    }
+
+    public Long getPriceId() {
+        return priceId;
+    }
+
+    public void setPriceId(Long priceId) {
+        this.priceId = priceId;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode == null ? null : qrCode.trim();
+    }
+
+    public Integer getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Integer deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy == null ? null : createBy.trim();
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime == null ? null : createTime.trim();
+    }
+
+    public String getModifyBy() {
+        return modifyBy;
+    }
+
+    public void setModifyBy(String modifyBy) {
+        this.modifyBy = modifyBy == null ? null : modifyBy.trim();
+    }
+
+    public String getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(String modifyTime) {
+        this.modifyTime = modifyTime == null ? null : modifyTime.trim();
+    }
+}

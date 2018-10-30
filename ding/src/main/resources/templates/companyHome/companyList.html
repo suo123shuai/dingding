@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<header th:replace="comm :: checkManagerLogin"></header>
+<header th:replace="comm :: header_web"></header>
+
+<style>
+
+    .bg-gary{
+        margin: 30px;
+        background-color: #18b683;
+        height: 100px;
+        width: 25%;
+        display: table-cell;
+        height:100px;
+        line-height:100px;
+        float : left;
+        color: #2E2D3C;
+    }
+    .mar{
+        margin: 30px;
+        height: 100px;
+        width: 25%;
+        display: table-cell;
+        height:100px;
+        line-height:100px;
+        float : left;
+        color: #2E2D3C;
+    }
+    a{
+        color: #f0f4f7;
+    }
+</style>
+<body>
+<div style="width: 100%;height:100px;background-color:#f0f4f7;line-height: 40px;" align="center" >
+    <input type="hidden" th:value="${session.dcoinManagerInfo.companyId}" id="companyId">
+    <table width="100%">
+        <tr>
+            <td width="10%" align="center"></td>
+            <td width="10%" align="center">本月租金</td>
+            <td width="10%" align="center">本月押金</td>
+            <td width="10%" align="center">本月其他收益</td>
+            <td width="10%" align="center">本月押金支出</td>
+            <td width="10%" align="center">全部租金</td>
+            <td width="10%" align="center">全部押金</td>
+            <td width="10%" align="center">全部其他收益</td>
+            <td width="10%" align="center">总收益</td>
+            <td width="10%" align="center"></td>
+        </tr>
+        <tr>
+            <td width="10%" align="center"></td>
+            <td width="10%" align="center"><h3>￥<span id="zj"></span></h3></td>
+            <td width="10%" align="center"><h3>￥<span id="yj"></span></h3></td>
+            <td width="10%" align="center"><h3>￥<span id="qt"></span></h3></td>
+            <td width="10%" align="center"><h3>￥<span id="zc"></span></h3></td>
+            <td width="10%" align="center"><h3>￥<span id="allzj"></span></h3></td>
+            <td width="10%" align="center"><h3>￥<span id="allyj"></span></h3></td>
+            <td width="10%" align="center"><h3>￥<span id="allqt"></span></h3></td>
+            <td width="10%" align="center"><h3>￥<span id="sum"></span></h3></td>
+            <td width="10%" align="center"></td>
+            <input type="hidden" id="hzj">
+            <input type="hidden" id="hbj">
+        </tr>
+    </table>
+</div>
+<div>
+    <div  class="bg-gary" align="center"  onclick="info()"><a onclick="info()">查看公司基本信息</a></div>
+    <div  class="bg-gary" align="center"  onclick="set()"><a onclick="set()">车电价格设置</a></div>
+</div>
+<div>
+    <div  class="mar" align="center"></div>
+    <div  class="bg-gary" align="center"  onclick="ret()"><a onclick="ret()">网点车电退回</a></div>
+</div>
+<div>
+    <div  class="bg-gary" align="center" onclick="cdmag()"><a onclick="cdmag()">车电管理</a></div>
+    <div  class="mar" align="center"></div>
+</div>
+<!--<div class="btn-group" id="exampleToolbar" role="group">
+    <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='../brand/brandList'">
+        品牌管理
+    </button>
+    <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='../models/modelList'">
+        型号管理
+    </button>
+</div>-->
+
+
+
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        exitsum();
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+    /*js*/
+    function info() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("查看公司基本信息","../page/companyHome/commpanyinfo");
+    }
+    function set() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("价格设置","../page/priceSetting/priceSettingList");
+    }
+    function ret() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("网点退回","../page/networkManagement/wangReturn");
+    }
+    function cdmag() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("车电管理","../page/commpanyVehicle/commpanyVehicleList");
+    }
+
+    function exitsum() {
+
+        var id=document.getElementById("companyId").value;
+        $.post(ctx + "/branch/bzc?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+
+                document.getElementById("zc").innerHTML = parseFloat(msg.rows.money);
+            }
+        });
+        $.post(ctx + "/branch/byj?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                document.getElementById("yj").innerHTML = parseFloat(msg.rows.money);
+            }
+        });
+        $.post(ctx + "/branch/bbj?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                document.getElementById("qt").innerHTML = parseFloat(msg.rows.money);
+            }
+        });
+        $.post(ctx + "/branch/bzj?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                document.getElementById("zj").innerHTML = parseFloat(msg.rows.money);
+            }
+        });
+        $.post(ctx + "/branch/qzj?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                document.getElementById("allzj").innerHTML = parseFloat(msg.rows.money);
+                $("#hzj").val(msg.rows.money);
+            }
+        });
+        $.post(ctx + "/branch/qyj?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                document.getElementById("allyj").innerHTML = parseFloat(msg.rows.money);
+            }
+        });
+        $.post(ctx + "/branch/qbj?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                document.getElementById("allqt").innerHTML = parseFloat(msg.rows.money);
+                $("#hbj").val(msg.rows.money);
+            }
+            var zj=$("#hzj").val();
+            var yj=$("#hbj").val();
+
+            var sum=parseInt(zj)+parseInt(yj);
+            document.getElementById("sum").innerHTML = sum;
+        });
+
+
+    }
+</script>

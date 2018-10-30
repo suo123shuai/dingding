@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.TbInoutMapper" >
+  <resultMap id="InoutResultMap" type="com.ddcar.entity.TbInout" >
+    <id column="inout_id" property="inoutId" jdbcType="BIGINT" />
+    <result column="vehicle_id" property="vehicleId" jdbcType="BIGINT" />
+    <result column="from_id" property="fromId" jdbcType="BIGINT" />
+    <result column="to_id" property="toId" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="delete_flag" property="deleteFlag" jdbcType="INTEGER" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="modify_by" property="modifyBy" jdbcType="VARCHAR" />
+    <result column="modify_time" property="modifyTime" jdbcType="VARCHAR" />
+    <result column="inout_type" property="inoutType" jdbcType="VARCHAR" />
+
+    <association property="vehicle" column="vehicle_id" jdbcType="BIGINT" javaType="com.ddcar.entity.TbVehicle">
+      <id column="vehicle_id" property="vehicleId" jdbcType="BIGINT" />
+      <result column="serial_number" property="serialNumber" jdbcType="VARCHAR" />
+
+      <association property="modelNumber" column="model_id" jdbcType="BIGINT" javaType="com.ddcar.entity.TbModelNumber">
+        <id column="model_id" property="modelId" jdbcType="BIGINT" />
+        <result column="model" property="model" jdbcType="VARCHAR" />
+
+        <association property="tbBrand" javaType="com.ddcar.entity.TbBrand">
+          <id column="brand_id" property="brandId" jdbcType="BIGINT" />
+          <result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+        </association>
+      </association>
+    </association>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    inout_id, vehicle_id, from_id, to_id, type, delete_flag, create_by, create_time,
+    modify_by, modify_time
+  </sql>
+  <select id="findTbInoutList" resultMap="InoutResultMap">
+    SELECT * FROM tb_inout t1
+    LEFT JOIN tb_vehicle t2
+    ON t1.vehicle_id=t2.vehicle_id
+    LEFT JOIN tb_model_number t3
+    ON t2.model_id = t3.model_id
+    LEFT JOIN tb_brand t4
+    ON t3.brand_id = t4.brand_id
+    WHERE t1.delete_flag=0
+  </select>
+  <!--不一定用，先留着-->
+  <select id="findTbInoutListout" resultMap="InoutResultMap">
+    SELECT * FROM tb_inout t1
+    LEFT JOIN tb_vehicle t2
+    ON t1.vehicle_id=t2.vehicle_id
+    LEFT JOIN tb_model_number t3
+    ON t2.model_id = t3.model_id
+    LEFT JOIN tb_brand t4
+    ON t3.brand_id = t4.brand_id
+    WHERE t1.delete_flag=0 AND t1.inout_type=2
+  </select>
+  <select id="selectByPrimaryKey" resultMap="InoutResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_inout
+    where inout_id = #{inoutId,jdbcType=BIGINT}
+  </select>
+  <select id="inWarehouse" resultType="com.ddcar.entity.Vehicles" parameterType="long">
+    SELECT model,v.type,serial_number,monthly_rent,cash_deposit,v.vehicle_id,
+    brand_name brand FROM tb_inout i,tb_price p,tb_model_number mn,tb_vehicle v,tb_brand b WHERE i.to_id = #{userId} AND
+    i.state = 1 AND i.vehicle_id = v.vehicle_id AND p.price_id = v.price_id AND v.model_id = mn.model_id
+    and i.delete_flag = 0 and mn.brand_id = b.brand_id
+  </select>
+
+  <select id="outWarehouse" resultType="com.ddcar.entity.Vehicles" parameterType="long">
+    SELECT model,v.type,serial_number,monthly_rent,cash_deposit,v.vehicle_id,i.create_time,
+    brand FROM tb_inout i,tb_price p,tb_model_number mn,tb_vehicle v WHERE i.from_id = #{userId} AND
+    i.state = 1 AND i.vehicle_id = v.vehicle_id AND p.price_id = v.price_id AND v.model_id = mn.model_id
+    and i.delete_flag = 0
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_inout
+    where inout_id = #{inoutId,jdbcType=BIGINT}
+  </delete>
+  <update id="confirmInOut" parameterType="Map">
+    UPDATE tb_inout set state = 2,modify_time = #{modifyTime} where to_id = #{userId} and vehicle_id in
+    <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </update>
+
+  <insert id="exitConfirm" parameterType="Map">
+    insert into tb_inout (from_id, to_id, vehicle_id, state, create_time,delete_flag)
+    values (#{fromId,jdbcType=BIGINT}, #{toId,jdbcType=BIGINT},
+    #{vehicleId,jdbcType=BIGINT}, 1, #{createTime,jdbcType=VARCHAR}, 0)
+  </insert>
+
+  <insert id="insert" parameterType="com.ddcar.entity.TbInout" >
+    insert into tb_inout (inout_id, vehicle_id, from_id, 
+       to_id, type,
+      delete_flag, create_by, create_time, 
+      modify_by, modify_time)
+    values (#{inoutId,jdbcType=BIGINT}, #{vehicleId,jdbcType=BIGINT}, #{fromId,jdbcType=BIGINT}, 
+       #{toId,jdbcType=BIGINT}, #{type,jdbcType=INTEGER},
+      #{deleteFlag,jdbcType=INTEGER}, #{createBy,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, 
+      #{modifyBy,jdbcType=VARCHAR}, #{modifyTime,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertTbInout" parameterType="com.ddcar.entity.TbInout" >
+    insert into tb_inout
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="inoutId != null" >
+        inout_id,
+      </if>
+      <if test="vehicleId != null" >
+        vehicle_id,
+      </if>
+      <if test="fromId != null" >
+        from_id,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="toId != null" >
+        to_id,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="inoutType != null" >
+        inout_type,
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyBy != null" >
+        modify_by,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="inoutId != null" >
+        #{inoutId,jdbcType=BIGINT},
+      </if>
+      <if test="vehicleId != null" >
+        #{vehicleId,jdbcType=BIGINT},
+      </if>
+      <if test="fromId != null" >
+        #{fromId,jdbcType=BIGINT},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=BIGINT},
+      </if>
+      <if test="toId != null" >
+        #{toId,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="inoutType != null" >
+        #{inoutType,jdbcType=INTEGER},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ddcar.entity.TbInout" >
+    update tb_inout
+    <set >
+      <if test="vehicleId != null" >
+        vehicle_id = #{vehicleId,jdbcType=BIGINT},
+      </if>
+      <if test="fromId != null" >
+        from_id = #{fromId,jdbcType=BIGINT},
+      </if>
+      <if test="toId != null" >
+        to_id = #{toId,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        modify_by = #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where inout_id = #{inoutId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ddcar.entity.TbInout" >
+    update tb_inout
+    set vehicle_id = #{vehicleId,jdbcType=BIGINT},
+      from_id = #{fromId,jdbcType=BIGINT},
+      to_id = #{toId,jdbcType=BIGINT},
+      type = #{type,jdbcType=INTEGER},
+      delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR},
+      modify_by = #{modifyBy,jdbcType=VARCHAR},
+      modify_time = #{modifyTime,jdbcType=VARCHAR}
+    where inout_id = #{inoutId,jdbcType=BIGINT}
+  </update>
+</mapper>

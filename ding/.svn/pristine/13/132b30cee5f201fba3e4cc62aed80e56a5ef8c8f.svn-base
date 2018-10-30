@@ -1,0 +1,206 @@
+package com.ddcar.controller;
+
+import com.common.BaseBean;
+import com.common.Commonparam;
+import com.ddcar.entity.*;
+import com.ddcar.service.BranchIndexService;
+import com.ddcar.service.OrderPayService;
+import com.ddcar.util.UtilLog;
+import com.weixin.FukuanPay;
+import com.weixin.PayRefund;
+import com.weixin.WeiXinUtilWap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/wang/index")
+public class WxIndexController {
+
+    @Autowired
+    BranchIndexService branchIndex;
+    @Autowired
+    OrderPayService orderPayService;
+    @Value("${wxp12}")
+    private String zhengShu;
+
+    /**
+     * 查询网点首页车电骑手总数
+     *
+     * @param userId
+     * @return
+     */
+    @RequestMapping("/count")
+    public @ResponseBody
+    BaseBean branchIndexVehicleCount(@RequestParam("userId") long userId) {
+        BaseBean bean = new BaseBean();
+        try {
+            BranchIndexCount branchIndexCount = branchIndex.indexCount(userId);
+            bean.setRows(branchIndexCount);
+            bean.setStatus(200);
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    /**
+     * 查询网点首页的用户信息，分页查询
+     *
+     * @param userId
+     * @param page
+     * @param size
+     * @return
+     */
+    @RequestMapping("/user")
+    public @ResponseBody
+    BaseBean indexUser(@RequestParam("userId") long userId,
+                       @RequestParam(value = "page", defaultValue = "1") Integer page,
+                       @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        BaseBean bean = new BaseBean();
+        try {
+            List<TbUser> tbUsers = branchIndex.indexBranchUser(userId, page, size);
+            bean.setRows(tbUsers);
+            bean.setStatus(200);
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/findrescue")
+    public @ResponseBody
+    BaseBean findrescue(long userId, long wangUserId) {
+        BaseBean bean = new BaseBean();
+        Map map = new HashMap();
+        map.put("userId", userId);
+        map.put("wangUserId", wangUserId);
+        try {
+            TbRescue rescue = branchIndex.findRescue(map);
+            bean.setStatus(200);
+            bean.setRows(rescue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    /**
+     * 救援
+     *
+     * @param repairPhone
+     * @param repairName
+     * @param reasonMsg
+     * @param status
+     * @return
+     */
+    @RequestMapping("/updrescue")
+    public @ResponseBody
+    BaseBean updRescue(
+            long rescueId, String repairPhone, String repairName,long userId,
+            String reasonMsg, Integer status) {
+        BaseBean bean = new BaseBean();
+        TbRescue rescue = new TbRescue();
+        rescue.setRescueId(rescueId);
+        rescue.setRepairPhone(repairPhone);
+        rescue.setRepairName(repairName);
+        rescue.setReasonMsg(reasonMsg);
+        rescue.setStatus(status);
+        rescue.setUserId(userId);
+        rescue.setModifyTime(Commonparam.fmt.format(new Date()));
+        try {
+            branchIndex.updRescue(rescue);
+            bean.setMsg("已提交");
+            bean.setStatus(200);
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    /**
+     * 用户退租信息
+     *
+     * @param userId
+     * @return
+     */
+    @RequestMapping("/rental")
+    public @ResponseBody
+    BaseBean withdrawRental(@RequestParam("userId") long userId,
+                            @RequestParam(value = "fuzzyField", defaultValue = "1^^^") String fuzzyField,
+                            @RequestParam(value = "page", defaultValue = "1") Integer page,
+                            @RequestParam(value = "size", defaultValue = "10") Integer size,
+                            @RequestParam(value = "condition", defaultValue = "0") int condition) {
+        BaseBean bean = new BaseBean();
+        Map map = new HashMap();
+        map.put("wangUserId", userId);
+        map.put("condition", condition);
+        if("1^^^".equals(fuzzyField)){
+            map.put("fuzzyField", null);
+        } else {
+            map.put("fuzzyField", fuzzyField);
+        }
+        try {
+            List<User> userVehicle = branchIndex.withdrawRental(map, page, size);
+            bean.setRows(userVehicle);
+            bean.setStatus(200);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    /**
+     * 要退租用户的信息
+     *
+     * @return
+     */
+    @RequestMapping("/rentalUserV")
+    public @ResponseBody
+    BaseBean throwALeaseUser(@RequestParam("userId") long userId,
+                             Long wangUserId) {
+        BaseBean bean = new BaseBean();
+        UserVehicle userVehicle = null;
+        try {
+            userVehicle = branchIndex.throwALeaseUser(userId, wangUserId);
+            bean.setStatus(200);
+            bean.setRows(userVehicle);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bean;
+    }
+
+    @RequestMapping("/withdrawal")
+    public @ResponseBody BaseBean tuizu(String[] ids, long userId, long parentId){
+        BaseBean bean = new BaseBean();
+        try {
+            String s = orderPayService.refundOrderPay(ids, userId, parentId,zhengShu);
+            System.out.println(s);
+            if("1".equals(s)){
+                bean.setStatus(200);
+                bean.setMsg("退款成功");
+            } else {
+                bean.setStatus(400);
+                bean.setMsg("退款失败！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return bean;
+    }
+}

@@ -1,0 +1,35 @@
+package com.ddcar.mapper;
+
+
+import com.ddcar.entity.TbBrand;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+@Mapper
+public interface TbBrandMapper {
+    //查询带分页
+    List<TbBrand> findTbBrandList(@Param("brandName")String brandName);
+    //查询库里是否有改品牌
+    Integer ifbrandName(@Param("brandName")String brandName);
+    //查询该品牌下是否有型号
+    Integer delmod(@Param("brandId")long brandId);
+    //根据品牌名称查询
+    TbBrand brandName(String brandName);
+    //查询
+    List<TbBrand> findList();
+    //根据ID查询
+    TbBrand selectByPrimaryKey(Long brandId);
+    //逻辑删除品牌
+    void delTbBrand(@Param("brandId") Long brandId);
+    //添加品牌
+    int insert(TbBrand tbBrand);
+
+    int insertSelective(TbBrand tbBrand);
+
+    //编辑品牌
+    int updatebrand(TbBrand record);
+
+    int updateByPrimaryKey(TbBrand record);
+}

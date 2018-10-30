@@ -1,0 +1,36 @@
+package com.ddcar.service.impl;
+
+import com.ddcar.entity.TbUser;
+import com.ddcar.entity.UserVehicle;
+import com.ddcar.mapper.TbRescueMapper;
+import com.ddcar.mapper.TbUserMapper;
+import com.ddcar.service.RiderUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Map;
+
+@Service
+public class RiderUserServiceImpl implements RiderUserService {
+
+    @Autowired
+    private TbUserMapper userMapper;
+    @Resource
+    private TbRescueMapper tbRescueMapper;
+
+    @Override
+    public UserVehicle findUser(long userId) throws Exception {
+        return userMapper.findUser(userId);
+    }
+
+    @Override
+    public TbUser getUserByUserId(long userId) throws Exception {
+        return userMapper.getUserByUserId(userId);
+    }
+
+    @Override
+    public int updRescuestatus(Map map) throws Exception {
+        return tbRescueMapper.updRescuestatus(map);
+    }
+}

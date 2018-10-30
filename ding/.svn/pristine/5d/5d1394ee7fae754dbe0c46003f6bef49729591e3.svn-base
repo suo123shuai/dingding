@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.TbPriceMapper" >
+  <resultMap id="BaseResultMap" type="com.ddcar.entity.TbPrice" >
+    <id column="price_id" property="priceId" jdbcType="BIGINT" />
+    <result column="monthly_rent" property="monthlyRent" jdbcType="DOUBLE" />
+    <result column="cash_deposit" property="cashDeposit" jdbcType="DOUBLE" />
+    <result column="discount" property="discount" jdbcType="DOUBLE" />
+    <result column="branch_id" property="branchId" jdbcType="BIGINT" />
+    <result column="model_id" property="modelId" jdbcType="BIGINT" />
+    <result column="model_type" property="modelType" jdbcType="INTEGER" />
+    <result column="delete_flag" property="deleteFlag" jdbcType="INTEGER" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="modify_by" property="modifyBy" jdbcType="VARCHAR" />
+    <result column="modify_time" property="modifyTime" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    price_id, monthly_rent, cash_deposit, discount, branch_id, model_id, model_type, 
+    delete_flag, create_by, create_time, modify_by, modify_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_price
+    where price_id = #{priceId,jdbcType=BIGINT}
+    and delete_flag =0
+  </select>
+  <!--查询该公司型号的价格 -->
+  <select id="modelprice" resultType="java.util.HashMap">
+    SELECT price_id AS priceId,IFNULL(monthly_rent,'') AS monthlyRent,IFNULL(cash_deposit,'') AS cashDeposit,
+  IFNULL((SELECT model FROM tb_model_number WHERE delete_flag=0 AND model_id=t1.`model_id`),'') AS modelName,
+  IFNULL((SELECT model_type FROM tb_model_number WHERE delete_flag=0 AND model_id=t1.`model_id`),'') AS modelType,
+  IFNULL(( SELECT brand_name FROM tb_brand WHERE delete_flag=0 AND brand_id=(SELECT brand_id FROM tb_model_number WHERE delete_flag=0 AND model_id=t1.`model_id`)),'') AS brandName
+  FROM tb_price t1 WHERE delete_flag=0 AND branch_id=#{branchId}
+  <if test="modelId != null and modelId>-1">
+  AND EXISTS (SELECT 1 FROM tb_model_number WHERE delete_flag=0 AND model_id=t1.`model_id` AND t1.model_id=#{modelId})
+  </if>
+  <if test="modelType != null and modelType>-1">
+  AND EXISTS (SELECT 1 FROM tb_model_number WHERE delete_flag=0 AND model_id=t1.`model_id` AND model_type=#{modelType})
+  </if>
+  <if test="brandId != null and brandId>-1">
+  AND EXISTS (SELECT 1 FROM tb_model_number WHERE delete_flag=0 AND model_id=t1.`model_id` AND brand_id=#{brandId})
+  </if>
+    ORDER BY price_id DESC
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_price
+    where price_id = #{priceId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.ddcar.entity.TbPrice" >
+    insert into tb_price (price_id, monthly_rent, cash_deposit, 
+      discount, branch_id, model_id, 
+      model_type, delete_flag, create_by, 
+      create_time, modify_by, modify_time
+      )
+    values (#{priceId,jdbcType=BIGINT}, #{monthlyRent,jdbcType=DOUBLE}, #{cashDeposit,jdbcType=DOUBLE}, 
+      #{discount,jdbcType=DOUBLE}, #{branchId,jdbcType=BIGINT}, #{modelId,jdbcType=BIGINT}, 
+      #{modelType,jdbcType=INTEGER}, #{deleteFlag,jdbcType=INTEGER}, #{createBy,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR}, #{modifyBy,jdbcType=VARCHAR}, #{modifyTime,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertprice" useGeneratedKeys="true" keyProperty="priceId" parameterType="com.ddcar.entity.TbPrice" >
+    insert into tb_price
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="priceId != null" >
+        price_id,
+      </if>
+      <if test="monthlyRent != null" >
+        monthly_rent,
+      </if>
+      <if test="cashDeposit != null" >
+        cash_deposit,
+      </if>
+      <if test="discount != null" >
+        discount,
+      </if>
+      <if test="branchId != null" >
+        branch_id,
+      </if>
+      <if test="modelId != null" >
+        model_id,
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyBy != null" >
+        modify_by,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="priceId != null" >
+        #{priceId,jdbcType=BIGINT},
+      </if>
+      <if test="monthlyRent != null" >
+        #{monthlyRent,jdbcType=DOUBLE},
+      </if>
+      <if test="cashDeposit != null" >
+        #{cashDeposit,jdbcType=DOUBLE},
+      </if>
+      <if test="discount != null" >
+        #{discount,jdbcType=DOUBLE},
+      </if>
+      <if test="branchId != null" >
+        #{branchId,jdbcType=BIGINT},
+      </if>
+      <if test="modelId != null" >
+        #{modelId,jdbcType=BIGINT},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updatePrice" parameterType="com.ddcar.entity.TbPrice" >
+    update tb_price
+    <set >
+      <if test="monthlyRent != null" >
+        monthly_rent = #{monthlyRent,jdbcType=DOUBLE},
+      </if>
+      <if test="cashDeposit != null" >
+        cash_deposit = #{cashDeposit,jdbcType=DOUBLE},
+      </if>
+      <if test="discount != null" >
+        discount = #{discount,jdbcType=DOUBLE},
+      </if>
+      <if test="branchId != null" >
+        branch_id = #{branchId,jdbcType=BIGINT},
+      </if>
+      <if test="modelId != null" >
+        model_id = #{modelId,jdbcType=BIGINT},
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        modify_by = #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where price_id = #{priceId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ddcar.entity.TbPrice" >
+    update tb_price
+    set monthly_rent = #{monthlyRent,jdbcType=DOUBLE},
+      cash_deposit = #{cashDeposit,jdbcType=DOUBLE},
+      discount = #{discount,jdbcType=DOUBLE},
+      branch_id = #{branchId,jdbcType=BIGINT},
+      model_id = #{modelId,jdbcType=BIGINT},
+      delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR},
+      modify_by = #{modifyBy,jdbcType=VARCHAR},
+      modify_time = #{modifyTime,jdbcType=VARCHAR}
+    where price_id = #{priceId,jdbcType=BIGINT}
+  </update>
+</mapper>

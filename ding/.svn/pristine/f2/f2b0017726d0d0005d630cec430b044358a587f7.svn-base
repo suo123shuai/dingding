@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>车电入库</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <h2>车电入库</h2>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>品牌:</label>
+                            </div>
+                            <div class="col-md-11">
+                                <select name="brandId" id="brand" class="form-control" onChange="getNextClassify()"   style="width:200px;">
+                                    <option value="">-- 请选择 --</option>
+                                </select>
+                                <span id="tipp" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>型号:</label>
+                            </div>
+                            <div class="col-md-11">
+                                <select name="modelId" id="modelId" class="form-control" style="width:300px;">
+                                    <option value="">-- 请选择 --</option>
+                                </select>
+                                <span id="tixh" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>车架号:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="vin" id="vin" class="form-control keyupclick"  style="width:300px;">
+                                <span id="ticjh" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>GPS号:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="gpsNumber" id="gpsNumber" class="form-control keyupclick"  style="width:300px;">
+                                <span id="tigps" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>预留编号:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="serialNumber" id="serialNumber" class="form-control keyupclick"  style="width:300px;">
+                                <span id="tiylbh" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>轮胎照片:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <button type="button" class="btn btn-outline btn-default" id="uploadBtn">
+                                    <i class="glyphicon" aria-hidden="true"></i>上传图片（400*400，500K)
+                                </button>
+                                <img src="" id="showImg"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                       <button type="button" class="btn btn-outline btn-default" id="vehicleadd">
+                            </i>保存
+                        </button>
+                        &nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-outline btn-default" onclick="esc()">
+                            </i>取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        //$(".tbsalelist").width(2200);
+        //$(".tbsalelist").css("max-width", 2200);
+        initUpload('uploadBtn','showImg',null,1024);
+        beandoption();
+        $("#tipp").text("")
+        $("#tixh").text("")
+        $("#ticjh").text("")
+        $("#tigps").text("")
+        $("#tiylbh").text("")
+    });
+    function beandoption() {
+        httpPost(ctx+'/brand/findList',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        var option='<option value="'+data.brandId+'">'+data.brandName+'</option>';
+                        $("[name=brandId]").append(option);
+                    }
+                } else {
+                    alert(msg.msg);
+                }
+            });
+    }
+    //下拉框连动
+    function getNextClassify() {
+        //获取下拉框主键
+        var classifyId = $("#brand").find('option:selected').val();
+        $("#modelId").empty();//清空二级目录
+        var NextModel = $("[name=modelId]");
+        $.ajax({
+            type: "post",
+            contentType: "application/json",
+            url: ctx+"/model/searchbrandId?brandId=" + classifyId,
+            success: function (data) {
+                if(data.status==200){
+                    var rows = data.rows;
+                    if (rows.length != "" && rows.length != null) {
+                        for (var i = 0; i < rows.length; i++) {
+                            NextModel.append("<option value=" + rows[i].modelId + ">" + rows[i].model + "</option>");
+                        }
+                    } else {
+                        NextModel.append("<option value=" + classifyId + ">该品牌暂无型号</option>");
+                    }
+                }else {
+                    alert("有误");
+                }
+            }
+        });
+    }
+        $("#vehicleadd").click(function () {
+            if($.trim($("#brand").val()).length==0){
+                $("#tipp").text("*请选择品牌！")
+                return;
+            }
+            if($.trim($("#modelId").val()).length==0){
+                $("#tixh").text("*请选择型号！")
+                return;
+            }
+            if($.trim($("#vin").val()).length==0){
+                $("#ticjh").text("*请填写车架号！")
+                return;
+            }
+            if($.trim($("#gpsNumber").val()).length==0){
+                $("#tigps").text("*请填写GSP号！")
+                return;
+            }
+            if($.trim($("#serialNumber").val()).length==0){
+                $("#tiylbh").text("*请填写预留编号！")
+                return;
+            }
+            var param={
+                type:$('#wrap input[name="type"]:checked ').val(),
+                modelId:document.getElementById("modelId").value,
+                vin:document.getElementById("vin").value,
+                gpsNumber:document.getElementById("gpsNumber").value,
+                serialNumber:document.getElementById("serialNumber").value,
+                tyreimg:$("#showImg")[0].src
+            }
+            httpPost(ctx+"/warehousing/add",param,function (data) {
+                if(data.status==200){
+                    swal({
+                        title:"信息提示",
+                        text:"入库成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    },function(){
+                        window.location.reload();
+                    })
+                }else {
+                    swal({
+                        title:'信息提示',
+                        text:'添加失败',
+                        type:'error',
+                        confirmButtonText:'确认'
+                    });
+                }
+            });
+        });
+    var esc=function () {
+        parent.closeCurr();
+    }
+</script>

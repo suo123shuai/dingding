@@ -1,0 +1,63 @@
+package com.ddcar.service.impl;
+
+import com.ddcar.entity.RescueXin;
+import com.ddcar.entity.TbBranch;
+import com.ddcar.entity.TbRescue;
+import com.ddcar.entity.TbUser;
+import com.ddcar.mapper.TbBranchMapper;
+import com.ddcar.mapper.TbRescueMapper;
+import com.ddcar.mapper.TbUserMapper;
+import com.ddcar.service.RiderIndexService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class RiderIndexServiceImpl implements RiderIndexService {
+
+    @Autowired
+    private TbBranchMapper branchMapper;
+
+    @Autowired
+    private TbRescueMapper rescueMapper;
+
+    @Resource
+    private TbUserMapper tbUserMapper;
+
+    @Override
+    public List<TbBranch> listBranch(String items) throws Exception {
+        return branchMapper.listBranch(items);
+    }
+
+    @Override
+    public int insertRescue(TbRescue rescue) throws Exception {
+        RescueXin rescue1 = rescueMapper.findRescuexin(rescue.getUserId());
+        if (null == rescue1) {
+            rescue.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            rescueMapper.insertSelective(rescue);
+            return 200;
+        }
+        return 400;
+    }
+
+    @Override
+    public TbBranch getBranch(long wangUserId) throws Exception {
+        return branchMapper.selectByPrimaryKey(wangUserId);
+    }
+
+    @Override
+    public RescueXin rescueInformation(long userId) throws Exception {
+        return rescueMapper.findRescuexin(userId);
+    }
+
+    @Override
+    public int updateUser(TbUser user) {
+        return tbUserMapper.updateByPrimaryKeySelective(user);
+    }
+}

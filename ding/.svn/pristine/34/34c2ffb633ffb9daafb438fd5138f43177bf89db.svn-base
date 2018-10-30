@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.SignUserMapper">
+    <resultMap id="BaseResultMap" type="com.ddcar.entity.TbUser">
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="id_front" property="idFront" jdbcType="VARCHAR"/>
+        <result column="id_contrary" property="idContrary" jdbcType="VARCHAR"/>
+        <result column="head_photo" property="headPhoto" jdbcType="VARCHAR"/>
+        <result column="id_number" property="idNumber" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="state" property="state" jdbcType="VARCHAR"/>
+        <result column="cash_deposit" property="cashDeposit" jdbcType="DOUBLE"/>
+        <result column="balance" property="balance" jdbcType="DOUBLE"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="use_money1" property="useMoney1" jdbcType="DOUBLE"/>
+        <result column="use_money2" property="useMoney2" jdbcType="DOUBLE"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="qr_code" property="qrCode" jdbcType="VARCHAR"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="open_state" property="openState" jdbcType="VARCHAR"/>
+        <result column="delete_flag" property="deleteFlag" jdbcType="INTEGER"/>
+        <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="modify_by" property="modifyBy" jdbcType="VARCHAR"/>
+        <result column="modify_time" property="modifyTime" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="ListMap" type="com.ddcar.pojo.SignUser">
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="head_photo" property="userLogo" jdbcType="VARCHAR"/>
+        <result column="phone" property="tel" jdbcType="VARCHAR"/>
+        <result column="id_number" property="idCart" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="BIGINT"/>
+    </resultMap>
+    <resultMap id="DetailMap" type="com.ddcar.pojo.SignUserDetail" extends="ListMap">
+        <result column="id_front" property="idCartPhotoFront" jdbcType="VARCHAR"/>
+        <result column="parent_id" property="parentId" jdbcType="INTEGER"/>
+        <result column="id_contrary" property="idCartPhotoSide" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="login" resultType="com.ddcar.entity.TbUser">
+      select * from tb_user where account=#{account} and password=#{pwd} and type=2
+    </select>
+
+    <select id="querySumDeposit" parameterType="long" resultType="map">
+    SELECT sum(cash_deposit) cash_deposit,sum(use_money1) use_deposit
+    FROM tb_user where parent_id=#{parentId} and delete_flag=0
+  </select>
+
+    <select id="queryNum" parameterType="long" resultType="map">
+    SELECT count(if(type=0, type, 0)) carNum,count(if(type=1, type, 0)) batteryNum ,
+    (select count(1) from tb_user where parent_id=#{parentId}  and delete_flag=0) userNum
+    FROM tb_vehicle where team_user_id=#{parentId} and state=1  and delete_flag=0
+  </select>
+
+    <select id="queryList" parameterType="long" resultMap="ListMap">
+    select user_id,user_name,head_photo,phone,id_number,
+    (select count(1) from tb_vehicle v where user_id=u.user_id and state=1 and delete_flag=0) type
+    from tb_user u where parent_id=#{parentId}  and delete_flag=0
+  </select>
+
+    <select id="queryUser" parameterType="string" resultType="com.ddcar.entity.TbUser">
+    select * from tb_user where qr_code=#{code}  and delete_flag=0
+  </select>
+
+    <select id="queryUserDetail" resultMap="DetailMap">
+    select user_id,user_name,head_photo,phone,id_number,id_front,id_contrary,parent_id,
+    (select count(1) from tb_vehicle v where user_id=u.user_id and state=1 and delete_flag=0) type
+    from tb_user u where user_id=#{userId} and type=3 and parent_id=#{parentId}  and delete_flag=0
+  </select>
+
+    <select id="isUserFlag" resultType="Integer">
+    select count(1) from tb_user where user_id=#{userId} and type=2  and delete_flag=0
+  </select>
+    <select id="regimentSignUserDetail" resultType="com.ddcar.entity.TbUser">
+        select * from tb_user where user_id=#{userId} and type=2  and delete_flag=0
+    </select>
+
+    <update id="bindUser">
+    update tb_user set parent_id=#{parentId} where user_id=#{userId}
+  </update>
+
+  <select id="leaseHistoryList" resultType="map">
+    SELECT i.type,i.model carName,i.serial_number code,o.start_rental_time start_date,
+    o.stop_rental_time end_date
+    FROM tb_order o
+    left join tb_order_item i on o.order_id=i.order_id
+    where o.pay_state=1 and o.user_id=#{userId}  and o.delete_flag=0 and order_type=1
+  </select>
+
+    <select id="isCarRenting" resultType="integer">
+        select count(1) from tb_vehicle where user_id=#{userId} and state=1 and delete_flag=0
+    </select>
+
+</mapper>

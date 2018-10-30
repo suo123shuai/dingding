@@ -1,0 +1,103 @@
+package com.ddcar.service.impl;
+
+import com.ddcar.entity.TbUser;
+import com.ddcar.mapper.TbUserMapper;
+import com.ddcar.service.TbUserService;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-15.
+ */
+@Service
+public class TbUserServiceImpl implements TbUserService{
+    @Autowired(required = false)
+    TbUserMapper tbUserMapper;
+
+    @Override
+    public List<HashMap> findComTbUser(Integer page, Integer size,Long branchId,Integer type,Long parentId) {
+        PageHelper.startPage(page,size);
+        return tbUserMapper.findComTbUser(branchId,type,parentId);
+    }
+
+    @Override
+    public List<HashMap> findComsign(Integer page, Integer size, Long branchId,Long userId,String userName) {
+        PageHelper.startPage(page,size);
+        return tbUserMapper.findComsign(branchId,userId,userName);
+    }
+
+    @Override
+    public List<HashMap> findTUser(Long branchId) {
+        return tbUserMapper.findTUser(branchId);
+    }
+
+    @Override
+    public Integer iftq(String account) {
+        return tbUserMapper.iftq(account);
+    }
+
+    @Transactional
+    @Override
+    public void insertGroup(TbUser tbUser) {
+        tbUserMapper.insertGroup(tbUser);
+    }
+
+    @Override
+    public TbUser idSearchComsign(Long userId) {
+        return tbUserMapper.idSearchComsign(userId);
+    }
+
+    @Transactional
+    @Override
+    public void updateGroup(TbUser tbUser) {
+        tbUserMapper.updateGroup(tbUser);
+    }
+
+    @Transactional
+    @Override
+    public void updateuser(TbUser tbUser) {
+        tbUserMapper.updateuser(tbUser);
+    }
+
+    @Transactional
+    @Override
+    public void delTbuser(Long[] userId) {
+        for (Long id:userId){
+            tbUserMapper.delTbuser(id);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void enable(Long[] userId) {
+        for (Long id:userId){
+            tbUserMapper.enable(id);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void close(Long[] userId) {
+        for (Long id:userId){
+            tbUserMapper.close(id);
+        }
+    }
+
+    @Override
+    public TbUser getUserByWeiXinId(String weiXinId, String avatar) throws Exception {
+        TbUser user = tbUserMapper.getUserByWeiXin(weiXinId);
+        if(null == user){
+            TbUser tbuser = new TbUser();
+            tbuser.setWeixinId(weiXinId);
+            tbuser.setHeadPhoto(avatar);
+            tbUserMapper.insertSelective(tbuser);
+            return tbuser;
+        }
+        return user;
+    }
+}

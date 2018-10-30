@@ -1,0 +1,14 @@
+package com.common;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class AA {
+    public static void main(String[] args) throws Exception {
+        Map map = new HashMap();
+        map.put("q", "qw");
+        map.put("ww", "ww");
+        boolean q = map.containsKey("ww");
+        System.out.println(q);
+    }
+}

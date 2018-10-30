@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<header th:replace="comm :: checkManagerLogin"></header>
+<header th:replace="comm :: header_web"></header>
+
+<style>
+
+    .bg-gary{
+        margin: 30px;
+        background-color: #18b683;
+        height: 100px;
+        width: 25%;
+        display: table-cell;
+        height:100px;
+        line-height:100px;
+        float : left;
+        color: #2E2D3C;
+    }
+    .mar{
+        margin: 30px;
+        height: 100px;
+        width: 25%;
+        display: table-cell;
+        height:100px;
+        line-height:100px;
+        float : left;
+        color: #2E2D3C;
+    }
+    a{
+        color: #f0f4f7;
+    }
+</style>
+<body>
+<div>
+    <div  class="bg-gary" align="center"  onclick="info()"><a onclick="info()">查看公司基本信息</a></div>
+    <div  class="bg-gary" align="center"  onclick="set()"><a onclick="set()">车电价格设置</a></div>
+</div>
+<div>
+    <div  class="mar" align="center"></div>
+    <div  class="bg-gary" align="center"  onclick="ret()"><a onclick="ret()">网点车电退回</a></div>
+</div>
+<div>
+    <div  class="bg-gary" align="center" onclick="cdmag()"><a onclick="cdmag()">车电管理</a></div>
+    <div  class="mar" align="center"></div>
+</div>
+<!--<div class="btn-group" id="exampleToolbar" role="group">
+    <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='../brand/brandList'">
+        品牌管理
+    </button>
+    <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='../models/modelList'">
+        型号管理
+    </button>
+</div>-->
+
+
+
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    /*js*/
+    function info() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("查看公司基本信息","../page/companyHome/commpanyinfo");
+    }
+    function set() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("价格设置","../page/priceSetting/priceSettingList");
+    }
+    function ret() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("网点退回","../page/networkManagement/wangReturn");
+    }
+    function cdmag() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("车电管理","../page/commpanyVehicle/commpanyVehicleList");
+    }
+</script>

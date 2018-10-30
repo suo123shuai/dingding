@@ -1,0 +1,36 @@
+package com.ddcar.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+
+import com.ddcar.entity.TbManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.ddcar.entity.Manager;
+import com.ddcar.entity.User;
+import com.ddcar.mapper.UserMapper;
+import com.ddcar.service.UserManager;
+import com.github.pagehelper.PageHelper;
+
+import javax.annotation.Resource;
+
+@Service
+public class UserManagerImpl implements UserManager{
+
+	@Resource
+	UserMapper userMapper;
+	
+//	@Override
+//	public List<User> findUserList(Integer page, Integer size) {
+//		PageHelper.startPage(page,size);
+//		return userMapper.findUserList();
+//	}
+
+	@Override
+	public TbManager loginManager(HashMap param) {
+		// TODO Auto-generated method stub
+		return userMapper.loginManager(param);
+	}
+
+}

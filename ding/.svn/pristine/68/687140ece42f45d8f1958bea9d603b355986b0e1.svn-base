@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.SendMessageMapper">
+
+    <select id="getSmsSum" parameterType="String" resultType="com.ddcar.entity.SendMessage">
+        SELECT COUNT(*) FROM tb_send_message
+        WHERE TO_DAYS(create_time) = TO_DAYS(NOW())
+        AND send_phone = #{phone}
+    </select>
+
+    <select id="getCodeTime" parameterType="String" resultType="Long">
+        SELECT TIMESTAMPDIFF(SECOND,
+        (SELECT create_time FROM tb_send_message WHERE send_massage_id =
+        (SELECT MAX(send_massage_id)FROM tb_send_message WHERE
+        send_phone = #{phone} GROUP BY send_phone)),
+         NOW())
+    </select>
+
+    <insert id="saveSendMessage" parameterType="com.ddcar.entity.SendMessage">
+        insert into tb_send_message
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="sendPhone != null">
+                send_phone,
+            </if>
+            <if test="sendCode != null">
+                send_code,
+            </if>
+            <if test="codeTime != null">
+                code_time,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="sendPhone != null">
+                #{sendPhone},
+            </if>
+            <if test="sendCode != null">
+                #{sendCode},
+            </if>
+            <if test="codeTime != null">
+                #{codeTime},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="type != null">
+                #{type},
+            </if>
+        </trim>
+    </insert>
+</mapper>

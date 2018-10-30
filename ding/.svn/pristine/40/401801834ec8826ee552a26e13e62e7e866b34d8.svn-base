@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.TbBranchMapper" >
+  <resultMap id="BaseResultMap" type="com.ddcar.entity.TbBranch" >
+    <id column="branch_id" property="branchId" jdbcType="BIGINT" />
+    <result column="branch_name" property="branchName" jdbcType="VARCHAR" />
+    <result column="website_type" property="websiteType" jdbcType="BIGINT" />
+    <result column="branch_type" property="branchType" jdbcType="VARCHAR" />
+    <result column="manager_id" property="managerId" jdbcType="BIGINT" />
+    <result column="branch_phone" property="branchPhone" jdbcType="VARCHAR" />
+    <result column="branchaaddr" property="branchaaddr" jdbcType="VARCHAR" />
+    <result column="items" property="items" jdbcType="VARCHAR" />
+    <result column="branch_state" property="branchState" jdbcType="INTEGER" />
+    <result column="delete_flag" property="deleteFlag" jdbcType="INTEGER" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="modify_by" property="modifyBy" jdbcType="VARCHAR" />
+    <result column="modify_time" property="modifyTime" jdbcType="VARCHAR" />
+    <association property="tbManager" column="vehicle_id" jdbcType="BIGINT" javaType="com.ddcar.entity.TbManager">
+      <id column="manager_id" property="managerId" jdbcType="BIGINT" />
+      <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    branch_id, branch_name,website_type, branch_type, manager_id, branch_phone, branchaaddr, branch_state,
+    delete_flag, create_by, create_time, modify_by, modify_time, items
+  </sql>
+  <select id="findTbBranchList" resultType="com.ddcar.entity.TbBranch">
+    SELECT * from tb_branch WHERE delete_flag=0;
+  </select>
+  <select id="lingVehicleJvli" parameterType="Map" resultType="com.ddcar.entity.TbBranch">
+        SELECT *,ROUND(6378.138 * 2 * ASIN(SQRT(POW(SIN((#{y} * PI() / 180 - Y * PI() / 180 ) / 2 ), 2
+        ) + COS(#{y} * PI() / 180) * COS(Y * PI() / 180) * POW(SIN((#{x} * PI() / 180 - X * PI() / 180 ) / 2
+        ), 2) )) * 1000) AS juli FROM tb_branch WHERE Y &lt;&gt; "" AND items LIKE '%0%' and type = 2
+        and delete_flag = 0 and ROUND(6378.138 * 2 * ASIN(SQRT(POW(SIN((#{y} * PI() / 180 - Y * PI() / 180 ) / 2 ), 2
+        ) + COS(#{y} * PI() / 180) * COS(Y * PI() / 180) * POW(SIN((#{x} * PI() / 180 - X * PI() / 180 ) / 2
+        ), 2) )) * 1000) &lt; 20000
+        ORDER BY juli ASC
+   </select>
+
+  <select id="qrCodeGetBranchId" parameterType="String" resultType="HashMap">
+    select branch_id branchId,branch_name branchName,items
+    from tb_branch where qr_code = #{qrCode} and delete_flag = 0
+  </select>
+  <!--查询该分公司下是否有网点-->
+  <select id="ifdelcom" resultType="java.lang.Integer">
+     SELECT COUNT(1) FROM tb_branch WHERE delete_flag=0 AND TYPE=2 AND parent_id=#{parentId}
+  </select>
+  <!--查询该分公司下是否有团签-->
+  <select id="ifdeltuan" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM tb_user WHERE delete_flag=0 AND TYPE=2 AND branch_id=#{branchId}
+  </select>
+  <!--查询该分公司下是否有没有退回的车电-->
+  <select id="ifdeltv" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM tb_vehicle WHERE delete_flag=0 AND manager!=3 AND branch_id=#{branchId}
+  </select>
+  <!--查询该网点下是否有车电-->
+  <select id="ifdelwtv" resultType="java.lang.Integer">
+   SELECT COUNT(1) FROM tb_vehicle WHERE delete_flag=0 AND wang_user_id=#{wangUserId}
+  </select>
+  <!--查询本公司管理的网点-->
+  <select id="wout" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    SELECT * FROM tb_branch WHERE delete_flag=0 AND parent_id =#{parentId,jdbcType=BIGINT} AND TYPE=2
+    <if test="websiteType != null and websiteType>-1">
+      AND website_type=#{websiteType}
+    </if>
+    <if test="branchId != null and branchId!=''">
+      AND branch_id=#{branchId}
+    </if>
+    <if test="branchName != null and branchName!=''">
+      AND branch_name LIKE '%${branchName}%'
+    </if>
+    ORDER BY branch_id DESC
+  </select>
+  <!--查询本公司可出库的网点-->
+  <select id="selectcomWang" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    SELECT * FROM tb_branch WHERE delete_flag=0 AND items LIKE "%0%" AND parent_id =#{parentId,jdbcType=BIGINT} AND TYPE=2
+    <if test="websiteType != null and websiteType>-1">
+      AND website_type=#{websiteType}
+    </if>
+    <if test="branchName != null and branchName!=''">
+      AND branch_name LIKE '%${branchName}%'
+    </if>
+    ORDER BY branch_id DESC
+  </select>
+  <select id="filWang" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    SELECT branch_id,branch_name FROM tb_branch WHERE delete_flag=0 AND parent_id =#{parentId,jdbcType=BIGINT} AND TYPE=2
+  </select>
+  <select id="wang" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    SELECT branch_id,branch_name FROM tb_branch WHERE delete_flag=0 AND TYPE=2 AND parent_id=#{branchId}
+  </select>
+  <select id="fen" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    SELECT branch_id,branch_name FROM tb_branch WHERE delete_flag=0 AND TYPE=1
+  </select>
+  <select id="Wang" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    SELECT * FROM tb_branch WHERE delete_flag=0 AND parent_id =#{parentId,jdbcType=BIGINT} AND TYPE=2 ORDER BY branch_id DESC
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List"/>
+    from tb_branch
+    where delete_flag=0 AND branch_id = #{branchId,jdbcType=BIGINT}
+    ORDER BY branch_id DESC
+  </select>
+  <select id="findTbBranchbranchList" resultMap="BaseResultMap">
+    SELECT t1.branch_id, t1.branch_name,t1.website_type, t1.branch_type, t1.manager_id, t1.branch_phone, t1.branchaaddr, t1.branch_state,
+    t1.delete_flag, t1.create_by, t1.create_time, t1.modify_by, t1.modify_time,t2.user_name,t1.x,t1.y,t2.user_account FROM tb_branch t1
+    LEFT JOIN tb_manager t2
+    ON t1.manager_id=t2.manager_id
+    WHERE t1.delete_flag=0 AND t1.type=1
+    <if test="branchId != null and branchId!=''">
+      AND t1.branch_id=#{branchId}
+    </if>
+    <if test="websiteType != null and websiteType>-1">
+      AND t1.website_type=#{websiteType}
+    </if>
+    <if test="branchName != null and branchName!=''">
+      AND branch_name LIKE '%${branchName}%'
+    </if>
+    ORDER BY branch_id DESC
+  </select>
+  <select id="branchSearchId" resultType="com.ddcar.entity.TbBranch" >
+    SELECT t1.*,IFNULL((SELECT user_name FROM tb_manager WHERE delete_flag=0 AND manager_id=t1.`manager_id`),'') AS userName FROM tb_branch t1
+    WHERE delete_flag=0 AND branch_id = #{branchId,jdbcType=BIGINT} ORDER BY branch_id DESC
+  </select>
+
+  <!--全部收益合计-->
+  <select id="allSum" resultType="java.util.HashMap">
+    SELECT SUM(t1.cash_deposit) AS yj,SUM(t1.rent_money) AS zj,SUM(t1.make_up_amount) AS qt FROM tb_order t1 WHERE delete_flag=0 AND order_type!=2 AND EXISTS (SELECT 1 FROM tb_branch WHERE delete_flag=0 AND branch_id=t1.`wang_user_id` AND parent_id=#{branchId})
+  </select>
+  <!--本月收益合计-->
+  <select id="monthSum" resultType="java.util.HashMap">
+    SELECT SUM(t1.cash_deposit) AS yj,SUM(t1.rent_money) AS zj,SUM(t1.make_up_amount) AS qt  FROM tb_order t1 WHERE delete_flag=0 AND order_type!=2 AND EXISTS (SELECT 1 FROM tb_branch WHERE delete_flag=0 AND branch_id=t1.`wang_user_id` AND parent_id=#{branchId}) AND DATE_FORMAT( create_time, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' )
+  </select>
+  <!--本月支出合计-->
+  <select id="exitSum" resultType="java.util.HashMap">
+     SELECT SUM(t1.cash_deposit) AS zc FROM tb_order t1 WHERE delete_flag=0 AND order_type=2 AND EXISTS (SELECT 1 FROM tb_branch WHERE delete_flag=0 AND branch_id=t1.`wang_user_id` AND parent_id=#{branchId})  AND DATE_FORMAT( create_time, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' )
+  </select>
+
+  <!--查询是否有该用户-->
+  <select id="ifbranchName" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM tb_branch WHERE delete_flag=0 AND TYPE=2 AND user_name=#{userName};
+  </select>
+  <!--查出最大编号的qrcode的最大值-->
+  <select id="maxqrcode" resultType="java.lang.Long">
+    SELECT IFNULL(MAX(branch_id),0) FROM tb_branch WHERE delete_flag=0 AND `type`=2 AND TO_DAYS(create_time)=TO_DAYS(NOW())
+  </select>
+  <!--删除公司-->
+  <update id="delTbBranch">
+    update tb_branch set delete_flag=1 where branch_id = #{branchId,jdbcType=BIGINT}
+  </update>
+  <!--启用-->
+  <update id="enable">
+    UPDATE tb_branch SET branch_state=0 WHERE branch_id=#{branchId,jdbcType=BIGINT}
+  </update>
+  <!--关停-->
+  <update id="close">
+    UPDATE tb_branch SET branch_state=1 WHERE branch_id=#{branchId,jdbcType=BIGINT}
+  </update>
+
+  <select id="loginUser" parameterType="Map" resultType="com.ddcar.entity.TbBranch">
+    select * from tb_branch where pwd = #{pwd} and user_name = #{userName} and type = #{type}
+    and delete_flag = 0
+</select>
+
+  <select id="fiindUserQrCode" parameterType="long" resultType="String">
+    select qr_code from tb_branch where branch_id = #{userid} and delete_flag = 0
+  </select>
+  <select id="findDiscount" parameterType="long" resultType="com.ddcar.entity.TbBranch">
+    select branch_id,monthdiscount,discount,twodiscount
+    from tb_branch where branch_id = #{branchId} and type = 1 and delete_flag = 0
+  </select>
+
+  <select id="listBranch" parameterType="Map" resultType="com.ddcar.entity.TbBranch">
+    select  x,y,branch_id,branch_phone,branchaaddr,branch_name,items ,parent_id,
+    ROUND(6378.138 * 2 * ASIN(SQRT(POW(SIN((#{y} * PI() / 180 - Y * PI() / 180 ) / 2 ), 2
+        ) + COS(#{y} * PI() / 180) * COS(Y * PI() / 180) * POW(SIN((#{x} * PI() / 180 - X * PI() / 180 ) / 2
+        ), 2) )) * 1000) AS juli from tb_branch
+    where items like "%"#{items}"%" and delete_flag = 0 and type = 2 and Y &lt;&gt; ""
+    and ROUND(6378.138 * 2 * ASIN(SQRT(POW(SIN((#{y} * PI() / 180 - Y * PI() / 180 ) / 2 ), 2
+        ) + COS(#{y} * PI() / 180) * COS(Y * PI() / 180) * POW(SIN((#{x} * PI() / 180 - X * PI() / 180 ) / 2
+        ), 2) )) * 1000) &lt; 20000
+    ORDER BY juli ASC
+  </select>
+  <select id="findCompanyPosition" resultType="java.util.HashMap">
+      SELECT IFNULL(x,'116.3972282409668') AS longitude,IFNULL(y,'39.90960456049752') AS latitude
+      FROM tb_branch WHERE delete_flag=0 AND branch_id=1
+  </select>
+  
+  <select id="findBranchId" parameterType="Long" resultType="Long">
+    select parent_id from tb_branch where branch_id = #{branchId}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_branch
+    where branch_id = #{branchId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.ddcar.entity.TbBranch" >
+    insert into tb_branch (branch_id, branch_name,website_type,type, branch_type,
+      manager_id,manager, branch_phone, branchaaddr,
+      branch_state, delete_flag, create_by,
+      create_time, modify_by, modify_time
+      )
+    values (#{branchId,jdbcType=BIGINT}, #{branchName,jdbcType=VARCHAR},#{websiteType,jdbcType=BIGINT},#{deleteFlag,jdbcType=INTEGER}, #{branchType,jdbcType=VARCHAR},
+      #{managerId,jdbcType=BIGINT},(SELECT user_name FROM tb_manager WHERE tb_manager.delete_flag=0 AND tb_manager.manager_id=#{managerId}), #{branchPhone,jdbcType=VARCHAR}, #{branchaaddr,jdbcType=VARCHAR},
+      #{branchState,jdbcType=INTEGER}, #{deleteFlag,jdbcType=INTEGER}, #{createBy,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR}, #{modifyBy,jdbcType=VARCHAR}, #{modifyTime,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" useGeneratedKeys="true" keyProperty="branchId" parameterType="com.ddcar.entity.TbBranch" >
+    insert into tb_branch
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="branchId != null" >
+        branch_id,
+      </if>
+      <if test="branchName != null" >
+        branch_name,
+      </if>
+      <if test="websiteType != null" >
+        website_type,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="branchType != null" >
+        branch_type,
+      </if>
+      <if test="managerId != null" >
+        manager_id,
+      </if>
+      <if test="branchPhone != null" >
+        branch_phone,
+      </if>
+      <if test="branchaaddr != null" >
+        branchaaddr,
+      </if>
+      <if test="branchState != null" >
+        branch_state,
+      </if>
+      <if test="x != null" >
+        x,
+      </if>
+      <if test="y != null" >
+        y,
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyBy != null" >
+        modify_by,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="branchId != null" >
+        #{branchId,jdbcType=BIGINT},
+      </if>
+      <if test="branchName != null" >
+        #{branchName,jdbcType=VARCHAR},
+      </if>
+      <if test="websiteType != null" >
+        #{websiteType,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="branchType != null" >
+        #{branchType,jdbcType=VARCHAR},
+      </if>
+      <if test="managerId != null" >
+        #{managerId,jdbcType=BIGINT},
+      </if>
+      <if test="branchPhone != null" >
+        #{branchPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="branchaaddr != null" >
+        #{branchaaddr,jdbcType=VARCHAR},
+      </if>
+      <if test="branchState != null" >
+        #{branchState,jdbcType=INTEGER},
+      </if>
+      <if test="x != null" >
+        #{x},
+      </if>
+      <if test="y != null" >
+        #{y},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!--新建网点-->
+  <insert id="insertDot" parameterType="com.ddcar.entity.TbBranch" >
+    insert into tb_branch
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="branchId != null" >
+        branch_id,
+      </if>
+      <if test="branchName != null" >
+        branch_name,
+      </if>
+      <if test="websiteType != null" >
+        website_type,
+      </if>
+      <if test="items != null" >
+        items,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="manager != null" >
+        manager,
+      </if>
+      <if test="branchPhone != null" >
+        branch_phone,
+      </if>
+      <if test="branchaaddr != null" >
+        branchaaddr,
+      </if>
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="pwd != null" >
+        pwd,
+      </if>
+      <if test="branchState != null" >
+        branch_state,
+      </if>
+      <if test="photo != null" >
+        photo,
+      </if>
+      <if test="parentId != null" >
+        parent_id,
+      </if>
+      <if test="qrCode != null" >
+        qr_code,
+      </if>
+      <if test="x != null" >
+        x,
+      </if>
+      <if test="y != null" >
+        y,
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyBy != null" >
+        modify_by,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="branchId != null" >
+        #{branchId,jdbcType=BIGINT},
+      </if>
+      <if test="branchName != null" >
+        #{branchName,jdbcType=VARCHAR},
+      </if>
+      <if test="websiteType != null" >
+        #{websiteType,jdbcType=INTEGER},
+      </if>
+      <if test="items != null" >
+        #{items},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="manager != null" >
+        #{manager,jdbcType=VARCHAR},
+      </if>
+      <if test="branchPhone != null" >
+        #{branchPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="branchaaddr != null" >
+        #{branchaaddr,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        md5(#{pwd,jdbcType=VARCHAR}),
+      </if>
+      <if test="branchState != null" >
+        #{branchState,jdbcType=INTEGER},
+      </if>
+      <if test="photo != null" >
+        #{photo,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        #{parentId},
+      </if>
+      <if test="qrCode != null" >
+        #{qrCode},
+      </if>
+      <if test="x != null" >
+        #{x},
+      </if>
+      <if test="y != null" >
+        #{y},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!--修改网点信息-->
+  <update id="updateDot" parameterType="com.ddcar.entity.TbBranch" >
+    update tb_branch
+    <set >
+      <if test="branchName != null" >
+        branch_name = #{branchName,jdbcType=VARCHAR},
+      </if>
+      <if test="websiteType != null" >
+        website_type = #{websiteType,jdbcType=INTEGER},
+      </if>
+      <if test="items != null" >
+        items = #{items},
+      </if>
+      <if test="type != null" >
+        type = #{type},
+      </if>
+      <if test="manager != null" >
+        manager = #{manager},
+      </if>
+      <if test="branchType != null" >
+        branch_type = #{branchType,jdbcType=VARCHAR},
+      </if>
+      <if test="managerId != null" >
+        manager_id = #{managerId,jdbcType=BIGINT},
+      </if>
+      <if test="branchPhone != null" >
+        branch_phone = #{branchPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        pwd = MD5(#{pwd}),
+      </if>
+      <if test="branchaaddr != null" >
+        branchaaddr = #{branchaaddr,jdbcType=VARCHAR},
+      </if>
+      <if test="monthdiscount != null" >
+        monthdiscount = #{monthdiscount},
+      </if>
+      <if test="discount != null" >
+        discount = #{discount},
+      </if>
+      <if test="twodiscount != null" >
+        twodiscount = #{twodiscount},
+      </if>
+      <if test="branchState != null" >
+        branch_state = #{branchState,jdbcType=INTEGER},
+      </if>
+      <if test="photo != null" >
+        photo = #{photo},
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        modify_by = #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=VARCHAR},
+      </if>
+      <if test="x!=null">
+        x=#{x},
+      </if>
+      <if test="y!=null">
+        y=#{y},
+      </if>
+    </set>
+    where branch_id = #{branchId,jdbcType=BIGINT}
+  </update>
+  <!--修改分公司信息-->
+  <update id="updateTbBranch" parameterType="com.ddcar.entity.TbBranch" >
+    update tb_branch
+    <set >
+      <if test="branchName != null" >
+        branch_name = #{branchName,jdbcType=VARCHAR},
+      </if>
+      <if test="websiteType != null" >
+        website_type = #{websiteType,jdbcType=INTEGER},
+      </if>
+      <if test="branchType != null" >
+        branch_type = #{branchType,jdbcType=VARCHAR},
+      </if>
+      <if test="managerId != null" >
+        manager_id = #{managerId,jdbcType=BIGINT},
+      </if>
+      <if test="branchPhone != null" >
+        branch_phone = #{branchPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="branchaaddr != null" >
+        branchaaddr = #{branchaaddr,jdbcType=VARCHAR},
+      </if>
+      <if test="monthdiscount != null" >
+        monthdiscount = #{monthdiscount},
+      </if>
+      <if test="discount != null" >
+        discount = #{discount},
+      </if>
+      <if test="twodiscount != null" >
+        twodiscount = #{twodiscount},
+      </if>
+      <if test="branchState != null" >
+        branch_state = #{branchState,jdbcType=INTEGER},
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        modify_by = #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=VARCHAR},
+      </if>
+      <if test="x!=null">
+        x=#{x},
+      </if>
+      <if test="y!=null">
+        y=#{y},
+      </if>
+    </set>
+    where branch_id = #{branchId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ddcar.entity.TbBranch" >
+    update tb_branch
+    set branch_name = #{branchName,jdbcType=VARCHAR},
+    website_type = #{websiteType,jdbcType=INTEGER},
+      branch_type = #{branchType,jdbcType=VARCHAR},
+      manager_id = #{managerId,jdbcType=BIGINT},
+      branch_phone = #{branchPhone,jdbcType=VARCHAR},
+      branchaaddr = #{branchaaddr,jdbcType=VARCHAR},
+      monthdiscount = #{branchaaddr},
+      discount = #{branchaaddr},
+      twodiscount = #{branchaaddr},
+      branch_state = #{branchState,jdbcType=INTEGER},
+      delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR},
+      modify_by = #{modifyBy,jdbcType=VARCHAR},
+      modify_time = #{modifyTime,jdbcType=VARCHAR}
+    where branch_id = #{branchId,jdbcType=BIGINT}
+  </update>
+</mapper>

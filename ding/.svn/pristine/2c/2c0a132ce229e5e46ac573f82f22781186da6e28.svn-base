@@ -1,0 +1,78 @@
+package com.ddcar.service.impl;
+
+import com.ddcar.entity.TbInvoice;
+import com.ddcar.entity.TbVehicle;
+import com.ddcar.entity.Vehicles;
+import com.ddcar.mapper.TbInvoiceMapper;
+import com.ddcar.mapper.TbVehicleMapper;
+import com.ddcar.service.RiderMyVehicleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class RiderMyVehicleServiceImpl implements RiderMyVehicleService {
+
+    @Autowired
+    private TbVehicleMapper vehicleMapper;
+    @Autowired
+    private TbInvoiceMapper invoiceMapper;
+
+    @Override
+    public List<Vehicles> findUserVehicle(long userId) {
+        List<Vehicles> riderVehicle = vehicleMapper.findRiderVehicle(userId);
+        for (Vehicles vehicles : riderVehicle){
+            String stopRentalTime = vehicles.getStopRentalTime();
+            String startRentalTime = vehicles.getStartRentalTime();
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            format.setLenient(false);
+            Date date1 = null;
+            Date date2 = null;
+            try {
+                date1 = format.parse(startRentalTime);
+                date2 = format.parse(stopRentalTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            //计算差值，天数
+            long days=(date2.getTime()-date1.getTime())/(1000*60*60*24);
+            vehicles.setEmainingDays(days);
+        }
+        return riderVehicle;
+    }
+
+    @Override
+    @Transactional
+    public int saveInvoice(Long vehicleId, String imgPath,
+                           String buyTime, String repairTime) {
+
+        TbInvoice invoice = new TbInvoice();
+        TbVehicle vehicle = vehicleMapper.findVehicleById(vehicleId);
+        invoice.setUserId(vehicle.getUserId());
+        invoice.setWangnUesrid(vehicle.getWangUserId());
+        invoice.setImgPath(imgPath);
+        invoice.setBuyTime(buyTime);
+        invoice.setRepairTime(repairTime);
+        invoice.setVehicleId(vehicleId);
+        int i = invoiceMapper.insertSelective(invoice);
+        TbVehicle vehicle1 = new TbVehicle();
+        vehicle1.setVehicleId(invoice.getVehicleId());
+        vehicle1.setInvoice(invoice.getImgPath());
+        int i1 = vehicleMapper.updateVehicleAll(vehicle1);
+        if(i > 0 && i1 > 0){
+            return i;
+        }
+        return 0;
+    }
+
+    @Override
+    public TbVehicle getVehicleByUserIdAndVehicleId(Map map) {
+        return vehicleMapper.getVehicleByUserIdAndVehicleId(map);
+    }
+}

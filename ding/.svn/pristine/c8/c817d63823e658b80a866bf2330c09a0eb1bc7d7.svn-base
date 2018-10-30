@@ -1,0 +1,377 @@
+package com.ddcar.entity;
+
+import java.io.Serializable;
+
+public class TbUser implements Serializable {
+    private Long userId;
+
+    private String userName;
+
+    private String idFront;
+
+    private String idContrary;
+
+    private String headPhoto;
+
+    private String idNumber;
+
+    private String phone;
+
+    private String state;
+
+    private Double cashDeposit;
+
+    private Double balance;
+
+    private String type;
+
+    private Long parentId;
+
+    private Double useMoney1;
+
+    private Double useMoney2;
+
+    private String address;
+
+    private String trueName;
+
+    private String qrCode;
+
+    private String account;
+
+    private String password;
+
+    private String openState;
+
+    private Integer deleteFlag;
+
+    private String createBy;
+
+    private String createTime;
+
+    private String modifyBy;
+
+    private String modifyTime;
+
+    private Long wangUserId;
+
+    private String rescue;
+
+    private Long branchId;
+
+    private String websiteName;
+
+    private Integer items;
+
+    private Integer websiteType;
+
+    private String manager;
+
+    private Integer number;
+
+    private double bond;
+
+    private String weixinId;
+
+    private String handheldIdPhoto;
+
+    private Long rescueWangId;
+
+    public Long getRescueWangId() {
+        return rescueWangId;
+    }
+
+    public void setRescueWangId(Long rescueWangId) {
+        this.rescueWangId = rescueWangId;
+    }
+
+    public String getTrueName() {
+        return trueName;
+    }
+
+    public void setTrueName(String trueName) {
+        this.trueName = trueName;
+    }
+
+    public String getHandheldIdPhoto() {
+        return handheldIdPhoto;
+    }
+
+    public void setHandheldIdPhoto(String handheldIdPhoto) {
+        this.handheldIdPhoto = handheldIdPhoto;
+    }
+
+    public String getWeixinId() {
+        return weixinId;
+    }
+
+    public void setWeixinId(String weixinId) {
+        this.weixinId = weixinId;
+    }
+
+    public String getManager() {
+        return manager;
+    }
+
+    public void setManager(String manager) {
+        this.manager = manager;
+    }
+
+    public Integer getNumber() {
+        return number;
+    }
+
+    public void setNumber(Integer number) {
+        this.number = number;
+    }
+
+    public double getBond() {
+        return bond;
+    }
+
+    public void setBond(double bond) {
+        this.bond = bond;
+    }
+
+    public Long getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
+    }
+
+    public String getWebsiteName() {
+        return websiteName;
+    }
+
+    public void setWebsiteName(String websiteName) {
+        this.websiteName = websiteName;
+    }
+
+    public Integer getItems() {
+        return items;
+    }
+
+    public void setItems(Integer items) {
+        this.items = items;
+    }
+
+    public Integer getWebsiteType() {
+        return websiteType;
+    }
+
+    public void setWebsiteType(Integer websiteType) {
+        this.websiteType = websiteType;
+    }
+
+    public String getRescue() {
+        return rescue;
+    }
+
+    public void setRescue(String rescue) {
+        this.rescue = rescue;
+    }
+
+    public Long getWangUserId() {
+        return wangUserId;
+    }
+
+    public void setWangUserId(Long wangUserId) {
+        this.wangUserId = wangUserId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName == null ? null : userName.trim();
+    }
+
+    public String getIdFront() {
+        return idFront;
+    }
+
+    public void setIdFront(String idFront) {
+        this.idFront = idFront == null ? null : idFront.trim();
+    }
+
+    public String getIdContrary() {
+        return idContrary;
+    }
+
+    public void setIdContrary(String idContrary) {
+        this.idContrary = idContrary == null ? null : idContrary.trim();
+    }
+
+    public String getHeadPhoto() {
+        return headPhoto;
+    }
+
+    public void setHeadPhoto(String headPhoto) {
+        this.headPhoto = headPhoto == null ? null : headPhoto.trim();
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber == null ? null : idNumber.trim();
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone == null ? null : phone.trim();
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state == null ? null : state.trim();
+    }
+
+    public Double getCashDeposit() {
+        return cashDeposit;
+    }
+
+    public void setCashDeposit(Double cashDeposit) {
+        this.cashDeposit = cashDeposit;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type == null ? null : type.trim();
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Double getUseMoney1() {
+        return useMoney1;
+    }
+
+    public void setUseMoney1(Double useMoney1) {
+        this.useMoney1 = useMoney1;
+    }
+
+    public Double getUseMoney2() {
+        return useMoney2;
+    }
+
+    public void setUseMoney2(Double useMoney2) {
+        this.useMoney2 = useMoney2;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address == null ? null : address.trim();
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode == null ? null : qrCode.trim();
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account == null ? null : account.trim();
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password == null ? null : password.trim();
+    }
+
+    public String getOpenState() {
+        return openState;
+    }
+
+    public void setOpenState(String openState) {
+        this.openState = openState == null ? null : openState.trim();
+    }
+
+    public Integer getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Integer deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy == null ? null : createBy.trim();
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime == null ? null : createTime.trim();
+    }
+
+    public String getModifyBy() {
+        return modifyBy;
+    }
+
+    public void setModifyBy(String modifyBy) {
+        this.modifyBy = modifyBy == null ? null : modifyBy.trim();
+    }
+
+    public String getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(String modifyTime) {
+        this.modifyTime = modifyTime == null ? null : modifyTime.trim();
+    }
+
+
+}

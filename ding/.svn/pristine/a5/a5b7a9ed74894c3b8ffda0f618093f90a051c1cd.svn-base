@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>价格设置</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline;}
+
+    </style>
+</head>
+<body class="gray-bg">
+
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+
+                        <div class="form-group">
+                            <label for="searchbrandName">品牌</label>
+                            <select name="brandId" id="searchbrandName" class="form-control" onChange="getNextClassify()" style="width: 150px">
+                                <option value="">-- 请选择 --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchmodel">型号</label>
+                            <select name="searchmodel" id="searchmodel" class="form-control"  style="width: 150px">
+                                <option value="">-- 请选择 --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchmodelType">类型</label>
+                            <select name="modelType" id="searchmodelType" class="form-control" >
+                                <option value="">-- 请选择 --</option>
+                                <option value="0">车辆</option>
+                                <option value="1">电池</option>
+                            </select>
+                        </div>
+
+                        <button type="button" class="btn btn-outline btn-default" onclick="loadData(1)">
+                            <i class="glyphicon glyphicon-search" aria-hidden="true"></i>查询
+                        </button>
+                        <button type="button" class="btn btn-outline btn-warning" onclick="clearSearch()">
+                            <i class="glyphicon" aria-hidden="true"></i>清除查询条件
+                        </button>
+                    </form>
+
+                </div>
+                <div class="ibox-content">
+
+                    <div class="btn-group" id="foot" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="setting()">
+                            价格设置
+                        </button>
+
+                    </div>
+                    <div  style="position:relative;width: 100%;overflow-x: scroll;border:1px solid #eee;margin-bottom:30px;">
+                        <table class="tbsalelist table table-striped table-bordered" data-toggle="table"  data-click-to-select="true" data-select-item-name="myRadioName" data-mobile-responsive="true">
+                            <thead>
+                            <tr>
+                                <th width="40" id="title-table-checkbox">全选</th>
+                                <th width="60">ID</th>
+                                <th width="80">品牌</th>
+                                <th width="80">类型</th>
+                                <th width="80">型号</th>
+                                <th width="80">月租（元/月）</th>
+                                <th width="80">押金（元）</th>
+                                <th width="80">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="table_content">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="setting()">
+                            价格设置
+                        </button>
+
+                    </div>
+                    <div class="btn-group" role="group" style="width:100%;">
+                        <header th:replace="comm :: pagenation_web"></header>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="upmyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">编辑价格</h4>
+            </div>
+            <br>
+            <form class="form-horizontal" name="addFm">
+                <input type="hidden" id="uppriceId">
+                <div class="form-group">
+                    <label class="control-label col-md-3">月租（元/月）：</label>
+                    <div class="col-md-8">
+                        <input type="text" name="monthlyRent" class="form-control" id="monthlyRent">
+                        <br>
+                        <span id="monthlyRentif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">押金（元）：</label>
+                    <div class="col-md-8">
+                        <input type="text" name="cashDeposit" class="form-control" id="cashDeposit">
+                        <br>
+                        <span id="cashDepositif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" id="updatemodel" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        //$(".tbsalelist").width(2200);
+        //$(".tbsalelist").css("max-width", 2200);
+        //initUpload('uploadBtn','showImg',null,1024);
+
+        loadData(1);
+        beandoption();
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+    function clearSearch(){
+        $('#searchForm input').val('');
+        $('#searchForm select').val('');
+        $('#selectSalerSearch').val('');
+        $('#selectKefuSearch').val('');
+    }
+
+    function showSystemLog(msgType,userId){
+        parent.locationCurrMenu();
+        parent.addPage("web登陆日志","${ctx}/pages/system/systemlog.jsp?msgType="+msgType+"&userId="+userId);
+
+    }
+    function refreshData(){
+        loadData(pageinfo["page"]);
+    }
+
+    function loadData(page, size) {
+        if (size != undefined) {
+            pageinfo["size"] = size;
+            $('#pagesize').html(size);
+        }
+        if (page == -1)
+            pageinfo["page"]--;
+        else if (page == -2)
+            pageinfo["page"]++;
+        else {
+            if (page >= pageinfo["tp"] && pageinfo["tp"] > 0)
+                pageinfo["page"] = pageinfo["tp"];
+            else
+                pageinfo["page"] = page;
+        }
+        pageinfo["modelId"]=$('#searchmodel').val();
+        pageinfo["modelType"]=$('#searchmodelType').val();
+        pageinfo["brandId"]=$('#searchbrandName').val();
+
+
+        $('#table_content').html('<tr><td colspan="23">'+$('#divLoading').html()+'</td></tr>');
+        httpPost(ctx+'/price/modelprice',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        array.push('<tr>');
+
+                        array.push('<td><input  type="checkbox" class="i-checks" name="checkbox-tr" value="' + data["priceId"]+ '"/></td>');
+                        array.push('<td >'+data["priceId"]+'</td>');
+                        array.push('<td >'+data["brandName"]+'</td>');
+                        array.push('<td >'+data["modelType"]+'</td>');
+                        array.push('<td >'+data["modelName"]+'</td>');
+                        array.push('<td >'+data["monthlyRent"]+'</td>');
+                        array.push('<td >'+data["cashDeposit"]+'</td>');
+                        array.push('<td><a onclick="edit('+data["priceId"]+',&quot;'+data["monthlyRent"]+'&quot;,&quot;'+data["cashDeposit"]+'&quot;)">编辑</a></td>');
+                        array.push('</tr>');
+                    }
+                    $('#table_content').html(array.join(''));
+                    initpageInfo(msg.total);
+                    array=[];
+
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+    function beandoption() {
+        httpPost(ctx+'/brand/findList',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        /*array.push('<option value='+data["brandId"]+'>'+data["brandName"]+'</option>');*/
+                        var option='<option value="'+data.brandId+'">'+data.brandName+'</option>';
+                        $("[name=brandId]").append(option);
+                    }
+
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+
+    //下拉框连动
+    function getNextClassify() {
+        //获取下拉框主键
+        var classifyId = $("#searchbrandName").find('option:selected').val();
+        var nu=-1;
+        $("#searchmodel").empty();//清空二级目录
+        var NextModel = $("[name=searchmodel]");
+        $.ajax({
+            type: "post",
+            contentType: "application/json",
+            url: ctx+"/model/searchbrandId?brandId=" + classifyId,
+            success: function (data) {
+                if(data.status==200){
+                    var rows = data.rows;
+                    if (rows.length != "" && rows.length != null) {
+                        for (var i = 0; i < rows.length; i++) {
+                            NextModel.append("<option value=" + rows[i].modelId + ">" + rows[i].model + "</option>");
+                        }
+                        //全部型号
+                        NextModel.append("<option value=" + nu + ">全部</option>");
+                    } else {
+                        NextModel.append("<option value=" + nu + ">该品牌暂无型号</option>");
+                    }
+                }else {
+                    alert("有误");
+
+                }
+
+            }
+        });
+    }
+
+    function edit(priceId,monthlyRent,cashDeposit){
+        $("#upmyModal").modal("show");
+        $("#uppriceId").val(priceId);
+        $("#monthlyRent").val(monthlyRent);
+        $("#cashDeposit").val(cashDeposit);
+    };
+
+    $("#updatemodel").click(function () {
+        var param={
+            priceId:$("#uppriceId").val(),
+            monthlyRent:document.getElementById("monthlyRent").value,
+            cashDeposit:document.getElementById("cashDeposit").value
+        }
+        httpPost(ctx+"/price/editprice",param,function (data) {
+            if(data.status==200){
+                $("#upmyModal").modal("hide");
+                loadData(1);
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:'编辑失败',
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+    });
+
+    function setting() {
+        top.parent.locationCurrMenu();
+        top.parent.addPage("价格设置","../page/priceSetting/setting");
+    }
+</script>
+
+

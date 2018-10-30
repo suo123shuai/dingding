@@ -1,0 +1,69 @@
+package com.ddcar.service;
+
+
+import com.ddcar.entity.TbVehicle;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-03.
+ */
+public interface TbVehicleService {
+
+    List<TbVehicle> findTbVehicleList(Integer page, Integer size,Long brandId,Integer modelType,Long branchId,String branchName,Long vehicleId,Integer state);
+
+    List<TbVehicle> allist();
+
+    List<TbVehicle> noOutTbVehicleList(Integer page, Integer size, Integer brandId,Integer modelType,Integer vehicleId);
+    //分公司退回的车电
+    List<HashMap> returnTbVehicleList(Integer page, Integer size,Integer branchId,String branchName);
+    //分公司退回的车电导出
+    List<HashMap> returnTbVehicleList();
+    //网点退回的车电
+    List<TbVehicle> wangReturnTbVehicleList(Integer page, Integer size, Long branchId);
+
+    List<TbVehicle> findTbVehiclebranchList(Integer page, Integer size,Integer modelId);
+    //查询该公司没有入库的车电
+    List<TbVehicle> ruTbVehicleList(Integer page, Integer size,Long branchId,Integer brandId,Integer modelType,Integer wangUserId,Integer source,Integer vehicleId,Integer state);
+    //查询分公司已入库的车电
+    List<HashMap> okTbVehicleList(Integer page, Integer size, Long branchId,Integer brandId,Integer modelType,Integer wangUserId,String branchName,Long vehicleId,String state,Integer tName);
+
+    List<HashMap> comveh(Long branchId);
+    //分公司入库
+    void completedRk(Long[] vehicleId);
+    //网点退回的分公司再入库
+    void completedRe(Long[] vehicleId);
+    //删除
+    void delTbVehicle(Long[] vehicleId);
+    //退回车电入库到平台
+    void comreturmTbVehicle(Long[] vehicleId);
+    //可租
+    void updatestateOk(Long[] vehicleId);
+    //维修
+    void updatestateRepair(Long[] vehicleId);
+    //停用
+    void updatestateokStop(Long[] vehicleId);
+    //出库到分公司
+    void vehicleOutCom(Long branchId,Long[] vehicleId);
+    //出库到网点
+    void vehicleOutWang(Long wangUserId,Long[] vehicleId);
+    //出库到平台
+    void vehicleOutPing(Long branchId,Long[] vehicleId);
+    //根据Id查询车辆信息
+    TbVehicle tbVehicleSeacherId(Long vehicleId);
+    //编辑车电信息
+    void updateTbVehicle(TbVehicle tbVehicle);
+    //新增车电信息
+    void add(TbVehicle tbVehicle);
+    //该公司的发票
+    List<HashMap> findRes(Integer page, Integer size, Long branchId,Long vehicleId);
+
+    void update(TbVehicle tbVehicle);
+
+    void del(Integer id);
+
+    //查车辆位置
+    List<HashMap> searchCarPosition(Long companyId,Integer page,Integer size,String userName);
+
+}
+

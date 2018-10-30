@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>编辑团签</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+    </style>
+</head>
+<body class="gray-bg">
+<input type="hidden" th:value="${#httpServletRequest.getParameter('userId')}" id="userId">
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <h2>编辑团签</h2>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>团签名称:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="userName" id="userName" class="form-control keyupclick"  style="width:280px;">
+                                <span id="userNameif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>团签地址:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                    <input type="text" placeholder="" name="address" id="address" class="form-control keyupclick"  style="width:300px;">
+                                    <span id="addressif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>管理员:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="manager" id="manager" class="form-control keyupclick"  style="width:100px;">
+                                <span id="managerif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>电话:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="phone" id="phone" class="form-control keyupclick"  style="width:250px;">
+                                <span id="phoneif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>保证金:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="bond" id="bond" class="form-control keyupclick"  style="width:100px;">&nbsp;元
+                                <span id="bondif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>已缴金额:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="cashDeposit" id="cashDeposit" class="form-control keyupclick"  style="width:100px;">&nbsp;元
+                                <span id="cashDepositif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>骑手数量:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="number" id="number" class="form-control keyupclick"  style="width:100px;">&nbsp;元
+                                <span id="numberif" style="color: red"></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" name="add" id="editgroup">
+                            </i>保存
+                        </button>
+                        &nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-outline btn-default" onclick="esc()">
+                            </i>取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+
+        huixian()
+
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+
+    //回显数据
+    function huixian() {
+        var id=$("#userId").val();
+        $.post(ctx + "/user/idSearchComsign?userId="+id, function (msg) {
+            if (msg.status == 200) {
+                $("#userName").val(msg.rows.userName);
+                $("#address").val(msg.rows.address);
+                $("#manager").val(msg.rows.manager);
+                $("#phone").val(msg.rows.phone);
+                $("#pwd").val(msg.rows.password);
+                $("#bond").val(msg.rows.bond);
+                $("#cashDeposit").val(msg.rows.cashDeposit);
+                $("#number").val(msg.rows.number);
+            }
+        });
+    }
+
+
+
+
+
+    //修改
+    $("#editgroup").click(function () {
+        if($.trim($("#userName").val()).length==0){
+            $("#userNameif").text("*请输入团签名称！")
+            return;
+        }
+        if($.trim($("#address").val()).length==0){
+            $("#addressif").text("*请输入团签地址！")
+            return;
+        }
+        if($.trim($("#manager").val()).length==0){
+            $("#managerif").text("*请输入管理员名称！")
+            return;
+        }
+        if($.trim($("#phone").val()).length==0){
+            $("#phoneif").text("*请输入电话！")
+            return;
+        }
+
+        if($.trim($("#bond").val()).length==0){
+            $("#bondif").text("*请输入保证金金额！")
+            return;
+        }
+        if($.trim($("#cashDeposit").val()).length==0){
+            $("#cashDepositif").text("*请输入已缴纳金额！")
+            return;
+        }
+        if($.trim($("#number").val()).length==0){
+            $("#numberif").text("*请输入骑手数量！")
+            return;
+        }
+        var param={
+            userId:$("#userId").val(),
+            userName:document.getElementById("userName").value,
+            address:document.getElementById("address").value,
+            manager:document.getElementById("manager").value,
+            phone:document.getElementById("phone").value,
+            bond:document.getElementById("bond").value,
+            cashDeposit:document.getElementById("cashDeposit").value,
+            number:document.getElementById("number").value
+        }
+        console.info(param)
+        httpPost(ctx+"/user/updateGroup",param,function (data) {
+            if(data.status==200){
+                location.href=ctx+"/page/groupCustomer/groupCusList";
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:'编辑失败',
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+    });
+    var esc=function () {
+        parent.closeCurr();
+    }
+</script>
+
+

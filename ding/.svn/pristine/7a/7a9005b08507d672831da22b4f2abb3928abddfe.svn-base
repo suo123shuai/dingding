@@ -1,0 +1,15 @@
+package com.ddcar.mapper;
+
+import com.ddcar.entity.Image;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface ImageMapper {
+
+    /**
+     * 插入新的图片信息
+     * @param image
+     * @return
+     */
+    int saveImage(Image image);
+}

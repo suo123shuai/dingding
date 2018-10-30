@@ -1,0 +1,30 @@
+package com.ddcar.service.impl;
+
+import com.ddcar.entity.TbUser;
+import com.ddcar.mapper.TbUserMapper;
+import com.ddcar.service.WxLonginService;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+@Service
+public class WxLonginServiceImpl implements WxLonginService {
+
+    @Resource
+    private TbUserMapper tbUserMapper;
+
+    @Override
+    public TbUser WxLongin(String weixinId) {
+        TbUser user;
+        user = tbUserMapper.getUserByWeiXin(weixinId);
+        if (null == user) {
+            user = new TbUser();
+            user.setWeixinId(weixinId);
+            user.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            tbUserMapper.insertSelective(user);
+        }
+        return user;
+    }
+}

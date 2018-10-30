@@ -1,0 +1,97 @@
+package com.ddcar.controller;
+
+import com.common.BaseBean;
+import com.ddcar.entity.TbBranch;
+import com.ddcar.entity.Vehicles;
+import com.ddcar.service.OrderPayService;
+import com.ddcar.service.RiderLeaseService;
+import com.ddcar.util.UtilLog;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/rider/Lease")
+public class RiderLeaseController {
+
+    @Autowired
+    RiderLeaseService riderLeaseService;
+    @Autowired
+    OrderPayService orderPayService;
+
+    @RequestMapping("/lingVehicleJvli")
+    public @ResponseBody
+    BaseBean lingVehicleJvli(String x, String y,
+                             @RequestParam(value = "page", defaultValue = "1") Integer page,
+                             @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        BaseBean bean = new BaseBean();
+        Map map = new HashMap();
+        map.put("x", x);
+        map.put("y", y);
+        try {
+            List<TbBranch> tbBranches = riderLeaseService.lingVehicleJvli(map, page, size);
+            bean.setStatus(200);
+            bean.setRows(tbBranches);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/findVehicleQrcode")
+    public @ResponseBody
+    BaseBean findVehicleQrcode(String qrCode, long wangUserId) {
+        BaseBean bean = new BaseBean();
+        Map map = new HashMap();
+        map.put("qrCode", qrCode);
+        map.put("wangUserId", wangUserId);
+        try {
+            Vehicles vehicleByqrCode = riderLeaseService.getVehicleByqrCode(map);
+            bean.setStatus(200);
+            bean.setRows(vehicleByqrCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/findDiscount")
+    public @ResponseBody
+    BaseBean findDiscount(long branchId) {
+        BaseBean bean = new BaseBean();
+        try {
+            TbBranch discount = riderLeaseService.findDiscount(branchId);
+            bean.setStatus(200);
+            bean.setRows(discount);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/order")
+    public @ResponseBody
+    BaseBean order(String ids, long userId, Integer yue, String payType, long branchId) {
+        BaseBean bean = new BaseBean();
+        try {
+            String[] split = ids.split(",");
+            orderPayService.generateOrders(split, userId, yue, payType, branchId);
+            bean.setStatus(200);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：", e);
+        }
+        return bean;
+    }
+
+
+}

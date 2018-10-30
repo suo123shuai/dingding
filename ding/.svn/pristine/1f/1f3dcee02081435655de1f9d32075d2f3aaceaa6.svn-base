@@ -1,0 +1,8 @@
+spring.datasource.url=jdbc:mysql://118.89.138.197/db_ddcar?characterEncoding=utf8&useSSL=false
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.datasource.username=root
+spring.datasource.password=STARnet2018!@#$
+
+imageStorePath=D:\\Program Files (x86)\\apache-tomcat-7-7888\\webapps\\youlh
+imageWebHttp=http://127.0.0.1:7888/youlh
+ueditorConfigPath=D:\\E\\maven-project\\ddcar-we b\\ddcar\\src\\main\\resources\\static\\ueditor\\config.json

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新建团签</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+
+    </style>
+</head>
+<body class="gray-bg">
+
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <h2>新建团签</h2>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>团签名称:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="userName" id="userName" class="form-control keyupclick"  style="width:280px;">
+                                <span id="userNameif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>团签地址:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                    <input type="text" placeholder="" name="address" id="address" class="form-control keyupclick"  style="width:300px;">
+                                    <span id="addressif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>管理员:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="manager" id="manager" class="form-control keyupclick"  style="width:100px;">
+                                <span id="managerif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>电话:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="phone" id="phone" class="form-control keyupclick"  style="width:250px;">
+                                <span id="phoneif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>账号:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="account" id="account" class="form-control keyupclick"  style="width:300px;">
+                                <span id="accountif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>密码:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="password" placeholder="" name="pwd" id="pwd" class="form-control keyupclick"  style="width:300px;">
+                                <span id="pwdif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>确认密码:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="password" placeholder="" name="password" id="password" class="form-control keyupclick"  style="width:300px;">
+                                <span id="passwordif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>保证金:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="bond" id="bond" class="form-control keyupclick"  style="width:100px;">&nbsp;元
+                                <span id="bondif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>已缴金额:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="cashDeposit" id="cashDeposit" class="form-control keyupclick"  style="width:100px;">&nbsp;元
+                                <span id="cashDepositif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>骑手上限:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="number" id="number" class="form-control keyupclick"  style="width:100px;">&nbsp;人
+                                <span id="numberif" style="color: red"></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" name="add" id="comadd">
+                            </i>保存
+                        </button>
+                        &nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-outline btn-default" onclick="esc()">
+                            </i>取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+        $("#comadd").click(function () {
+            if($.trim($("#userName").val()).length==0){
+                $("#userNameif").text("*请输入团签名称！")
+                return;
+            }
+            if($.trim($("#address").val()).length==0){
+                $("#addressif").text("*请输入团签地址！")
+                return;
+            }
+            if($.trim($("#manager").val()).length==0){
+                $("#managerif").text("*请输入管理员名称！")
+                return;
+            }
+            if($.trim($("#phone").val()).length==0){
+                $("#phoneif").text("*请输入手机号！")
+                return;
+            }
+            var phone = $.trim($("#phone").val());
+            if(!(/^1(3|4|5|7|8)\d{9}$/.test(phone))){
+                $("#phoneif").text("*手机号格式有误！")
+                return false;
+            }
+            if($.trim($("#account").val()).length==0){
+                $("#accountif").text("*请输入账号！")
+                return;
+            }
+            if($.trim($("#pwd").val()).length==0){
+                $("#pwdif").text("*请输入密码！")
+                return;
+            }
+            if($("#pwd").val()!=$("#password").val()){
+                $("#passwordif").text("*两次密码不一致！")
+                return;
+            }
+            if($.trim($("#bond").val()).length==0){
+                $("#bondif").text("*请输入保证金金额！")
+                return;
+            }
+            if($.trim($("#cashDeposit").val()).length==0){
+                $("#cashDepositif").text("*请输入已缴纳金额！")
+                return;
+            }
+            if($.trim($("#number").val()).length==0){
+                $("#numberif").text("*请输入骑手数量！")
+                return;
+            }
+            var param={
+                userName:document.getElementById("userName").value,
+                address:document.getElementById("address").value,
+                manager:document.getElementById("manager").value,
+                phone:document.getElementById("phone").value,
+                account:document.getElementById("account").value,
+                password:document.getElementById("password").value,
+                bond:document.getElementById("bond").value,
+                cashDeposit:document.getElementById("cashDeposit").value,
+                number:document.getElementById("number").value
+            }
+            httpPost(ctx+"/user/insertGroup",param,function (data) {
+                if(data.status==200){
+                    swal({
+                        title:"信息提示",
+                        text:"新增成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    },function(){
+                        window.location.reload();
+                    })
+                }else {
+                    swal({
+                        title:'信息提示',
+                        text:data.msg,
+                        type:'error',
+                        confirmButtonText:'确认'
+                    });
+                }
+            });
+        });
+    var esc=function () {
+        parent.closeCurr();
+    }
+</script>
+
+

@@ -1,0 +1,79 @@
+package com.ddcar.service.impl;
+
+import com.ddcar.entity.*;
+import com.ddcar.mapper.TbOrderItemMapper;
+import com.ddcar.mapper.TbRescueMapper;
+import com.ddcar.mapper.TbUserMapper;
+import com.ddcar.mapper.TbVehicleMapper;
+import com.ddcar.service.BranchIndexService;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class BranchIndexServiceImpl implements BranchIndexService {
+
+    @Autowired(required = false)
+    TbUserMapper userMapper;
+    @Autowired(required = false)
+    TbVehicleMapper vehicleMapper;
+    @Autowired(required = false)
+    TbRescueMapper tbRescueMapper;
+    @Resource
+    TbOrderItemMapper tbOrderItemMapper;
+
+    @Override
+    public BranchIndexCount indexCount(long userId) throws Exception{
+        BranchIndexCount bic = new BranchIndexCount();
+        int userCount = userMapper.userCount(userId);
+        Map map = new HashMap();
+        map.put("wangUserId", userId);
+        map.put("type", 1);
+        int vehicleCount = vehicleMapper.branchVehicleCount(map);
+        map.put("type", 2);
+        int batteryCount = vehicleMapper.branchVehicleCount(map);
+        bic.setUserCount(userCount);
+        bic.setBatteryCount(batteryCount);
+        bic.setVehicleCount(vehicleCount);
+        return bic;
+    }
+
+    @Override
+    public List<TbUser> indexBranchUser(long userId,Integer page, Integer size) {
+        PageHelper.startPage(page, size);
+        return userMapper.indexUser(userId);
+    }
+
+    @Override
+    public int updRescue(TbRescue record) {
+        Map map = new HashMap();
+        map.put("userId", record.getUserId());
+        map.put("rescue", record.getStatus());
+        userMapper.updUser(map);
+        return tbRescueMapper.updateByPrimaryKeySelective(record);
+    }
+
+    @Override
+    public TbRescue findRescue(Map map) throws Exception {
+        return tbRescueMapper.findRescue(map);
+    }
+
+    @Override
+    public UserVehicle withdrawRental(long userId) {
+        UserVehicle uv = userMapper.findUser(userId);
+//        List<TbOrderItem> tbOrderItems = tbOrderItemMapper.listOrderVehicle(userId);
+//        uv.setOrderItems(tbOrderItems);
+        return uv;
+    }
+
+    @Override
+    public List<TbUser> throwALeaseUser(long userId,Integer page, Integer size) {
+        PageHelper.startPage(page, size);
+        return userMapper.throwALeaseUser(userId);
+    }
+}

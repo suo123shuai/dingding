@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <title>欢迎</title>
+    <header th:replace="comm :: header_web"></header>
+</head>
+
+<body class="gray-bg">
+
+   <div><h3 style="margin:30px;">欢迎登陆！<span th:text="${session.dcoinManagerInfo.userName}">test</span></h3></div>
+  
+  
+  
+   <footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>

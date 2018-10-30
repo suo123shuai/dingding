@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <base th:href="@{/}"/>
+    <title>常见问题</title>
+</head>
+<body>
+<h3>这是常见问题页面</h3>
+</body>
+</html>

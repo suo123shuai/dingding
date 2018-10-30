@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.TbRescueMapper" >
+  <resultMap id="BaseResultMap" type="com.ddcar.entity.TbRescue" >
+    <id column="rescue_id" property="rescueId" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="rescue_address" property="rescueAddress" jdbcType="VARCHAR" />
+    <result column="rescue_time" property="rescueTime" jdbcType="VARCHAR" />
+    <result column="branch_id" property="branchId" jdbcType="BIGINT" />
+    <result column="wang_user_id" property="wangUserId" jdbcType="BIGINT" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="repair_phone" property="repairPhone" jdbcType="VARCHAR" />
+    <result column="repair_name" property="repairName" jdbcType="VARCHAR" />
+    <result column="reason_msg" property="reasonMsg" jdbcType="VARCHAR" />
+    <result column="delete_flag" property="deleteFlag" jdbcType="INTEGER" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="modify_by" property="modifyBy" jdbcType="VARCHAR" />
+    <result column="modify_time" property="modifyTime" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    rescue_id, user_id, rescue_address, rescue_time,branch_id, wang_user_id, status, repair_phone,
+    repair_name, reason_msg, delete_flag, create_by, create_time, modify_by, modify_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_rescue
+    where rescue_id = #{rescueId,jdbcType=BIGINT}
+    and delete_flag =0
+  </select>
+
+  <select id="findRescue" resultType="com.ddcar.entity.UserRescue" parameterType="Map">
+    select rescue_address, rescue_time, r.user_id, u.user_name, u.phone, u.rescue, u.head_photo,
+    r.status, r.rescue_id,r.create_time,r.remarks from tb_rescue r join tb_user u on r.user_id = u.user_id
+    where r.wang_user_id = #{wangUserId} and r.user_id = #{userId}
+    and (r.status = 1 or r.status = 2) and r.delete_flag =0
+  </select>
+  <!--查询救援信息-->
+  <select id="rescueList" resultType="java.util.HashMap">
+    SELECT rescue_id AS rescueId,rescue_address AS rescueAddress,rescue_time AS rescueTime,
+    IFNULL((SELECT user_name FROM tb_user WHERE delete_flag=0 AND user_id=t1.`user_id`),'') AS userName,
+    IFNULL((SELECT phone FROM tb_user WHERE delete_flag=0 AND user_id=t1.`user_id`),'') AS userphone,
+    IFNULL((SELECT branch_name FROM tb_branch WHERE delete_flag=0 AND branch_id=t1.`wang_user_id`),'') AS branchName,
+    IFNULL((SELECT branch_phone FROM tb_branch WHERE delete_flag=0 AND branch_id=t1.`wang_user_id`),'') AS branchPhone,
+    IFNULL((SELECT branchaaddr FROM tb_branch WHERE delete_flag=0 AND branch_id=t1.`wang_user_id`),'') AS branchaaddr
+    FROM tb_rescue t1 WHERE t1.`delete_flag`=0
+    AND EXISTS ( SELECT branch_id FROM tb_branch WHERE delete_flag=0 AND branch_id=t1.`wang_user_id` AND parent_id=#{branchId})
+    <if test="userName != null and userName!=''">
+    AND EXISTS (SELECT 1 FROM tb_user WHERE delete_flag=0 AND user_id=t1.`user_id` AND user_name LIKE '%${userName}%')
+    </if>
+    <if test="phone != null and phone!=''">
+   AND EXISTS (SELECT 1 FROM tb_user WHERE delete_flag=0 AND user_id=t1.`user_id` AND phone LIKE '%${phone}%')
+    </if>
+    ORDER BY rescue_id DESC
+  </select>
+  <select id="findRescuexin" resultType="com.ddcar.entity.RescueXin" parameterType="long">
+    select r.rescue_address, r.create_time, r.status,r.rescue_id,r.modify_time,
+    b.branch_phone, b.branchaaddr, b.branch_name,r.repair_name,r.repair_phone
+    from tb_rescue r join tb_branch b on r.wang_user_id = b.branch_id
+    and user_id = #{userId,jdbcType=BIGINT} and (status = 1 or status = 2 or status = 3)
+    and r.delete_flag = 0
+  </select>
+
+  <update id="updRescuestatus" parameterType="Map">
+    update tb_rescue set status = #{status}, modify_time = #{modifyTime}
+    where rescue_id = #{rescueId}
+  </update>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_rescue
+    where rescue_id = #{rescueId,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com.ddcar.entity.TbRescue" >
+    insert into tb_rescue (rescue_id, user_id, rescue_address, 
+      rescue_time, wang_user_id, status, 
+      repair_phone, repair_name, reason_msg, 
+      delete_flag, create_by, create_time, 
+      modify_by, modify_time)
+    values (#{rescueId,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{rescueAddress,jdbcType=VARCHAR}, 
+      #{rescueTime,jdbcType=VARCHAR}, #{wangUserId,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, 
+      #{repairPhone,jdbcType=VARCHAR}, #{repairName,jdbcType=VARCHAR}, #{reasonMsg,jdbcType=VARCHAR}, 
+      #{deleteFlag,jdbcType=INTEGER}, #{createBy,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, 
+      #{modifyBy,jdbcType=VARCHAR}, #{modifyTime,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ddcar.entity.TbRescue" >
+    insert into tb_rescue
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="rescueId != null" >
+        rescue_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="rescueAddress != null" >
+        rescue_address,
+      </if>
+      <if test="rescueTime != null" >
+        rescue_time,
+      </if>
+      <if test="wangUserId != null" >
+        wang_user_id,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="repairPhone != null" >
+        repair_phone,
+      </if>
+      <if test="repairName != null" >
+        repair_name,
+      </if>
+      <if test="reasonMsg != null" >
+        reason_msg,
+      </if>
+      <if test="deleteFlag != null" >
+        delete_flag,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyBy != null" >
+        modify_by,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+      <if test="branchId != null">
+        branch_id,
+      </if>
+      <if test="remarks != null">
+        remarks
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="rescueId != null" >
+        #{rescueId,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="rescueAddress != null" >
+        #{rescueAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="rescueTime != null" >
+        #{rescueTime,jdbcType=VARCHAR},
+      </if>
+      <if test="wangUserId != null" >
+        #{wangUserId,jdbcType=BIGINT},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="repairPhone != null" >
+        #{repairPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="repairName != null" >
+        #{repairName,jdbcType=VARCHAR},
+      </if>
+      <if test="reasonMsg != null" >
+        #{reasonMsg,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=VARCHAR},
+      </if>
+      <if test="branchId != null">
+        #{branchId},
+      </if>
+      <if test="remarks != null">
+        #{remarks},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ddcar.entity.TbRescue" >
+    update tb_rescue
+    <set >
+      <if test="rescueAddress != null" >
+        rescue_address = #{rescueAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="rescueTime != null" >
+        rescue_time = #{rescueTime,jdbcType=VARCHAR},
+      </if>
+      <if test="wangUserId != null" >
+        wang_user_id = #{wangUserId,jdbcType=BIGINT},
+      </if>
+      <if test="repairPhone != null" >
+        repair_phone = #{repairPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="repairName != null" >
+        repair_name = #{repairName,jdbcType=VARCHAR},
+      </if>
+      <if test="reasonMsg != null" >
+        reason_msg = #{reasonMsg,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyBy != null" >
+        modify_by = #{modifyBy,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+       STATUS = #{status},
+      </if>
+    </set>
+    where user_id = #{userId,jdbcType=BIGINT}
+    AND status = 1
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ddcar.entity.TbRescue" >
+    update tb_rescue
+    set user_id = #{userId,jdbcType=BIGINT},
+      rescue_address = #{rescueAddress,jdbcType=VARCHAR},
+      rescue_time = #{rescueTime,jdbcType=VARCHAR},
+      wang_user_id = #{wangUserId,jdbcType=BIGINT},
+      status = #{status,jdbcType=INTEGER},
+      repair_phone = #{repairPhone,jdbcType=VARCHAR},
+      repair_name = #{repairName,jdbcType=VARCHAR},
+      reason_msg = #{reasonMsg,jdbcType=VARCHAR},
+      delete_flag = #{deleteFlag,jdbcType=INTEGER},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR},
+      modify_by = #{modifyBy,jdbcType=VARCHAR},
+      modify_time = #{modifyTime,jdbcType=VARCHAR}
+    where rescue_id = #{rescueId,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,199 @@
+package com.ddcar.service.impl;
+
+import ch.qos.logback.core.net.SyslogOutputStream;
+import com.common.DoubleOperation;
+import com.common.OrderSequence;
+import com.ddcar.entity.*;
+import com.ddcar.mapper.*;
+import com.ddcar.service.OrderPayService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.sql.SQLOutput;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Service
+public class OrderPayServiceImpl implements OrderPayService {
+
+    @Autowired
+    private TbOrderMapper orderMapper;
+    @Autowired
+    private TbVehicleMapper vehicleMapper;
+    @Autowired
+    private TbOrderItemMapper orderItemMapper;
+    @Autowired
+    private TbBranchMapper branchMapper;
+    @Resource
+    private TbUserMapper tbUserMapper;
+
+    @Override
+    @Transactional
+    public int generateOrders(String[] ids, long userId, Integer yue,
+                              String payType, long branchId) throws Exception {
+        TbOrder order = new TbOrder();
+        //拿到最新的订单的id号
+        String orderNo = orderMapper.getOrderNo();
+//        获取订单号
+        String orderId = OrderSequence.getOrderId(orderNo);
+
+//      插入订单明细
+        TbOrderItem orderItem = new TbOrderItem();
+        List<Vehicles> findprice;
+        findprice = vehicleMapper.findprice(ids);
+
+        //      租凭结束时间
+        Date date = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, yue);
+        Date time = calendar.getTime();
+        String stopFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time);
+
+        double deposit = 0;
+        double rent = 0;
+
+        String format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+        for (Vehicles vc : findprice) {
+            orderItem.setCashDeposit(vc.getCashDeposit());
+            orderItem.setRentMoney(vc.getMonthlyRent());
+            orderItem.setUserId(userId);
+            orderItem.setOrderId(orderId);
+            orderItem.setVehicleId(vc.getVehicleId());
+            orderItem.setType(vc.getType());
+            orderItem.setModel(vc.getModel());
+            orderItem.setSerialNumber(vc.getSerialNumber());
+            orderItem.setCreateTime(format);
+            orderItem.setStopRentalTime(stopFormat);
+            orderItem.setStartRentalTime(format);
+            deposit = DoubleOperation.sum(deposit, vc.getCashDeposit());
+            rent = DoubleOperation.sum(rent, vc.getMonthlyRent());
+            orderItemMapper.insertOrder(orderItem);
+        }
+//      分公司折扣
+        double discount = 0;
+        TbBranch branch = branchMapper.findDiscount(branchId);
+        if (yue < 12) {
+            discount = DoubleOperation.div(branch.getMonthdiscount(), 10, 2);
+        } else if (yue >= 12 && yue < 24) {
+            discount = DoubleOperation.div(branch.getDiscount(), 10, 2);
+        } else {
+            discount = DoubleOperation.div(branch.getTwodiscount(), 10, 2);
+        }
+
+//      插入订单表
+        order.setOrderNo(orderId);
+        order.setCreateTime(format);
+        order.setUserId(userId);
+        order.setCashDeposit(deposit);
+        order.setRentMoney(rent);
+        order.setDiscount(DoubleOperation.mul(discount, 10));
+        order.setStartRentalTime(format);
+        order.setStopRentalTime(stopFormat);
+        order.setRentalTime(yue);
+        order.setPayState("0");
+        order.setOrderType(payType);
+        //      用户信息 用户是否属于团签，个人用户支付押金，团签用户免押金
+        UserVehicle user = tbUserMapper.findUser(userId);
+
+        if (0 == user.getParentId()) {
+            order.setTotalMoney(DoubleOperation.sum(deposit,
+                    DoubleOperation.mul(yue, DoubleOperation.mul(rent, discount))));
+        } else {
+            order.setTotalMoney(
+                    DoubleOperation.mul(yue, DoubleOperation.mul(rent, discount)));
+        }
+        order.setUserSuperiorId(user.getParentId());
+        orderMapper.insertOrder(order);
+        return 0;
+    }
+
+    @Override
+    public Double userRefund(Long userId, double makeUpAmount) throws Exception {
+        List<TbOrder> order = orderMapper.getOrder(userId);
+        double cashDeposit = 0;
+        //用户订单的所有押金金额
+        for (TbOrder tbOrder : order) {
+            cashDeposit += tbOrder.getCashDeposit();
+        }
+        Double sub = DoubleOperation.sub(cashDeposit, makeUpAmount);
+        return sub;
+    }
+
+    @Override
+    @Transactional
+    public int refundOrder(String[] ids, long userId, double makeUpAmount,long parentId) throws Exception {
+        //拿到最新的订单的id号
+        String orderNo = orderMapper.getOrderNo();
+//        获取订单号
+        String orderId = OrderSequence.getOrderId(orderNo);
+        String format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        Map map = new HashMap();
+        TbOrderItem orderi = new TbOrderItem();
+        TbOrder order = new TbOrder();
+        map.put("userId", userId);
+        map.put("ids", ids);
+        List<Vehicles> vehicles = tbUserMapper.listUsetVehicleGet(map);
+        double deposit = 0;
+        for (Vehicles v : vehicles) {
+            orderi.setCreateTime(format);
+            orderi.setOrderId(orderId);
+            orderi.setVehicleId(v.getVehicleId());
+            orderi.setCashDeposit(v.getCashDeposit());
+            deposit = DoubleOperation.sum(deposit, v.getCashDeposit());
+            orderItemMapper.insertOrder(orderi);
+        }
+        order.setCashDeposit(deposit);
+        order.setOrderNo(orderId);
+        order.setPayState("2");
+        order.setCreateTime(format);
+        order.setUserId(userId);
+        //团签没押金，
+        double orderAmount = 0;
+        if(parentId != 0){
+            orderAmount = DoubleOperation.sub(0.0, makeUpAmount);
+            //退租后更新团签押金使用金额
+            Map map1 = new HashMap();
+            map1.put("money", -deposit);
+            map1.put("userId", parentId);
+            tbUserMapper.updateDeposit(map1);
+        } else {
+            orderAmount = DoubleOperation.sub(deposit, makeUpAmount);
+        }
+        order.setTotalMoney(orderAmount);
+        //新增订单
+        orderMapper.insertOrder(order);
+        //更新车电的状态
+        vehicleMapper.updateWithdrawalStatus(ids);
+
+        return 0;
+    }
+
+    @Override
+    public TbOrder getOrderByOrderId(String orderId) {
+        return orderMapper.getOrderByOrderId(orderId);
+    }
+
+    @Override
+    public int paySuccess(Map map) {
+        String orderNo = map.get("out_trade_no").toString();
+//        TbOrder order = orderMapper.getOrderByOrderId(orderNo);
+        orderMapper.updatePayState(orderNo);
+        List<TbOrderItem> orderItems = orderItemMapper.listVehicleId(orderNo);
+        //更新车电状态
+        TbVehicle vehicle = new TbVehicle();
+        for (TbOrderItem orderItem : orderItems) {
+            vehicle.setDeposit(orderItem.getCashDeposit());
+            vehicle.setUserId(orderItem.getUserId());
+            vehicle.setStartRentalTime(orderItem.getStartRentalTime());
+            vehicle.setStopRentalTime(orderItem.getStopRentalTime());
+            vehicle.setState("1");
+            vehicle.setVehicleId(orderItem.getVehicleId());
+            vehicle.setModifyTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            vehicleMapper.updateVehicleAll(vehicle);
+        }
+        return 0;
+    }
+}

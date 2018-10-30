@@ -1,0 +1,392 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <title>丁丁后台管理系统</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+
+</head>
+
+<body class="fixed-sidebar full-height-layout gray-bg" style="overflow:hidden">
+<input type="hidden" th:if="${session.dcoinManagerInfo!=null}" th:value="${session.dcoinManagerInfo.uRole}" id="usertype">
+<div id="wrapper">
+    <div style="display:none;"><a id="addPage" class="J_menuItem" href="">addPage</a></div>
+    <!--左侧导航开始-->
+    <nav class="navbar-default navbar-static-side" role="navigation">
+        <div class="nav-close"><i class="fa fa-times-circle"></i>
+        </div>
+        <div class="sidebar-collapse">
+            <ul class="nav" id="side-menu">
+                <li class="nav-header" style="padding:20px 0px 20px 20px;">
+                    <div class="dropdown profile-element">
+                        <span style="color:#fff;font-size:20px;">丁丁后台管理系统</span>
+
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                <span class="clear">
+                               <span class="block m-t-xs"><strong class="font-bold"><span th:if="${session.dcoinManagerInfo!=null}" th:text="${session.dcoinManagerInfo.userName}"></span></strong></span>
+                                <span class="text-muted text-xs block">
+                                 <span th:if="${session.dcoinManagerInfo!=null && session.dcoinManagerInfo.uRole==1}">超级管理员</span>
+                                 <b class="caret"></b></span>
+                                </span>
+                        </a>
+                        <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                            <li><a class="J_menuItem" title="修改密码" href="updatePassword">修改密码</a>
+                            </li>
+
+                            <li class="divider"></li>
+                            <li><a href="login">安全退出</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="logo-element">丁丁租车</div>
+                </li>
+               <!--<li>
+                    <a class="J_menuItem" title="web用户管理" href="manager/userList">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">web用户管理</span>
+                    </a>
+                </li>-->
+
+                <li name="ping">
+                    <a class="J_menuItem"  title="首页" href="managerhome/homeList">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">首页</span>
+                    </a>
+                </li>
+
+
+
+                <li name="ping">
+                    <a class="#">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">账号管理</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a class="J_menuItem" title="账号管理" href="userAdmin/userAdninList">
+                                <i class="fa fa-columns"></i>
+                                <span class="nav-label">账号管理</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li name="ping">
+                    <a class="J_menuItem" title="分公司管理" href="company/companyList">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">分公司管理</span>
+                    </a>
+                </li>
+
+                <li name="ping">
+                    <a class="#">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">车电管理</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a class="J_menuItem" title="新车电入库" href="carBattery/warehousing">
+                                <i class="fa fa-columns"></i>
+                                <span class="nav-label">新车电入库</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="J_menuItem" title="出库" href="carBattery/outtreasuryBranch">
+                                <i class="fa fa-columns"></i>
+                                <span class="nav-label">出库</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="J_menuItem" title="车电退回" href="carBattery/return">
+                                <i class="fa fa-columns"></i>
+                                <span class="nav-label">车电退回</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="J_menuItem" title="车电管理" href="carBattery/carBatteryList">
+                                <i class="fa fa-columns"></i>
+                                <span class="nav-label">车电管理</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li name="ping">
+                    <a class="J_menuItem" title="反馈管理" href="feedback/feedbackList">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">反馈管理</span>
+                    </a>
+                </li>
+
+
+                <!--&lt;!&ndash;分公司企业端&ndash;&gt;-->
+                <li name="fen">
+                    <a class="J_menuItem" title="首页" href="companyHome/companyList">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">首页</span>
+                    </a>
+                </li>
+                <li name="fen">
+                    <a class="J_menuItem" title="车电价格设置" href="priceSetting/priceSettingList.html">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">车电价格设置</span>
+                    </a>
+                </li>
+
+
+                <li name="fen">
+                    <a class="J_menuItem" title="车电入库" href="companyWarehousing/warehousing">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">车电入库</span>
+                    </a>
+                </li>
+
+
+
+                <li name="fen">
+                    <a class="J_menuItem" title="车电出库" href="outLibrary/libraryList">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">车电出库</span>
+                    </a>
+                </li>
+
+                <li name="fen">
+                    <a class="J_menuItem" title="网点管理" href="networkManagement/networkList">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">网点管理</span>
+                    </a>
+                </li>
+                <li name="fen">
+                   <a class="J_menuItem" title="团签客户管理" href="groupCustomer/groupCusList">
+                       <i class="fa fa-columns"></i>
+                       <span class="nav-label">团签客户管理</span>
+                   </a>
+               </li>
+               <li name="fen">
+                   <a class="J_menuItem" title="骑手管理">
+                       <i class="fa fa-columns"></i>
+                       <span class="nav-label">骑手管理</span>
+                       <span class="fa arrow"></span>
+                   </a>
+                   <ul class="nav nav-second-level">
+                       <li>
+                           <a class="J_menuItem" title="骑手管理" href="rider/riderList">
+                               <i class="fa fa-columns"></i>
+                               <span class="nav-label">骑手管理</span>
+                           </a>
+                       </li>
+                       <li>
+                           <a class="J_menuItem" title="按地图查看骑手" href="riderManage/riderManageList">
+                               <i class="fa fa-columns"></i>
+                               <span class="nav-label">按地图查看骑手</span>
+                           </a>
+                       </li>
+                   </ul>
+               </li>
+                <!--style="display: none"-->
+               <li name="fen">
+                   <a class="J_menuItem" title="车电管理" href="commpanyVehicle/commpanyVehicleList">
+                       <i class="fa fa-columns"></i>
+                       <span class="nav-label">车电管理</span>
+                   </a>
+               </li>
+               <li name="fen">
+                   <a class="J_menuItem" title="发票查看" href="invoice/invoiceList">
+                       <i class="fa fa-columns"></i>
+                       <span class="nav-label">发票查看</span>
+                   </a>
+               </li>
+               <li name="fen">
+                   <a class="J_menuItem" title="救援管理" href="rescue/rescueList">
+                       <i class="fa fa-columns"></i>
+                       <span class="nav-label">救援管理</span>
+                   </a>
+               </li>
+                <li name="fen">
+                    <a class="J_menuItem" title="参数管理" href="priceSetting/parameter">
+                        <i class="fa fa-columns"></i>
+                        <span class="nav-label">参数管理</span>
+                    </a>
+                </li>
+            </ul>
+            </li>
+
+            </ul>
+        </div>
+    </nav>
+    <!--左侧导航结束-->
+    <!--右侧部分开始-->
+    <div id="page-wrapper" class="gray-bg dashbard-1">
+
+        <div class="row content-tabs">
+
+
+            <button class="roll-nav roll-left J_tabLeft"><i class="fa fa-backward"></i>
+            </button>
+            <nav class="page-tabs J_menuTabs">
+                <div class="page-tabs-content">
+                    <a class="navbar-minimalize btn btn-primary" style="height:50px;width:58px;padding:0px;padding-top:10px;" href="javascript:;">
+                        <i class="fa fa-bars"></i>
+                    </a>
+
+                </div>
+            </nav>
+            <button class="roll-nav roll-right J_tabRight"><i class="fa fa-forward"></i>
+            </button>
+            <div class="btn-group roll-nav roll-right">
+                <button class="dropdown J_tabClose" data-toggle="dropdown">关闭操作<span class="caret"></span>
+
+                </button>
+                <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                    <li class="J_tabShowActive"><a>定位当前选项卡</a>
+                    </li>
+                    <li class="divider"></li>
+                    <li class="J_tabCloseAll"><a>关闭全部选项卡</a>
+                    </li>
+                    <li class="J_tabCloseOther"><a>关闭其他选项卡</a>
+                    </li>
+                </ul>
+            </div>
+            <a href="login" class="roll-nav roll-right J_tabExit"><i class="fa fa fa-sign-out"></i> 退出</a>
+        </div>
+        <div class="row J_mainContent" id="content-main">
+            <iframe class="J_iframe" name="iframe0" width="100%" height="100%" src="welcome" frameborder="0" data-id="welcomeManager" seamless></iframe>
+        </div>
+        <div class="footer">
+            <div style="text-align:center;">&copy; 2017-<span id="nowYear"></span> 丁丁
+            </div>
+        </div>
+    </div>
+    <!--右侧部分结束-->
+
+    <!--右侧边栏开始-->
+    <div id="right-sidebar">
+        <div class="sidebar-container">
+
+            <ul class="nav nav-tabs navs-3">
+
+                <li class="active">
+                    <a data-toggle="tab" href="#tab-1">
+                        <i class="fa fa-gear"></i> 主题
+                    </a>
+
+                </li>
+
+            </ul>
+
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane active">
+
+                    <div class="skin-setttings">
+
+
+                        <div class="title">皮肤选择</div>
+                        <div class="setings-item default-skin nb">
+                                <span class="skin-name ">
+                         <a href="#" class="s-skin-0">
+                             默认皮肤
+                         </a>
+                    </span>
+                        </div>
+                        <div class="setings-item blue-skin nb">
+                                <span class="skin-name ">
+                        <a href="#" class="s-skin-1">
+                            蓝色主题
+                        </a>
+                    </span>
+                        </div>
+                        <div class="setings-item yellow-skin nb">
+                                <span class="skin-name ">
+                        <a href="#" class="s-skin-3">
+                            黄色/紫色主题
+                        </a>
+                    </span>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<footer th:replace="comm :: footer_web"></footer>
+
+<script type="text/javascript">
+    var preMenu=null;
+    $(function(){
+        $('#nowYear').html((new Date()).getFullYear());
+
+        var h=$('#content-main').css("height").replace('px','');
+        $('#content-main').css("height",parseInt(h,10)+60+'px');
+
+        var utype=document.getElementById("usertype").value;
+        if(utype==1){
+            $("[name=fen]").hide();
+        }else if(utype==2)
+        {
+            $("[name=ping]").hide();
+        }else {
+            $("[name=fen]").hide();
+            $("[name=ping]").hide();
+        }
+
+    });
+
+    function addPage(title,url){
+
+        $('#addPage').html(title);
+        $('#addPage').attr('href',url);
+        $('#addPage').attr('title',title);
+        $('#addPage').click();
+
+    }
+    function findElementById(id){
+        return $('#'+id);
+    }
+    function locationCurrMenu(){
+        if($(".page-tabs-content").children(".active").length>0){
+            preMenu = $(".page-tabs-content").children(".active")[0];
+        }
+    }
+    function closeCurr(){
+        if(preMenu){
+            $(".page-tabs-content").children(".active").each(function(){
+                $(this).remove();
+                $('.J_iframe[data-id="'+$(this).data("id")+'"]').remove();
+            });
+
+            var k=$(preMenu).data("id");
+            $(preMenu).addClass("active");
+            $(".J_mainContent .J_iframe").each(function(){
+
+                if($(this).data("id")==k){
+                    $(this).show();
+                    $(this).siblings(".J_iframe").hide();//隐藏其他
+                    $(this).attr('src', $(this).attr('src'));//刷新内容
+                    return false;
+                }
+            });
+
+            var n=parseInt($(".page-tabs-content").css("margin-left"));
+            if(n<0){$(".page-tabs-content").animate({marginLeft:(n+l)+"px"},"fast")}
+
+            preMenu=null;
+
+
+        }
+
+
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>骑手管理</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:underline; text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline;}
+    </style>
+</head>
+<body class="gray-bg">
+
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+
+                        <div class="form-group">
+                            <label for="searchType">类型</label>
+                            <select id="searchType" class="form-control">
+                                <option value="-1">全部</option>
+                                <option value="1">网点</option>
+                                <option value="2">团签</option>
+                                <option value="3">个人</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchparentId">团签客户名称</label>
+                            <select name="searchtName" id="searchparentId" class="form-control">
+                                <option value="-1">全部</option>
+                            </select>
+                        </div>
+
+                        <button type="button" class="btn btn-outline btn-default" onclick="loadData(1)">
+                            <i class="glyphicon glyphicon-search" aria-hidden="true"></i>查询
+                        </button>
+                        <button type="button" class="btn btn-outline btn-warning" onclick="clearSearch()">
+                            <i class="glyphicon" aria-hidden="true"></i>清除查询条件
+                        </button>
+                    </form>
+
+                </div>
+                <div class="ibox-content">
+
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <a href="../networkManagement/addWang" type="button" class="btn btn-outline btn-default" onclick="">
+                            新建网点
+                        </a>
+                        <button type="button" class="btn btn-outline btn-default" onclick="">
+                            删除
+                        </button>
+                    </div>
+                    <div  style="position:relative;width: 100%;overflow-x: scroll;border:1px solid #eee;margin-bottom:30px;">
+                        <table class="tbsalelist table table-striped table-bordered" data-toggle="table"  data-click-to-select="true" data-select-item-name="myRadioName" data-mobile-responsive="true">
+                            <thead>
+                            <tr>
+                                <th width="40" id="title-table-checkbox">全选</th>
+                                <th width="80">骑手Id</th>
+                                <th width="80">骑手姓名</th>
+                                <th width="80">骑手电话</th>
+                                <th width="80">类型</th>
+                                <th width="80">押金</th>
+                                <th width="80">剩余金额</th>
+                                <th width="80">状态</th>
+                                <th width="80">操作</th>
+                                <th width="80">二维码</th>
+                            </tr>
+                            </thead>
+                            <tbody id="table_content">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <a href="../networkManagement/addWang" type="button" class="btn btn-outline btn-default" onclick="">
+                            新建网点
+                        </a>
+                        <button type="button" class="btn btn-outline btn-default" onclick="">
+                            删除
+                        </button>
+                    </div>
+                    <div class="btn-group" role="group" style="width:100%;">
+                        <header th:replace="comm :: pagenation_web"></header>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        //$(".tbsalelist").width(2200);
+        //$(".tbsalelist").css("max-width", 2200);
+        //initUpload('uploadBtn','showImg',null,1024);
+
+        loadData(1);
+        tNameoption();
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+    function clearSearch(){
+        $('#searchForm input').val('');
+        $('#searchForm select').val('');
+        $('#selectSalerSearch').val('');
+        $('#selectKefuSearch').val('');
+    }
+
+    function showSystemLog(msgType,userId){
+        parent.locationCurrMenu();
+        parent.addPage("web登陆日志","${ctx}/pages/system/systemlog.jsp?msgType="+msgType+"&userId="+userId);
+
+    }
+    function refreshData(){
+        loadData(pageinfo["page"]);
+    }
+
+    function loadData(page, size) {
+        if (size != undefined) {
+            pageinfo["size"] = size;
+            $('#pagesize').html(size);
+        }
+        if (page == -1)
+            pageinfo["page"]--;
+        else if (page == -2)
+            pageinfo["page"]++;
+        else {
+            if (page >= pageinfo["tp"] && pageinfo["tp"] > 0)
+                pageinfo["page"] = pageinfo["tp"];
+            else
+                pageinfo["page"] = page;
+        }
+        pageinfo["type"]=$('#searchType').val();
+        pageinfo["parentId"]=$('#searchparentId').val();
+
+        $('#table_content').html('<tr><td colspan="23">'+$('#divLoading').html()+'</td></tr>');
+        httpPost(ctx+'/user/findComTbUser',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        array.push('<tr>');
+                        array.push('<td><input  type="checkbox" class="i-checks" name="checkbox-tr" value="' + data["userId"]+ '"/></td>');
+                        array.push('<td >'+data["userId"]+'</td>');
+                        array.push('<td >'+data["userName"]+'</td>');
+                        array.push('<td >'+data["phone"]+'</td>');
+                        if (data["type"] == 1) {
+                            array.push('<td>网点</td>');
+                        } else if (data["type"] == 2) {
+                            array.push('<td>团签</td>');
+                        }else if (data["type"] == 3) {
+                            array.push('<td>个人</td>');
+                        }else{
+                            array.push('<td>数据不匹配</td>');
+                        }
+                        array.push('<td >'+data["cashDeposit"]+'</td>');
+                        array.push('<td >'+data["balance"]+'</td>');
+                        if (data["openState"] == 0) {
+                            array.push('<td>开启</td>');
+                        } else if (data["openState"] == 1) {
+                            array.push('<td>关闭</td>');
+                        }else{
+                            array.push('<td>数据不匹配</td>');
+                        }
+                        array.push('<td >'+'<a href="#">编辑</a>'+'</td>');
+                        array.push('<td >'+'<a href="#">打印</a>'+'</td>');
+                        array.push('</tr>');
+                    }
+                    $('#table_content').html(array.join(''));
+                    initpageInfo(msg.total);
+                    array=[];
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+    function tNameoption() {
+        httpPost(ctx+'/user/findTUser',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        var option='<option value="'+data.userId+'">'+data.userName+'</option>';
+                        $("[name=searchtName]").append(option);
+                    }
+                } else {
+                    alert(msg.msg);
+                }
+            });
+    }
+
+
+</script>
+
+

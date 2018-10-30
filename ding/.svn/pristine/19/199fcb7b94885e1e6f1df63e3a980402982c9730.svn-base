@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>编辑骑手</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+    </style>
+</head>
+<body class="gray-bg">
+<input type="hidden" th:value="${#httpServletRequest.getParameter('userId')}" id="userId">
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <h2>编辑骑手</h2>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>骑手名称:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="userName" id="userName" class="form-control keyupclick"  style="width:280px;">
+                                <span id="userNameif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+
+
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>电话:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="phone" id="phone" class="form-control keyupclick"  style="width:250px;">
+                                <span id="phoneif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>头像:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <button type="button" class="btn btn-outline btn-default" id="uploadBtn">
+                                    <i class="glyphicon" aria-hidden="true"></i>上传图片（400*400，500K)
+                                </button>
+                                <img src="" id="showImg"/>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>状态:</label>
+                            </div>
+                        <div class="col-md-8" id="wrap">
+                            <input type="radio" name="openState" value="0">&nbsp;开启&nbsp;&nbsp;&nbsp;
+                            <input type="radio" name="openState" value="1">&nbsp;关闭
+                        </div>
+                        </div>
+                        <br>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" name="add" id="editgroup">
+                            </i>保存
+                        </button>
+                        &nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-outline btn-default" onclick="javascript:history.go(-1)">
+                            </i>取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        initUpload('uploadBtn','showImg',null,1024);
+        huixian();
+
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+
+    //回显数据
+    function huixian() {
+        var id=$("#userId").val();
+        $.post(ctx + "/user/idSearchComsign?userId="+id, function (msg) {
+            if (msg.status == 200) {
+                $("#userName").val(msg.rows.userName);
+                $("#phone").val(msg.rows.phone);
+                ss=msg.rows.openState;
+                var radios = $("[name=openState]");
+                radios.eq(ss).attr("checked",true);
+            }
+        });
+    }
+
+
+
+
+
+    //修改
+    $("#editgroup").click(function () {
+        if($.trim($("#userName").val()).length==0){
+            $("#userNameif").text("*请输入骑手名称！")
+            return;
+        }
+        if($.trim($("#phone").val()).length==0){
+            $("#phoneif").text("*请输入电话！")
+            return;
+        }
+
+        var param={
+            userId:$("#userId").val(),
+            userName:document.getElementById("userName").value,
+            phone:document.getElementById("phone").value,
+            headPhoto:$("#showImg")[0].src,
+            openState:$('#wrap input[name="openState"]:checked ').val()
+        }
+        console.info(param)
+        httpPost(ctx+"/user/updateuser",param,function (data) {
+            if(data.status==200){
+                location.href=ctx+"/page/rider/riderList";
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:'编辑失败',
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+    });
+
+</script>
+
+

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>救援管理</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:underline; text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline;}
+    </style>
+</head>
+<body class="gray-bg">
+
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <!--<div class="form-group">
+                            <label for="">车辆编号</label>
+                            <input type="text" placeholder="" id="searchNickname" class="form-control keyupclick"  style="width:120px;">
+                        </div>-->
+                        <div class="form-group">
+                            <label for="searchuserName">姓名</label>
+                            <input type="text" placeholder="" id="searchuserName" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchphone">手机</label>
+                            <input type="text" placeholder="" id="searchphone" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <button type="button" class="btn btn-outline btn-default" onclick="loadData(1)">
+                            <i class="glyphicon glyphicon-search" aria-hidden="true"></i>查询
+                        </button>
+                        <button type="button" class="btn btn-outline btn-warning" onclick="clearSearch()">
+                            <i class="glyphicon" aria-hidden="true"></i>清除查询条件
+                        </button>
+                    </form>
+
+                </div>
+                <div class="ibox-content">
+
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                    </div>
+                    <div  style="position:relative;width: 100%;overflow-x: scroll;border:1px solid #eee;margin-bottom:30px;">
+                        <table class="tbsalelist table table-striped table-bordered" data-toggle="table"  data-click-to-select="true" data-select-item-name="myRadioName" data-mobile-responsive="true">
+                            <thead>
+                            <tr>
+                                <th width="40" id="title-table-checkbox">全选</th>
+                                <th width="80">需要救援人</th>
+                                <th width="80">需要救援人电话</th>
+                                <th width="80">救援地址</th>
+                                <th width="80">救援时间</th>
+                                <th width="80">救援门店</th>
+                                <th width="80">电话</th>
+                                <th width="80">地址</th>
+                                <th width="80">提醒门店</th>
+                            </tr>
+                            </thead>
+                            <tbody id="table_content">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="btn-group" id="foot" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                    </div>
+                    <div class="btn-group" role="group" style="width:100%;">
+                        <header th:replace="comm :: pagenation_web"></header>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        //$(".tbsalelist").width(2200);
+        //$(".tbsalelist").css("max-width", 2200);
+        //initUpload('uploadBtn','showImg',null,1024);
+
+        loadData(1);
+
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+    function clearSearch(){
+        $('#searchForm input').val('');
+        $('#searchForm select').val('');
+        $('#selectSalerSearch').val('');
+        $('#selectKefuSearch').val('');
+    }
+
+    function showSystemLog(msgType,userId){
+        parent.locationCurrMenu();
+        parent.addPage("web登陆日志","${ctx}/pages/system/systemlog.jsp?msgType="+msgType+"&userId="+userId);
+
+    }
+    function refreshData(){
+        loadData(pageinfo["page"]);
+    }
+
+    function loadData(page, size) {
+        if (size != undefined) {
+            pageinfo["size"] = size;
+            $('#pagesize').html(size);
+        }
+        if (page == -1)
+            pageinfo["page"]--;
+        else if (page == -2)
+            pageinfo["page"]++;
+        else {
+            if (page >= pageinfo["tp"] && pageinfo["tp"] > 0)
+                pageinfo["page"] = pageinfo["tp"];
+            else
+                pageinfo["page"] = page;
+        }
+        pageinfo["userName"]=$('#searchuserName').val();
+        pageinfo["phone"]=$('#searchphone').val();
+
+
+        $('#table_content').html('<tr><td colspan="23">'+$('#divLoading').html()+'</td></tr>');
+        httpPost(ctx+'/rescue/rescueList',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        array.push('<tr>');
+                        array.push('<td><input  type="checkbox" class="i-checks" name="checkbox-tr" value="' + data["branchId"]+ '"/></td>');
+                        array.push('<td >'+data["userName"]+'</td>');
+                        array.push('<td >'+data["userphone"]+'</td>');
+                        array.push('<td >'+data["rescueAddress"]+'</td>');
+                        array.push('<td >'+data["rescueTime"]+'</td>');
+                        array.push('<td >'+data["branchName"]+'</td>');
+                        array.push('<td >'+data["branchPhone"]+'</td>');
+                        array.push('<td >'+data["branchaaddr"]+'</td>');
+                        array.push('<td >'+'<a onclick="rem('+data["branchPhone"]+')">提醒</a>'+'</td>');
+                        array.push('</tr>');
+                    }
+                    $('#table_content').html(array.join(''));
+                    initpageInfo(msg.total);
+                    array=[];
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+    function rem(branchPhone) {
+        var param={
+            phone:branchPhone,
+        }
+        httpPost(ctx + "/api/user/rem?phone=",param,function (data) {
+            if(data.status==200){
+                swal({
+                    title:"信息提示",
+                    text:"已提醒网点前往救援！",
+                    type:"success",
+                    confirmButtonText:'确定'
+                })
+            }else {
+                swal({
+                    title:"信息提示",
+                    text:"提醒失败！",
+                    type:"error",
+                    confirmButtonText:'确定'
+                })
+            }
+        });
+
+    }
+</script>
+
+

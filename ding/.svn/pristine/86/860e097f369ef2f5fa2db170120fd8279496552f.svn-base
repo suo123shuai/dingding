@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <base th:href="@{/}"/>
+    <title>租车流程</title>
+</head>
+<body>
+<h4>租车流程：</h4>
+<p style="font-size:13px">本平台提供两类用户租车：</p>
+<p style="font-size:13px">第一类：普通骑手租赁</p>
+<img src="img/pt.png" style="width: 150%;height: 150%">
+<p style="font-size:13px">第二类：团签骑手租赁</p>
+<img src="img/tq.png" style="width: 150%;height: 150%">
+</body>
+</html>

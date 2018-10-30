@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>客户管理</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script th:src="@{/js/js/jquery-2.1.0.js}"></script>
+    <script th:src="@{/js/jquery.qrcode.min.js}"></script>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:underline;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline;}
+        .cod{margin: auto;}
+    </style>
+</head>
+<body>
+<input type="hidden" th:value="${#httpServletRequest.getParameter('qrCode')}" id="qrCode">
+<div id="code" class="cod"></div>
+<br>
+<button type="button" class="btn btn-outline btn-default" name="add" id="vehicleadd">
+    </i>保存
+</button>
+</body>
+</html>
+<script type="text/javascript">
+        $("#code").qrcode({
+            width: 400, //宽度
+            height: 400, //高度
+            text:$("#qrCode").val()  //任意内容
+        });
+
+</script>
+
+

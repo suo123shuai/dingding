@@ -1,0 +1,40 @@
+package com.ddcar.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.io.Serializable;
+
+@JsonIgnoreProperties(value = {"handler"})
+public class UserVehicleParticular extends TbVehicle implements Serializable {
+
+    private Double monthlyRent;
+
+    private String userName;
+
+    private TbModelNumber modelNumber;
+
+    public double getMonthlyRent() {
+        return monthlyRent;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setMonthlyRent(double monthlyRent) {
+        this.monthlyRent = monthlyRent;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public TbModelNumber getModelNumber() {
+        return modelNumber;
+    }
+
+    public void setModelNumber(TbModelNumber modelNumber) {
+        this.modelNumber = modelNumber;
+    }
+}
+

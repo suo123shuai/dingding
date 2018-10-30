@@ -1,0 +1,32 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ddcar.mapper.AccountFlowMapper">
+    <insert id="saveFlow" parameterType="com.ddcar.entity.AccountFlow">
+        INSERT INTO tb_Account_flow
+        (create_time,money,user_id,wang_user_id,branch_id,pay_type,user_superior_id,order_no)
+        VALUES (NOW(),#{money},#{userId},#{wangUserId},#{branchId},#{payType},#{userSuperiorId},#{orderNo})
+    </insert>
+
+    <select id="findWangFlow" parameterType="Long" resultType="com.ddcar.entity.AccountFlow">
+     SELECT a.money,a.pay_type,a.create_time,u.true_name FROM tb_Account_flow a
+     JOIN tb_user u ON a.user_id=u.user_id
+     WHERE DATE_FORMAT( a.create_time, '%Y%m' )
+     = DATE_FORMAT( CURDATE( ) , '%Y%m' ) AND a.wang_user_id = #{wangUserId}
+     AND a.delete_flag = 0 ORDER BY create_time DESC
+    </select>
+    
+    <select id="incomeTotal" parameterType="Long" resultType="HashMap">
+        SELECT SUM(IF(pay_type = 0,money,0)) y, SUM(IF(pay_type = 1,money,0)) z,
+        SUM(IF (pay_type = 2,money,0)) t,SUM(IF(pay_type = 3,money,0)) b
+        FROM tb_Account_flow
+        WHERE wang_user_id = #{wangUserId} AND delete_flag = 0
+    </select>
+    
+    <select id="expenditureTotal" parameterType="Long" resultType="Map">
+        SELECT SUM(IF(pay_type = 0,money,0)) y, SUM(IF(pay_type = 1,money,0)) z,
+        SUM(IF(pay_type = 2,money,0)) t,SUM(IF(pay_type = 3,money,0)) b
+        FROM tb_Account_flow
+        WHERE DATE_FORMAT( create_time, '%Y%m' )
+        = DATE_FORMAT( CURDATE( ) , '%Y%m' )
+        AND wang_user_id = #{wangUserId} AND delete_flag = 0
+    </select>
+</mapper>

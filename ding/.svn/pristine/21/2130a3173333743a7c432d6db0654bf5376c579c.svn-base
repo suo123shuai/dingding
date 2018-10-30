@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>参数设置</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+
+    </style>
+</head>
+<body class="gray-bg">
+
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <input type="hidden" th:value="${session.dcoinManagerInfo.companyId}" id="companyId">
+                        <h2>年付价格设置</h2>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>一年内付:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="monthdiscount" id="monthdiscount" class="form-control keyupclick" style="width:100px;">&nbsp;&nbsp;折
+                                <span id="monthdiscountif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>一年付:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="discount" id="discount" class="form-control keyupclick" style="width:100px;">&nbsp;&nbsp;折
+                                <span id="discountif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>二年付:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="twodiscount" id="twodiscount" class="form-control keyupclick"  style="width:100px;">&nbsp;&nbsp;折
+                                <span id="twodiscountif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" name="add" id="vehicleadd">
+                            </i>保存
+                        </button>
+                        &nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-outline btn-default" onclick="javascript:history.go(-1)">
+                            </i>取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        huixian();
+
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+        });
+    });
+
+    //回显数据
+    function huixian() {
+        var id=document.getElementById("companyId").value;
+        $.post(ctx + "/branch/searchId?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                $("#monthdiscount").val(msg.rows.monthdiscount);
+                $("#discount").val(msg.rows.discount);
+                $("#twodiscount").val(msg.rows.twodiscount);
+            }
+        });
+    }
+
+    //设置折扣
+        $("#vehicleadd").click(function () {
+            if($.trim($("#monthdiscount").val()).length==0){
+                $("#monthdiscountif").text("*请设置一年内折扣！")
+                return;
+            }
+            if($.trim($("#discount").val()).length==0){
+                $("#discountif").text("*请设置一年折扣！")
+                return;
+            }
+            if($.trim($("#twodiscount").val()).length==0){
+                $("#twodiscountif").text("*请设置二年折扣！")
+                return;
+            }
+            var param={
+                branchId:document.getElementById("companyId").value,
+                monthdiscount:document.getElementById("monthdiscount").value,
+                discount:document.getElementById("discount").value,
+                twodiscount:document.getElementById("twodiscount").value
+            }
+            httpPost(ctx+"/branch/updatebrand",param,function (data) {
+                if(data.status==200){
+                    swal({
+                        title:"信息提示",
+                        text:"设置成功",
+                        type:"success",
+                        confirmButtonText:'确定'
+                    })
+                }else {
+                    swal({
+                        title:'信息提示',
+                        text:'编辑失败',
+                        type:'error',
+                        confirmButtonText:'确认'
+                    });
+                }
+            });
+        });
+
+</script>
+
+

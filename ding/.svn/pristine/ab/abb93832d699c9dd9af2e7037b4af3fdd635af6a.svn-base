@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>价格设置</title>
+    <!--<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+    <style type="text/css">
+        a{text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <div class="form-group">
+                            <label for="searchbrandName">品牌名称</label>
+                            <input type="text" placeholder="" id="searchbrandName" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchmodel">型号名称</label>
+                            <input type="text" placeholder="" id="searchmodel" class="form-control keyupclick"  style="width:120px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchmodelType">所属车电</label>
+                            <select type="text" placeholder="" id="searchmodelType" class="form-control keyupclick"  style="width:120px;">
+                                <option value="">-- 请选择 --</option>
+                                <option value="0">车辆</option>
+                                <option value="1">电池</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-default" onclick="loadData(1)">
+                            <i class="glyphicon glyphicon-search" aria-hidden="true"></i>查询
+                        </button>
+                        <button type="button" class="btn btn-outline btn-warning" onclick="clearSearch()">
+                            <i class="glyphicon" aria-hidden="true"></i>清除查询条件
+                        </button>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="deleteData()">
+                            <i class="glyphicon" aria-hidden="true"></i>删除
+                        </button>
+                    </div>
+                    <div  style="position:relative;width: 100%;overflow-x: scroll;border:1px solid #eee;margin-bottom:30px;">
+                        <table id="model" class="tbsalelist table table-striped table-bordered" data-toggle="table"  data-click-to-select="true" data-select-item-name="myRadioName" data-mobile-responsive="true">
+                            <thead>
+                            <tr>
+                                <th width="40" id="title-table-checkbox">全选</th>
+                                <th width="60">型号ID</th>
+                                <th width="80">型号</th>
+                                <th width="80">所属品牌</th>
+                                <th width="80">所属车电</th>
+                                <th width="80">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="table_content">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="btn-group" id="foot" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="refreshData()">
+                            <i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>刷新
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default" onclick="deleteData()">
+                            <i class="glyphicon" aria-hidden="true"></i>删除
+                        </button>
+                    </div>
+                    <div class="btn-group" role="group" style="width:100%;">
+                        <header th:replace="comm :: pagenation_web"></header>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">设置价格</h4>
+            </div>
+            <br>
+            <form class="form-horizontal" name="addFm">
+                <input type="hidden" name="mid" \>
+                <div class="form-group">
+                    <label class="control-label col-md-3">月租（元/月）：</label>
+                    <div class="col-md-8">
+                        <input type="text" name="monthlyRent" class="form-control" id="monthlyRent">
+                        <br>
+                        <span id="monthlyRentif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">押金（元）：</label>
+                    <div class="col-md-8">
+                        <input type="text" name="cashDeposit" class="form-control" id="cashDeposit">
+                        <br>
+                        <span id="cashDepositif" style="color: red"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" id="setting" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        loadData(1);
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+        });
+        $.getJSON("/searchmodel",function (arr) {
+            $(arr).each(function () {
+                var $opt = $("<option/>");
+                $opt.html(this.brandId);
+                $opt.val(this.brandName);
+                $opt.appendTo("#brandId");
+            });
+        });
+    });
+    function clearSearch(){
+        $('#searchForm input').val('');
+        $('#searchForm select').val('');
+        $('#selectSalerSearch').val('');
+        $('#selectKefuSearch').val('');
+    }
+    function showSystemLog(msgType,userId){
+        parent.locationCurrMenu();
+        parent.addPage("web登陆日志","${ctx}/pages/system/systemlog.jsp?msgType="+msgType+"&userId="+userId);
+    }
+    function refreshData(){
+        loadData(pageinfo["page"]);
+    }
+    function loadData(page, size) {
+        if (size != undefined) {
+            pageinfo["size"] = size;
+            $('#pagesize').html(size);
+        }
+        if (page == -1)
+            pageinfo["page"]--;
+        else if (page == -2)
+            pageinfo["page"]++;
+        else {
+            if (page >= pageinfo["tp"] && pageinfo["tp"] > 0)
+                pageinfo["page"] = pageinfo["tp"];
+            else
+                pageinfo["page"] = page;
+        }
+        pageinfo["brandName"]=$('#searchbrandName').val();
+        pageinfo["model"]=$('#searchmodel').val();
+        pageinfo["modelType"]=$('#searchmodelType').val();
+        $('#table_content').html('<tr><td colspan="23">'+$('#divLoading').html()+'</td></tr>');
+        httpPost(ctx+'/model/onPriceModel',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        array.push('<tr>');
+                        array.push('<td><input  type="checkbox" class="i-checks" name="checkbox-tr" value="' + data["modelId"]+ '"/></td>');
+                        array.push('<td >'+data["modelId"]+'</td>');
+                        array.push('<td >'+data["model"]+'</td>');
+                        array.push('<td >'+data["brandName"]+'</td>');
+                        if (data["modelType"] == 0) {
+                            array.push('<td>车辆</td>');
+                        } else if (data["modelType"] == 1) {
+                            array.push('<td>电池</td>');
+                        }else{
+                            array.push('<td>数据不匹配</td>');
+                        }
+                        array.push('<td >'+'<a onclick="add('+data["modelId"]+')">价格设置</a>'+'</td>');
+                        array.push('</tr>');
+                    }
+                    $('#table_content').html(array.join(''));
+                    initpageInfo(msg.total);
+                    array=[];
+                } else {
+                    alert(msg.msg);
+                }
+            });
+    }
+    function add(modelId) {
+        $("[name=mid]").val(modelId);
+        $("#monthlyRentif").text("")
+        $("#cashDepositif").text("")
+        $("#myModal").modal("show");
+    };
+    $("#setting").click(function () {
+        if($.trim($("#monthlyRent").val()).length==0){
+            $("#monthlyRentif").text("*请填写月租价格！")
+            return;
+        }
+        if($.trim($("#cashDeposit").val()).length==0){
+            $("#cashDepositif").text("*请填写押金！")
+            return;
+        }
+        var param={
+            monthlyRent:document.getElementById("cashDeposit").value,
+            cashDeposit:document.getElementById("monthlyRent").value,
+            modelId:$("[name=mid]").val()
+        }
+        httpPost(ctx+"/price/setting",param,function (data) {
+            if(data.status==200){
+                $("#myModal").modal("hide");
+                loadData(1);
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:'添加失败',
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+    });
+</script>
+
+

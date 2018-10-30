@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新增分公司</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+        .mapBox {  font-size: 14px; height: 94vh; }
+        .mapBox > #mapInfo { padding: 20px; }
+        .mapBox > div { width: 100%; height: 100%; }
+        .mapBox > p { padding: 20px; }
+        .map-btn{padding: 5px 10px;border: 1px solid #00CC99;background: white}
+    </style>
+</head>
+<body class="gray-bg">
+
+
+<input type="hidden" th:value="${#httpServletRequest.getParameter('branchId')}" id="branchId">
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title col-sm-4">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <br>
+                        <br>
+                        <br>
+                        <div class="row" style="margin-top: 10vh">
+                            <div class="col-sm-3 text-right">
+                                <label>公司名称:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="" name="branchName" id="branchName" class="form-control keyupclick"  style="width:300px;">
+                                <span id="tigsmc" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>类型:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="col-md-8" id="wrap">
+                                    <input type="radio" name="websiteType" value="0">&nbsp;自营&nbsp;&nbsp;&nbsp;
+                                    <input type="radio" name="websiteType" value="1">&nbsp;加盟
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>管理员:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <select name="managerId" id="managerId" class="form-control">
+                                    <option value="">-- 请选择 --</option>
+                                </select>
+                                <span id="tigly" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>电话:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="" name="branchPhone" id="branchPhone" class="form-control keyupclick"  style="width:300px;">
+                                <span id="tidh" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>地址:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="" name="branchaaddr" id="branchaaddr" class="form-control keyupclick"  style="width:300px;">
+                                <span id="tidd" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>网点坐标:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="点击获取经度" onclick="getposition()" readonly name="branchx" id="branchx" class=" form-control keyupclick"  style="width: 147px">
+                                <input type="text" placeholder="点击获取纬度" onclick="getposition()" readonly name="branchy" id="branchy" class="form-control keyupclick" style="width: 147px" >
+                                <span id="branchposition" style="color: red"></span>
+                            </div>
+
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label>状态:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="col-md-8" id="wrapsta">
+                                    <input type="radio" name="branchState" value="0" checked="checked">&nbsp;开启&nbsp;&nbsp;&nbsp;
+                                    <input type="radio" name="branchState" value="1">&nbsp;关停
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="ibox-content"  style="margin-top: 22vh">
+
+                            <div class="btn-group" id="exampleToolbar" role="group">
+                                <button type="button" class="btn btn-outline btn-default" name="add" id="branchupdate">
+                                    </i>保存
+                                </button>
+                                &nbsp;&nbsp;&nbsp;
+                                <button type="button" class="btn btn-outline btn-default" onclick="javascript:history.go(-1)">
+                                    </i>取消
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                    </form>
+
+                </div>
+                <div class="col-sm-8" style="display: none" id="maps">
+                    <input type="hidden" name="companyId" th:value="${session.dcoinManagerInfo.companyId}">
+                    <div style="height: 50px;padding: 10px">
+                        <div style="">
+                            <input type="text" name="address" th:value="${#httpServletRequest.getParameter('address')}" style="height: 32px">
+                            <button type="button" onclick="codeAddress()" class="map-btn">搜索</button>
+                            <div style="float: right">
+                                <button type="button" class="map-btn" onclick="closeMap()">关闭</button>
+                                <button type="button" class="map-btn" onclick="clearOverlays()" >清除标记</button>
+                                <button type="button" class="map-btn" onclick="showOverlays()">显示标记</button>
+                                <button type="button" class="map-btn" onclick="deleteOverlays()">删除标记</button>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="mapBox">
+                        <div id="mapBox">
+                            <p id="mapInfo"></p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp"></script>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+
+        adminoption();
+        huixian();
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+
+    function adminoption() {
+        httpPost(ctx+'/manager/companyAdmin',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        var option='<option value="'+data.managerId+'">'+data.userName+'</option>';
+                        $("[name=managerId]").append(option);
+                    }
+
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+
+
+    //回显数据
+    function huixian() {
+        var id=$("#branchId").val();
+        $.post(ctx + "/branch/searchId?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                $("#branchName").val(msg.rows.branchName);
+                var radios = $("[name=websiteType]");
+                radios.eq(msg.rows.websiteType).attr("checked",true);
+                $("#managerId").val(msg.rows.managerId);
+                $("#branchPhone").val(msg.rows.branchPhone);
+                $("#branchaaddr").val(msg.rows.branchaaddr);
+
+                $("[name=branchx]").val(msg.rows.x);
+                $("[name=branchy]").val(msg.rows.y);
+                var radios = $("[name=branchState]");
+                radios.eq(msg.rows.branchState).attr("checked",true);
+            }
+        });
+    }
+    //修改
+    $("#branchupdate").click(function () {
+        /*  if($.trim($("#upbrandName").val()).length==0){
+         $("#ti").text("*请填写品牌名称！")
+         return;
+         }*/
+        if($.trim($("#branchName").val()).length==0){
+            $("#tigsmc").text("*请填写公司名称！")
+            return;
+        }
+        if($.trim($("#managerId").val()).length==0){
+            $("#tigly").text("*请选择管理员！")
+            return;
+        }
+        if($.trim($("#branchPhone").val()).length==0){
+            $("#tidh").text("*请填写电话！")
+            return;
+        }
+        if($.trim($("#branchaaddr").val()).length==0){
+            $("#tidd").text("*请填写地址！")
+            return;
+        }
+        if ($.trim($('[name=branchx]').val()).length<=0||$.trim($('[name=branchy]').val()).length<=0){
+            $('#branchposition').html("*请获取经纬度");
+            return;
+        }
+        var param={
+            branchId:$("#branchId").val(),
+            branchName:document.getElementById("branchName").value,
+            websiteType:$('#wrap input[name="websiteType"]:checked ').val(),
+            managerId:document.getElementById("managerId").value,
+            branchPhone:document.getElementById("branchPhone").value,
+            branchaaddr:document.getElementById("branchaaddr").value,
+            branchState:$('#wrapsta input[name="branchState"]:checked ').val(),
+            x:$("[name=branchx]").val(),
+            y:$("[name=branchy]").val()
+        }
+        console.info(param)
+        httpPost(ctx+"/branch/updatebrand",param,function (data) {
+            if(data.status==200){
+                location.href=ctx+"/page/company/companyList";
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:'编辑失败',
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+    });
+
+    function getposition(){
+       // var address=$.trim($("#branchaaddr").val());
+        /*if (address.length<=0){
+            alert('请先输入网点地址')
+        }else {*/
+            //location=ctx+'/page/networkManagement/getPosition?address='+address;
+            $("#maps").show();
+
+            showMap($("[name=branchy]").val(),$("[name=branchx]").val());
+            //*geocoder.getLocation(address)
+        /*}*/
+    }
+
+    var latitude=39.90960456049752;//纬度
+    var longitude=116.3972282409668;//经度
+    var address=$.trim($('[name=address]').val());
+    var map,markersArray = [];
+
+
+    function showMap(latitude,longitude) {
+
+        var center = new qq.maps.LatLng(latitude,longitude);
+        map = new qq.maps.Map(document.getElementById("mapBox"),{
+            center: center,
+            zoom: 14,
+            zoomControl: true,    //不启用缩放控件
+            mapTypeControlOptions: {  //设置控件的地图类型为普通街道地图
+                mapTypeIds: qq.maps.MapTypeId.ROADMAP
+            }
+
+        });
+
+        addMarker(center);
+        //添加dom监听事件
+        qq.maps.event.addDomListener(map, 'click', function(event) {
+            addMarker(event.latLng);
+        });
+
+        //调用地址解析类
+        geocoder = new qq.maps.Geocoder({
+            complete : function(result){
+                console.info(result);
+                map.setCenter(result.detail.location);
+                var info = new qq.maps.InfoWindow({ map: map });
+                var marker = new qq.maps.Marker({
+                    map:map,
+                    position: result.detail.location
+                });
+
+                markersArray.push(marker);
+                marker.name = $.trim($('[name=address]').val());
+                //marker.locate = data.locate;
+                qq.maps.event.addListener(marker, 'click', function() {    //获取标记的点击事件
+                    info.open();  //点击标记打开提示窗
+                    info.setContent('<div style="width: 200px;height: 100px;text-align: center"><p>纬度：<span style="color: #0c9;">'+this.position.lat+'</span></p>' +
+                        '<p>经度：<span style="color: #0c9;">'+this.position.lng+'</span></p>' +
+                        '<p style="text-align: center"><button class="map-btn" onclick="setPosition(&quot;'+this.position.lat+'&quot;,&quot;'+this.position.lng+'&quot;)">确定</button></p>' +
+                        '</div>');  //***设置提示窗内容（这里用到了marker对象中保存的数据）
+                    console.info(this);
+                    info.setPosition(new qq.maps.LatLng(this.position.lat, this.position.lng));  //提示窗位置
+                });
+            }
+        });
+
+    }
+
+    //添加标记
+    function addMarker(location) {
+        var info = new qq.maps.InfoWindow({ map: map });
+        var marker = new qq.maps.Marker({
+            position: location,
+            map: map
+        });
+        qq.maps.event.addListener(marker, 'click', function() {    //获取标记的点击事件
+            info.open();  //点击标记打开提示窗
+            info.setContent('<div style="width: 200px;height: 100px;text-align: center"><p>纬度：<span style="color: #0c9;">'+this.position.lat+'</span></p>' +
+                '<p>经度：<span style="color: #0c9;">'+this.position.lng+'</span></p>' +
+                '<p style="text-align: center"><button class="map-btn" onclick="setPosition(&quot;'+this.position.lat+'&quot;,&quot;'+this.position.lng+'&quot;)">确定</button></p>' +
+                '</div>');  //***设置提示窗内容（这里用到了marker对象中保存的数据）
+            console.info(this);
+            info.setPosition(new qq.maps.LatLng(this.position.lat, this.position.lng));  //提示窗位置
+        });
+        markersArray.push(marker);
+    }
+
+    //清除覆盖层
+    function clearOverlays() {
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+        }
+    }
+
+    //显示覆盖层
+    function showOverlays() {
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(map);
+            }
+        }
+    }
+
+
+    //删除覆盖物
+    function deleteOverlays() {
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+            markersArray.length = 0;
+        }
+    }
+
+    function codeAddress() {
+        var address = $("[name=address]").val();
+        //alert(address);
+        //通过getLocation();方法获取位置信息值
+        geocoder.getLocation(address);
+    }
+
+    function setPosition(latitude,longitude){
+        //alert(latitude+'===>'+longitude);
+        $("[name=branchx]").val(longitude);
+        $("[name=branchy]").val(latitude);
+    }
+
+    function closeMap() {
+        $("#maps").hide();
+    }
+
+
+</script>
+
+

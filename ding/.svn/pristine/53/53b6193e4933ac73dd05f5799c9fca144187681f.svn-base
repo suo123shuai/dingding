@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <base th:href="@{/}"/>
+    <title>站点概括</title>
+</head>
+<body>
+<h3>这是站点概括</h3>
+</body>
+</html>

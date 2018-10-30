@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<header th:replace="comm :: checkManagerLogin"></header>
+<header th:replace="comm :: header_web"></header>
+
+<style>
+
+    .bg-gary{
+        margin: 30px;
+        background-color: #f0f4f7;
+        height: 100px;
+        width: 25%;
+        display: table-cell;
+        height:100px;
+        line-height:100px;
+        float : left;
+        color: #2E2D3C;
+    }
+</style>
+<body>
+
+<div>
+<div  class="bg-gary" align="center"><a href="../carBattery/warehousing"> 新车电入库</a></div>
+    <div  class="bg-gary" align="center"><a href="../carBattery/outtreasuryBranch">出库</a></div>
+</div>
+<div>
+    <div  class="bg-gary" align="center"><a href="../carBattery/return">分公司车电退回</a></div>
+    <div  class="bg-gary" align="center"><a href="../carBattery/carBatteryList">车电管理</a></div>
+</div>
+<div>
+    <div  class="bg-gary" align="center"><a href="../brand/brandList">品牌管理</a></div>
+    <div  class="bg-gary" align="center"><a href="../models/modelList">型号管理</a></div>
+</div>
+<!--<div class="btn-group" id="exampleToolbar" role="group">
+    <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='../brand/brandList'">
+        品牌管理
+    </button>
+    <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='../models/modelList'">
+        型号管理
+    </button>
+</div>-->
+
+
+
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    /*js*/
+
+</script>

@@ -1,0 +1,71 @@
+package com.ddcar.mapper;
+
+
+import com.ddcar.entity.TbOrder;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+import java.util.Map;
+
+@Mapper
+public interface TbOrderMapper {
+    int deleteByPrimaryKey(Long orderId);
+
+    int insert(TbOrder record);
+
+    int insertSelective(TbOrder record);
+
+    TbOrder selectByPrimaryKey(Long orderId);
+
+    int updateByPrimaryKeySelective(TbOrder record);
+
+    int updateByPrimaryKey(TbOrder record);
+
+    /**
+     * 生成订单
+     * @param record
+     * @return
+     */
+    int insertOrder(TbOrder record);
+
+    /**
+     * 订单号查订单
+     * @param orderId
+     * @return
+     */
+    TbOrder getOrderByOrderId(String orderId);
+
+    /**
+     * 查用户未退款订单
+     * @param userId
+     * @return
+     */
+    List<TbOrder> getOrder(long userId);
+
+    /**
+     * 更新订单的退款状态
+     * @param map
+     * @return
+     */
+    Integer updOrder(Map map);
+
+    /**
+     * 获取订单号
+     * @return
+     */
+    String getOrderNo();
+
+    /**
+     * 更新订单支付状态
+     * @param orderNo
+     * @return
+     */
+    int updatePayState(String orderNo);
+
+    /**
+     * 查用户的最新租凭订单信息
+     * @param userId
+     * @return
+     */
+    TbOrder findOrderPay(long userId);
+}

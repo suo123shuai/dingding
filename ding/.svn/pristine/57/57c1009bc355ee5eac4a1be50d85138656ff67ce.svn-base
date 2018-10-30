@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新建网点</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+
+    </style>
+</head>
+<body class="gray-bg">
+<input type="hidden" th:value="${#httpServletRequest.getParameter('branchId')}" id="branchId">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <h2>新建网点</h2>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>类型:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <div class="col-md-8" id="wrap">
+                                    <input type="radio" name="websiteType" value="0" checked="checked">&nbsp;自营&nbsp;&nbsp;&nbsp;
+                                    <input type="radio" name="websiteType" value="1">&nbsp;加盟
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>营业类型:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                &nbsp;&nbsp;&nbsp;<input type="checkbox" name="items" value="0">&nbsp;租车&nbsp;
+                                <input type="checkbox" name="items" value="1">&nbsp;修车&nbsp;
+                                <input type="checkbox" name="items" value="2">&nbsp;卖车&nbsp;
+                                <input type="checkbox" name="items" value="3">&nbsp;救援
+                                <span id="itemsif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>名称:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="branchName" id="branchName" class="form-control keyupclick"  style="width:300px;">
+                                <span id="branchNameif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>网点地址:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="branchaaddr" id="branchaaddr" class="form-control keyupclick"  style="width:300px;">
+                                <span id="branchaaddrif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>管理员:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="manager" id="manager" class="form-control keyupclick"  style="width:300px;">
+                                <span id="managerif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>联系电话:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="branchPhone" id="branchPhone" class="form-control keyupclick"  style="width:300px;">
+                                <span id="branchPhoneif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>账号:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="userName" id="userName" class="form-control keyupclick"  style="width:300px;">
+                                <span id="userNameif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>密码:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="password" placeholder="" name="pwdone" id="pwdone" class="form-control keyupclick"  style="width:300px;">
+                                <span id="pwdoneif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>确认密码:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="password" placeholder="" name="pwd" id="pwd" class="form-control keyupclick"  style="width:300px;">
+                                <span id="pwdif" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>网点照片:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <button type="button" class="btn btn-outline btn-default" id="uploadBtn">
+                                    <i class="glyphicon" aria-hidden="true"></i>上传图片（400*400，500K)
+                                </button>
+                                <img src="" id="showImg"/>
+                            </div>
+                        </div>
+
+
+                    </form>
+
+                </div>
+
+                <div class="ibox-content">
+
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" id="wangupdate">
+                            </i>保存
+                        </button>
+                        &nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-outline btn-default" onclick="javascript:history.go(-1)">
+                            </i>取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        initUpload('uploadBtn','showImg',null,1024);
+        huixian();
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+
+    //回显数据
+    function huixian() {
+        var id=$("#branchId").val();
+        $.post(ctx + "/branch/searchId?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                $("#branchName").val(msg.rows.branchName);
+                $("#manager").val(msg.rows.manager);
+                $("#userName").val(msg.rows.userName);
+                var radios = $("[name=websiteType]");
+                radios.eq(msg.rows.websiteType).attr("checked",true);
+                $("#managerId").val(msg.rows.managerId);
+                $("#branchPhone").val(msg.rows.branchPhone);
+                $("#branchaaddr").val(msg.rows.branchaaddr);
+                $("#pwd").val(msg.rows.pwd);
+                $("#pwdone").val(msg.rows.pwd);
+                var radios = $("[name=branchState]");
+                radios.eq(msg.rows.branchState).attr("checked",true);
+            }
+        });
+    }
+
+    $("#wangupdate").click(function () {
+        var param={
+            branchId:$("#branchId").val(),
+            branchName:document.getElementById("branchName").value,
+            websiteType:$('#wrap input[name="websiteType"]:checked ').val(),
+            manager:document.getElementById("manager").value,
+            branchPhone:document.getElementById("branchPhone").value,
+            branchaaddr:document.getElementById("branchaaddr").value,
+            userName:document.getElementById("userName").value,
+            pwd:document.getElementById("pwd").value,
+            photo:$("#showImg")[0].src
+        }
+        console.info(param)
+        httpPost(ctx+"/branch/updateDot",param,function (data) {
+            if(data.status==200){
+                location.href=ctx+"/page/networkManagement/networkList";
+            }else {
+                swal({
+                    title:'信息提示',
+                    text:'编辑失败',
+                    type:'error',
+                    confirmButtonText:'确认'
+                });
+            }
+        });
+        });
+
+</script>
+
+

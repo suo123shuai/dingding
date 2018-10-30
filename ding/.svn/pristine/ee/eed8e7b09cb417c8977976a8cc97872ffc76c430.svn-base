@@ -1,0 +1,26 @@
+package com.ddcar.service;
+
+import com.ddcar.entity.TbBrand;
+
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-03.
+ */
+public interface TbBrandService {
+
+    List<TbBrand> findTbBrandMapperList(Integer page, Integer size,String brandName);
+
+    List<TbBrand> findList();
+    //id查询
+    TbBrand tbBrandid(Long brandId);
+    //逻辑删除
+    void delTbBrand(Long[] brandId);
+
+    void add(TbBrand tbBrand);
+    //编辑品牌
+    void update(TbBrand tbBrand);
+
+    void del(Integer brandId);
+
+}

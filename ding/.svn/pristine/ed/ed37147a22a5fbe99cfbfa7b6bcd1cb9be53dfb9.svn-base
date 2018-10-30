@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<!--自定义Overlay-->
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>骑手位置</title>
+    <base th:href="@{/}"/>
+    <style>
+        body { height:100vh; background: #fff; color: #3D3D3D; }
+        .mapBox { width: 98vw; font-size: 14px; height: 100vh; }
+        .mapBox > #mapInfo { padding: 20px; }
+        .mapBox > div { width: 100%; height: 100%; }
+        .mapBox > p { padding: 20px; }
+        .addShop { display: block; color: #fff; background: #00CC99; border: none; font-size: 14px; width: 50vw; margin: 0.4rem 0 0 25vw; padding: 0.32rem; border-radius: 0.8rem; }
+        .mapInfo > p.center { text-align: center; }
+        .mapInfo > p { line-height: 0.533333rem; }
+        .mapInfo > button { display: block; margin: 0.106667rem auto; color: #0c9; background: #fafafb; border: 1px solid #0c9; border-radius: 0.133333rem; padding: 0.15rem 0.3rem; }
+    </style>
+</head>
+<body>
+<input type="hidden" name="companyId" th:value="${session.dcoinManagerInfo.companyId}">
+<div class="mapBox">
+    <div id="mapBox">
+        <p id="mapInfo"></p>
+    </div>
+</div>
+
+<script th:src="@{/js/jquery.min.js}"></script>
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp"></script>
+<script>
+    var latitude=39.90960456049752;//纬度
+    var longitude=116.3972282409668;//经度
+
+    $(function () {
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                latitude=position.coords.latitude;
+                longitude=position.coords.longitude
+            },
+            function (e) {
+                alert('获取当前位置失败');
+                throw(e.message);
+            }
+        )
+        showMap(latitude,longitude);
+    });
+         //假设要以这个地址为中心点显示地图
+
+    function showMap(latitude, longitude){
+        var map = new qq.maps.Map(document.getElementById("mapBox"),{    //地图部分初始化
+            zoom: 10,               //设置地图缩放级别
+            center: new qq.maps.LatLng(latitude, longitude),     //设置中心点
+            zoomControl: true,    //不启用缩放控件
+            mapTypeControlOptions: {  //设置控件的地图类型为普通街道地图
+                mapTypeIds: qq.maps.MapTypeId.ROADMAP
+            }
+        });
+        //var info = new qq.maps.InfoWindow({ map: map });      //添加提示窗
+        $.post('vehicle/carPosition',
+            {
+            companyId:$("[name=companyId]").val()
+            },
+            function (data) {
+                var info = new qq.maps.InfoWindow({ map: map });
+                if (data.status == 200){
+                   var result=data.rows;
+                    for(var i=0; i<result.length; i++){
+                        var data = result[i];
+                        var marker = new qq.maps.Marker({ position: new qq.maps.LatLng(data.latitude, data.longitude), map: map });    //创建标记
+                        //***将必要的数据存入每一个对应的marker对象
+                        //marker.id = data.id;
+                        marker.name = data.userName;
+                        //marker.locate = data.locate;
+                        qq.maps.event.addListener(marker, 'click', function() {    //获取标记的点击事件
+                            info.open();  //点击标记打开提示窗
+                            info.setContent(this.name);  //***设置提示窗内容（这里用到了marker对象中保存的数据）
+                            info.setPosition(new qq.maps.LatLng(this.position.lat, this.position.lng));  //提示窗位置
+                        });
+                    }
+                }else {
+                    alert(data.msg);
+                }
+            }
+        );
+
+       /* var result = { "code":0, "msg":"success",
+            "data":[ {"id":1,"name":"第5个商铺","locate":"广东省深圳市龙岗区坂田五和大道与吉华路交汇处","latitude":"39.9254100000", "longitude":"116.5220000000"},
+                {"id":2,"name":"我是最远的","locate":"北京市防过热合同然后他忽然北京市防过热合同然后他忽然北京市防过热合同然后他忽然","latitude":"39.91800000", "longitude":"116.518000000"},
+                {"id":3,"name":"最近的商铺","locate":"辽宁省个合同然后他发热感惹发热个体个体","latitude":"39.9244100000", "longitude":"116.5174500000"},
+                {"id":4,"name":"第4个商铺","locate":"第4个第4个第4个第4个第4个第4个","latitude":"39.92600000", "longitude":"116.5194500000"},
+                {"id":5,"name":"第二近的商铺","locate":"第5个第5个第5个第5个第5个第5个","latitude":"39.92300000", "longitude":"116.5200000000"}]};
+        //result中数据 用于显示标记、和标记点击时的提示信息
+        if(result.code==0 && result.msg=="success"){
+            for(var i=0; i<result.data.length; i++){
+                var data = result.data[i];
+                var marker = new qq.maps.Marker({ position: new qq.maps.LatLng(data.latitude, data.longitude), map: map });    //创建标记
+                //!***将必要的数据存入每一个对应的marker对象
+                //marker.id = data.id;
+                marker.name = data.name;
+                //marker.locate = data.locate;
+                qq.maps.event.addListener(marker, 'click', function() {    //获取标记的点击事件
+                    info.open();  //点击标记打开提示窗
+                    info.setContent(this.name);  //!***设置提示窗内容（这里用到了marker对象中保存的数据）
+                    info.setPosition(new qq.maps.LatLng(this.position.lat, this.position.lng));  //提示窗位置
+                });
+            }
+        }else{
+            //layer.open({ content: "获取附近商铺失败", skin: 'msg', time: 2 });
+        }*/
+    }
+
+    function bindShop(shopInfo){    //地图标注提示窗上按钮 点击后执行的函数
+        alert(shopInfo);  //传过来的包含 id/经度/纬度 的字符串参数
+    }
+</script>
+</body>
+
+</html>

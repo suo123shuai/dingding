@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新增分公司</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+
+    </style>
+</head>
+<body class="gray-bg">
+
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <h2>新增分公司</h2>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>公司名称:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="branchName" id="branchName" class="form-control keyupclick"  style="width:300px;">
+                                <span id="tigsmc" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>类型:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <div class="col-md-8" id="wrap">
+                                    <input type="radio" name="websiteType" value="0" checked="checked">&nbsp;自营&nbsp;&nbsp;&nbsp;
+                                    <input type="radio" name="websiteType" value="1">&nbsp;加盟
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>管理员:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <select name="managerId" id="managerId" class="form-control">
+                                    <option value="">-- 请选择 --</option>
+                                </select>
+                                <span id="tigly" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>电话:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="branchPhone" id="branchPhone" class="form-control keyupclick"  style="width:300px;">
+                                <span id="tidh" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>地址:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <input type="text" placeholder="" name="branchaaddr" id="branchaaddr" class="form-control keyupclick"  style="width:300px;">
+                                <span id="tidd" style="color: red"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>状态:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <div class="col-md-8" id="wrapsta">
+                                    <input type="radio" name="branchState" value="0" checked="checked">&nbsp;开启&nbsp;&nbsp;&nbsp;
+                                    <input type="radio" name="branchState" value="1">&nbsp;关停
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+
+
+
+                    </form>
+
+                </div>
+
+                <div class="ibox-content">
+
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" name="add" id="vehicleadd">
+                            </i>保存
+                        </button>
+                        &nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-outline btn-default" onclick="">
+                            </i>取消
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+
+        adminoption();
+        $("#tigsmc").text("")
+        $("#tigly").text("")
+        $("#tidh").text("")
+        $("#tidd").text("")
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+
+    function adminoption() {
+        httpPost(ctx+'/manager/companyAdmin',
+            pageinfo,
+            function(msg, status) {
+                if (msg.status == 200) {
+                    rowData = msg.rows;
+                    var array = [];
+                    for ( var i = 0; i < msg.rows.length; i++) {
+                        var data = msg.rows[i];
+                        var option='<option value="'+data.managerId+'">'+data.userName+'</option>';
+                        $("[name=managerId]").append(option);
+                    }
+
+                } else {
+                    alert(msg.msg);
+
+                }
+            });
+    }
+
+
+    $("[name=add]").click(function () {
+        $("#vehicleadd").click(function () {
+            if($.trim($("#branchName").val()).length==0){
+                $("#tigsmc").text("*请填写公司名称！")
+                return;
+            }
+            if($.trim($("#managerId").val()).length==0){
+                $("#tigly").text("*请选择管理员！")
+                return;
+            }
+            if($.trim($("#branchPhone").val()).length==0){
+                $("#tidh").text("*请填写电话！")
+                return;
+            }
+            if($.trim($("#branchaaddr").val()).length==0){
+                $("#tidd").text("*请填写地址！")
+                return;
+            }
+            var param={
+                branchName:document.getElementById("branchName").value,
+                websiteType:$('#wrap input[name="websiteType"]:checked ').val(),
+                managerId:document.getElementById("managerId").value,
+                branchPhone:document.getElementById("branchPhone").value,
+                branchaaddr:document.getElementById("branchaaddr").value,
+                branchState:$('#wrapsta input[name="branchState"]:checked ').val()
+            }
+            httpPost(ctx+"/branch/add",param,function (data) {
+                if(data.status==200){
+                    location.href=ctx+"/page/company/companyList";
+                }else {
+                    swal({
+                        title:'信息提示',
+                        text:'添加失败',
+                        type:'error',
+                        confirmButtonText:'确认'
+                    });
+                }
+            });
+        });
+    });
+
+</script>
+
+

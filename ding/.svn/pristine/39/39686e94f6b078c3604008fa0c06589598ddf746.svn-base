@@ -1,0 +1,101 @@
+package com.ddcar.controller;
+
+import com.common.BaseBean;
+import com.ddcar.entity.RescueXin;
+import com.ddcar.entity.TbBranch;
+import com.ddcar.entity.TbRescue;
+import com.ddcar.entity.TbUser;
+import com.ddcar.service.RiderIndexService;
+import com.ddcar.service.TbUserService;
+import com.ddcar.util.UtilLog;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
+import java.util.List;
+
+@Controller
+@RequestMapping("/rider/index")
+public class RiderIndexController {
+
+    @Autowired
+    private RiderIndexService riderIndex;
+    @Resource
+    private TbUserService tbUserService;
+
+    @RequestMapping("/listrider")
+    public @ResponseBody BaseBean listrider(String items){
+        BaseBean bean = new BaseBean();
+        try {
+            List<TbBranch> tbBranches = riderIndex.listBranch(items);
+            bean.setStatus(200);
+            bean.setRows(tbBranches);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：",e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/rescue")
+    public @ResponseBody BaseBean rescue(TbRescue rescue){
+        BaseBean bean = new BaseBean();
+        try {
+            int i = riderIndex.insertRescue(rescue);
+            if(i == 200){
+                bean.setStatus(i);
+            } else {
+                bean.setStatus(i);
+                bean.setMsg("不可重复插入");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：",e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/rescueInformation")
+    public @ResponseBody BaseBean rescueInformation(long userId){
+        BaseBean bean = new BaseBean();
+        try {
+            RescueXin tbRescue = riderIndex.rescueInformation(userId);
+            bean.setStatus(200);
+            bean.setRows(tbRescue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：",e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/findBranch")
+    public @ResponseBody BaseBean findrescue(long wangUserId){
+        BaseBean bean = new BaseBean();
+        try {
+            TbBranch branch = riderIndex.getBranch(wangUserId);
+            bean.setStatus(200);
+            bean.setRows(branch);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误：",e);
+        }
+        return bean;
+    }
+
+    @RequestMapping("/login")
+    public @ResponseBody BaseBean weiXinlogin(String weiXinId, String avatar){
+        BaseBean bean = new BaseBean();
+        try {
+            TbUser user = tbUserService.getUserByWeiXinId(weiXinId, avatar);
+            bean.setStatus(200);
+            bean.setRows(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilLog.logger.error("错误", e);
+        }
+        return bean;
+    }
+}

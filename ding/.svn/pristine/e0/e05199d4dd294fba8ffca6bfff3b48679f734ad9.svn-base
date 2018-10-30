@@ -1,0 +1,14 @@
+package com.common;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+public class AA {
+    public static void main(String[] args) throws Exception {
+        Date date1 = Commonparam.fmt.parse("2018-12-17 18:51:41");
+        Date date2 = new Date();
+        long days=(date2.getTime()-date1.getTime())/(1000*60*60*24);
+        System.out.println(days);
+    }
+}

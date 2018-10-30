@@ -1,0 +1,398 @@
+package com.ddcar.controller;
+
+import com.common.BaseBean;
+import com.common.Commonparam;
+import com.ddcar.entity.TbBranch;
+import com.ddcar.entity.TbManager;
+import com.ddcar.entity.TbVehicle;
+import com.ddcar.service.TbBranchService;
+import com.ddcar.util.UtilLog;
+import com.github.pagehelper.PageInfo;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.rmi.CORBA.Util;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-03.
+ */
+@Controller
+@RequestMapping("/branch")
+public class TbBranchController {
+
+    @Autowired
+    TbBranchService tbBranchService;
+
+    private String msg="TbBranchController";
+   /* @Autowired
+    TbVehicleService tbVehicleService;*/
+
+    @RequestMapping(value = "/findTbBranchList")
+    public @ResponseBody
+    BaseBean findTbManagerList(Integer page, Integer size) throws Exception {
+        BaseBean bean = new BaseBean();
+        try {
+            List<TbBranch> list=tbBranchService.findTbBranchMapperList(page,size);
+            bean.setStatus(200);
+            bean.setRows(list);
+            bean.setTotal(new PageInfo<>(list).getTotal());
+
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+        }
+        return bean;
+    }
+    //查询车电信息
+   /* @RequestMapping(value = "/findTbVehicleList")
+    public @ResponseBody
+    BaseBean findTbManagerList(Integer page, Integer size) throws Exception {
+        BaseBean bean = new BaseBean();
+        try {
+            List<TbVehicle> list=tbVehicleService.findTbVehicleList(page,size);
+            bean.setStatus(200);
+            bean.setRows(list);
+            bean.setTotal(new PageInfo<>(list).getTotal());
+
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+        }
+        return bean;
+    }*/
+
+    @RequestMapping(value = "/findTbBranchbranchList")
+    public @ResponseBody
+    BaseBean findTbBranchbranchList(Integer page, Integer size,Integer branchId,String branchName,Integer websiteType) throws Exception {
+        BaseBean bean = new BaseBean();
+        try {
+            List<TbBranch> list=tbBranchService.findTbBranchbranchList(page,size,branchId,branchName,websiteType);
+            bean.setStatus(200);
+            bean.setRows(list);
+            bean.setTotal(new PageInfo<>(list).getTotal());
+
+        } catch (Exception e) {
+            bean.setMsg(Commonparam.handle(e));
+        }
+        return bean;
+    }
+    //查询分公司的网点
+    @ResponseBody
+    @RequestMapping("/selectcomWang")
+    public BaseBean selectcomWang(HttpSession session,Integer page, Integer size,Long branchId,String branchName,Integer websiteType){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            baseBean.setRows(tbBranchService.selectcomWang(com,page,size,websiteType,branchId,branchName));
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+            UtilLog.logger.error("错误信息",e);
+        }
+        return baseBean;
+    }
+    //添加分公司
+    @ResponseBody
+    @RequestMapping("/add")
+    public BaseBean add(TbBranch tbBranch, HttpSession session){
+        BaseBean baseBean=new BaseBean();
+        TbManager loginUser= (TbManager) session.getAttribute("loginUser");
+        if(loginUser!=null){
+            tbBranch.setModifyBy(loginUser.getUserName());
+        }
+        tbBranch.setDeleteFlag(0);
+        tbBranch.setType(1);
+        try{
+            tbBranchService.add(tbBranch);
+            baseBean.setStatus(200);
+            baseBean.setMsg("添加成功");
+        }catch(RuntimeException ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error(msg,ex);
+        }
+        return baseBean;
+    }
+
+    //编辑分公司信息
+    @ResponseBody
+    @RequestMapping("/updatebrand")
+    public BaseBean editAddress(TbBranch tbBranch){
+        BaseBean baseBean=new BaseBean();
+        try {
+            tbBranchService.update(tbBranch);
+            baseBean.setStatus(200);
+            baseBean.setMsg("编辑成功");
+        }catch (Exception ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error("操作失败",ex);
+            UtilLog.logger.error("===========",ex);
+        }
+        return baseBean;
+    }
+
+
+    //编辑网点信息
+    @ResponseBody
+    @RequestMapping("/updateDot")
+    public BaseBean updateDot(TbBranch tbBranch){
+        BaseBean baseBean=new BaseBean();
+        try {
+            tbBranchService.updateDot(tbBranch);
+            baseBean.setStatus(200);
+            baseBean.setMsg("编辑成功");
+        }catch (Exception ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error("操作失败",ex);
+        }
+        return baseBean;
+    }
+
+    //逻辑删除
+    @RequestMapping("/delTbBranch")
+    @ResponseBody
+    public BaseBean delTbBrand(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            tbBranchService.delTbBranch(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //启用
+    @RequestMapping("/enable")
+    @ResponseBody
+    public BaseBean enable(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            tbBranchService.enable(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //关停
+    @RequestMapping("/close")
+    @ResponseBody
+    public BaseBean close(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            tbBranchService.close(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //根据id查询
+    @ResponseBody
+    @RequestMapping("/searchId")
+    public BaseBean searchId(@RequestParam("branchId")Long branchId){
+        BaseBean baseBean=new BaseBean();
+        try {
+            baseBean.setRows(tbBranchService.branchSearchId(branchId));
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //新建网点
+    @ResponseBody
+    @RequestMapping("/insertDot")
+    public BaseBean insertDot(TbBranch tbBranch, HttpSession session){
+        BaseBean baseBean=new BaseBean();
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        try{
+            tbBranch.setDeleteFlag(0);
+            tbBranch.setType(2);
+            tbBranch.setParentId(companyId.getCompanyId());
+            tbBranch.setCreateBy(companyId.getUserName());
+            tbBranch.setBranchState(0);
+            Date date=new Date();
+            DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String time=format.format(date);
+            tbBranch.setCreateTime(time);
+            tbBranchService.insertDot(tbBranch);
+            baseBean.setStatus(200);
+            baseBean.setMsg("添加成功");
+        }catch(RuntimeException ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error(msg,ex);
+        }
+        return baseBean;
+    }
+
+
+    /**  获取分公司坐标
+     * @author ZhangXuanWei
+     * @date 2018/9/21 10:06
+     * @param branchId
+     * @return com.common.BaseBean
+     */
+    @ResponseBody
+    @RequestMapping("/companyPosition")
+    public BaseBean companyPosition(Long branchId){
+        BaseBean baseBean=new BaseBean();
+        try {
+            if (branchId!=null){
+                HashMap map = tbBranchService.searchCompanyPosition(branchId);
+                baseBean.setStatus(200);
+                baseBean.setRows(map);
+            }else {
+                baseBean.setMsg("参数错误");
+            }
+        }catch (Exception ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error("操作失败",ex);
+        }
+        return baseBean;
+    }
+
+
+
+    //导出分公司
+    @RequestMapping("/branch/downloadExcel")
+    public void setUpExcel(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String[] headers = { "公司Id", "公司名称","公司类型","电话","地址"};
+        List<TbBranch> branche=tbBranchService.findTbBranchbranchList();
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet();
+        //设置列宽
+        sheet.setDefaultColumnWidth((short) 18);
+        //创建第一行的对象，第一行一般用于填充标题内容。从第二行开始一般是数据
+        HSSFRow row = sheet.createRow(0);
+        for (short i = 0; i < headers.length; i++) {
+            //创建单元格，每行多少数据就创建多少个单元格
+            HSSFCell cell = row.createCell(i);
+            HSSFRichTextString text = new HSSFRichTextString(headers[i]);
+            //给单元格设置内容
+            cell.setCellValue(text);
+        }
+
+        //遍历集合，将每个集合元素对象的每个值填充到单元格中
+        for(int i=0;i<branche.size();i++){
+            TbBranch tbBranch=branche.get(i);
+            //从第二行开始填充数据
+            row = sheet.createRow(i+1);
+            //该集合只记录数量和时间，这两个值来自statisticsModel。如果对象比较复杂，需要额外转换，比如Date类型的日期，int，float类型的数值
+            List<String> datas=new ArrayList<>();
+
+            datas.add(tbBranch.getBranchId().toString());//id
+            datas.add(tbBranch.getBranchName());
+            datas.add(tbBranch.getWebsiteType().toString());
+            datas.add(tbBranch.getBranchaaddr());
+            datas.add(tbBranch.getBranchPhone());
+            for (int j=0;j<datas.size();j++) {
+                String string=datas.get(j);
+                HSSFCell cell = row.createCell(j);
+                HSSFRichTextString richString = new HSSFRichTextString(string);
+                HSSFFont font3 = workbook.createFont();
+                //定义Excel数据颜色，这里设置为蓝色
+                /*font3.setColor(HSSFColor.BLUE.index);
+                richString.applyFont(font3);*/
+                cell.setCellValue(richString);
+            }
+
+        }
+
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-disposition", "attachment;filename="+"Branch.xls");//Excel文件名
+        try {
+            response.flushBuffer();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //将workbook中的内容写入输出流中
+        workbook.write(response.getOutputStream());
+
+    }
+
+    //导出网点
+    @RequestMapping("/wang/downloadExcel")
+    public void wangsetUpExcel(HttpServletRequest request, HttpServletResponse response,HttpSession session) throws IOException {
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        String[] headers = { "网点Id", "网点名称","类型","电话","地址"};
+        List<TbBranch> wang=tbBranchService.Wang(com);
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet();
+        //设置列宽
+        sheet.setDefaultColumnWidth((short) 18);
+        //创建第一行的对象，第一行一般用于填充标题内容。从第二行开始一般是数据
+        HSSFRow row = sheet.createRow(0);
+        for (short i = 0; i < headers.length; i++) {
+            //创建单元格，每行多少数据就创建多少个单元格
+            HSSFCell cell = row.createCell(i);
+            HSSFRichTextString text = new HSSFRichTextString(headers[i]);
+            //给单元格设置内容
+            cell.setCellValue(text);
+        }
+
+        //遍历集合，将每个集合元素对象的每个值填充到单元格中
+        for(int i=0;i<wang.size();i++){
+            TbBranch tbBranch=wang.get(i);
+            //从第二行开始填充数据
+            row = sheet.createRow(i+1);
+            //该集合只记录数量和时间，这两个值来自statisticsModel。如果对象比较复杂，需要额外转换，比如Date类型的日期，int，float类型的数值
+            List<String> datas=new ArrayList<>();
+
+            datas.add(tbBranch.getBranchId().toString());//id
+            datas.add(tbBranch.getBranchName());
+            datas.add(tbBranch.getWebsiteType().toString());
+            datas.add(tbBranch.getBranchaaddr());
+            datas.add(tbBranch.getBranchPhone());
+            for (int j=0;j<datas.size();j++) {
+                String string=datas.get(j);
+                HSSFCell cell = row.createCell(j);
+                HSSFRichTextString richString = new HSSFRichTextString(string);
+                HSSFFont font3 = workbook.createFont();
+                //定义Excel数据颜色，这里设置为蓝色
+                /*font3.setColor(HSSFColor.BLUE.index);
+                richString.applyFont(font3);*/
+                cell.setCellValue(richString);
+            }
+
+        }
+
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-disposition", "attachment;filename="+"Dot.xls");//Excel文件名
+        try {
+            response.flushBuffer();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //将workbook中的内容写入输出流中
+        workbook.write(response.getOutputStream());
+
+    }
+
+
+
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-cmn" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>公司信息</title>
+    <header th:replace="comm :: checkManagerLogin"></header>
+    <header th:replace="comm :: header_web"></header>
+
+    <style type="text/css">
+        a{text-decoration:underline;text-decoration:none;}
+        .col-xs-4{padding:0px;}
+        .col-xs-8{padding:0px;}
+        .col-sm-4{padding:0px;}
+        .col-sm-8{padding:0px;padding-right:10px;}
+        .a-reason{background-color: red;text-decoration:underline; }
+
+    </style>
+</head>
+<body class="gray-bg">
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form role="form" class="form-inline" id="searchForm">
+                        <input type="hidden" th:value="${session.dcoinManagerInfo.companyId}" id="companyId">
+                        <h2>公司信息</h2>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>类型:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <div class="col-md-8" id="wrap">
+                                    <span id="websiteType"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>名称:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <span id="branchName"></span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>网点地址:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <span id="branchaaddr"></span>
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class="row">
+                            <div class="col-sm-1 text-right">
+                                <label>联系电话:</label>
+                            </div>
+                            <div class="col-sm-11">
+                                <span id="branchPhone"></span>
+                            </div>
+                        </div>
+                        <br>
+                    </form>
+                </div>
+                <div class="ibox-content">
+
+                    <div class="btn-group" id="exampleToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="javascript:history.go(-1)">
+                            </i>取消
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="comm :: footer_web"></footer>
+</body>
+</html>
+<script type="text/javascript">
+    var index ='';
+    var rowData = [];
+    var roleArray = [ "管理员", "普通用户" ];
+    $(function() {
+        huixian();
+        $('.keyupclick').on('keypress', function(evt){
+            if (evt.keyCode == 13) {
+                loadData(1);
+            }
+
+        });
+
+    });
+
+    //回显数据
+    function huixian() {
+        var id=document.getElementById("companyId").value;
+        $.post(ctx + "/branch/searchId?branchId="+id, function (msg) {
+            if (msg.status == 200) {
+                /*$("#branchName").val(msg.rows.branchName);*/
+
+                if (msg.rows.websiteType == 0) {
+                    document.getElementById("websiteType").innerHTML ="自营";
+                } else if (msg.rows.websiteType == 1) {
+                    document.getElementById("websiteType").innerHTML ="加盟";
+                }
+                document.getElementById("branchName").innerHTML = msg.rows.branchName;
+                document.getElementById("branchaaddr").innerHTML = msg.rows.branchaaddr;
+                document.getElementById("branchPhone").innerHTML = msg.rows.branchPhone;
+                document.getElementById("userName").innerHTML = msg.rows.userName;
+                $("#discount").val(msg.rows.discount);
+                $("#twodiscount").val(msg.rows.twodiscount);
+            }
+        });
+    }
+
+</script>
+
+

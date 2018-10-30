@@ -1,0 +1,27 @@
+package com.ddcar.service;
+
+import com.ddcar.entity.Feedback;
+import com.ddcar.entity.Image;
+
+import java.util.HashMap;
+import java.util.List;
+
+public interface FeedbackService {
+
+    /**
+     * 插入新的反馈信息
+     * @param feedback
+     * @return
+     */
+    Long saveFeedback(String content, Long userId, String addresss)throws Exception;
+
+    //查询反馈信息
+    List<HashMap> findFeedback(Integer page,Integer size,String content,Integer state,String userName);
+
+    //删除
+    void del(Long[] feedbackId);
+    //已处理
+    void seate(Long[] feedbackId);
+    //id查询
+    List<Image> selectFeedbzckId(Long feedbzckId);
+}

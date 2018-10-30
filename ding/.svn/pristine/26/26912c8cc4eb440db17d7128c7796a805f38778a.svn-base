@@ -1,0 +1,12 @@
+com\dcoin\controller\UploadimageAction.class
+com\dcoin\entity\User.class
+com\common\MD5Util.class
+com\common\BaseBean.class
+com\dcoin\controller\DispatcherController.class
+com\dcoin\service\impl\UserManagerImpl.class
+com\dcoin\DcoinApplication.class
+com\dcoin\controller\UserController.class
+com\dcoin\entity\Manager.class
+com\dcoin\service\UserManager.class
+com\dcoin\mapper\UserMapper.class
+com\common\Commonparam.class

@@ -1,0 +1,222 @@
+package com.ddcar.controller;
+
+import com.common.BaseBean;
+import com.common.Commonparam;
+import com.ddcar.entity.TbManager;
+import com.ddcar.entity.TbUser;
+import com.ddcar.service.TbUserService;
+import com.ddcar.util.UtilLog;
+import com.github.pagehelper.PageInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpSession;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2018-09-15.
+ */
+@Controller
+@RequestMapping("/user")
+public class TbUserController {
+
+    @Autowired
+    TbUserService tbUserService;
+
+    private String msg;
+    //查看用户
+    @ResponseBody
+    @RequestMapping("/findComTbUser")
+    public BaseBean findRes(HttpSession session, Integer page, Integer size,Integer type,Long parentId){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            List<HashMap> comTbUser = tbUserService.findComTbUser(page, size, com, type, parentId);
+            baseBean.setRows(comTbUser);
+            baseBean.setTotal(new PageInfo<>(comTbUser).getTotal());
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+    //查询团签
+    @ResponseBody
+    @RequestMapping("/findComsign")
+    public BaseBean findComsign(HttpSession session, Integer page, Integer size,Long userId,String userName){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            List<HashMap> comsign = tbUserService.findComsign(page, size, com, userId, userName);
+            baseBean.setRows(comsign);
+            baseBean.setTotal(new PageInfo<>(comsign).getTotal());
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //团签下拉框
+    @ResponseBody
+    @RequestMapping("/findTUser")
+    public BaseBean findTUser(HttpSession session){
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        Long com=companyId.getCompanyId();
+        BaseBean baseBean=new BaseBean();
+        try {
+            baseBean.setRows(tbUserService.findTUser(com));
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+
+    //新建团签
+    @ResponseBody
+    @RequestMapping("/insertGroup")
+    public BaseBean insertGroup(TbUser tbUser, HttpSession session){
+        BaseBean baseBean=new BaseBean();
+        try{
+            Integer iftq = tbUserService.iftq(tbUser.getAccount());
+            if (iftq>0){
+                baseBean.setMsg("用户名已存在");
+                return baseBean;
+            }
+        TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+        String com=companyId.getUserName();
+        tbUser.setDeleteFlag(0);
+        tbUser.setType("2");
+        tbUser.setBranchId(companyId.getCompanyId());
+        Date date=new Date();
+        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String time=format.format(date);
+        tbUser.setCreateBy(com);
+        tbUser.setCreateTime(time);
+            tbUserService.insertGroup(tbUser);
+            baseBean.setStatus(200);
+            baseBean.setMsg("添加成功");
+        }catch(RuntimeException ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error(msg,ex);
+        }
+        return baseBean;
+    }
+
+
+    //根据id查询团签信息
+    @ResponseBody
+    @RequestMapping("/idSearchComsign")
+    public BaseBean idSearchComsign(@RequestParam("userId")Long userId){
+        BaseBean baseBean=new BaseBean();
+        try {
+            baseBean.setRows(tbUserService.idSearchComsign(userId));
+            baseBean.setStatus(200);
+        }catch (Exception e){
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+    //编辑骑手信息
+    @ResponseBody
+    @RequestMapping("/updateuser")
+    public BaseBean updateuser(HttpSession session,TbUser tbUser){
+        BaseBean baseBean=new BaseBean();
+        try {
+            TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+            String com=companyId.getUserName();
+            Date date=new Date();
+            DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String time=format.format(date);
+            tbUser.setModifyBy(com);
+            tbUser.setModifyTime(time);
+            tbUserService.updateuser(tbUser);
+            baseBean.setStatus(200);
+            baseBean.setMsg("编辑成功");
+        }catch (Exception ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error("操作失败",ex);
+        }
+        return baseBean;
+    }
+    //编辑团签信息
+    @ResponseBody
+    @RequestMapping("/updateGroup")
+    public BaseBean updateGroup(HttpSession session,TbUser tbUser){
+        BaseBean baseBean=new BaseBean();
+        try {
+            TbManager companyId =  (TbManager) session.getAttribute("dcoinManagerInfo");
+            String com=companyId.getUserName();
+            Date date=new Date();
+            DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String time=format.format(date);
+            tbUser.setModifyBy(com);
+            tbUser.setModifyTime(time);
+            tbUserService.updateGroup(tbUser);
+            baseBean.setStatus(200);
+            baseBean.setMsg("编辑成功");
+        }catch (Exception ex){
+            baseBean.setMsg(Commonparam.handle(ex));
+            Log.logger.error("操作失败",ex);
+            UtilLog.logger.error("",ex);
+        }
+        return baseBean;
+    }
+    //逻辑删除
+    @RequestMapping("/delTbuser")
+    @ResponseBody
+    public BaseBean delTbuser(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            tbUserService.delTbuser(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //启用
+    @RequestMapping("/enable")
+    @ResponseBody
+    public BaseBean enable(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            tbUserService.enable(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+    //关停
+    @RequestMapping("/close")
+    @ResponseBody
+    public BaseBean close(Long[] delArr) {
+        BaseBean baseBean = new BaseBean();
+        try {
+            tbUserService.close(delArr);
+            baseBean.setStatus(200);
+        } catch (Exception e) {
+            baseBean.setStatus(400);
+            baseBean.setMsg(Commonparam.handle(e));
+        }
+        return baseBean;
+    }
+
+
+}
