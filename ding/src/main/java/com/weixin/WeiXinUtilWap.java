@@ -26,11 +26,11 @@ public class WeiXinUtilWap {
     private static final String getReqUser1349003701InfoSubscribeTimeUrl = "https://api.weixin.qq.com/cgi-bin/user/info?";
     public static final String getPreOrderUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
     public static final String tuiKuan = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers";
-    public static final String appid = "wx1c5a237b06797e5a";// 公众号应用唯一标识
-    private static final String app_secret = "da1d26700ef95403170e2185ba0387e7";//微信登录，jspAPI使用，暂时未更新是错误的
+    public static final String appi797e5a";// 公众号应用唯一标识
+    private static final String app_secret = "d6700e";//微信登录，jspAPI使用，暂时未更新是错误的
 
-    public static final String mch_id = "1515127071";
-    private static final String key = "dingdingi44KKUHGIK2414HGHRF9KH28";
+    public static final String mch";
+    private static final String key = "dingdin8";
     private static final String pay_notify_url = "https://www.dingding101.com/ddcar/weixin/notifyWeiXin";//jsapi,扫码支付回调，不带端口号
     private static final String userinfo_redirect_uri = "https://www.youlunhui.com/youlh/p/weixin/reqTokenWeb";// 重定向地址，需要进行UrlEncode
     public static final String wx_refund = "https://api.mch.weixin.qq.com/secapi/pay/refund";//退款接口
